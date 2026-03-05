@@ -1,0 +1,30 @@
+{
+  "$id": "https://example.org/schemas/match-cancelled.schema.json",
+  "title": "MatchCancelled",
+  "type": "object",
+  "properties": {
+    "matchId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "fieldId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "traceId": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "matchId",
+    "fieldId",
+    "timestamp",
+    "traceId"
+  ],
+  "additionalProperties": false
+}

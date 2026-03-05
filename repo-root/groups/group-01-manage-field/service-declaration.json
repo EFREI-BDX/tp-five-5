@@ -1,0 +1,152 @@
+{
+  "serviceId": "group-01-manage-field",
+  "name": "Manage Field",
+  "version": "1.0.0",
+  "description": "Service responsable du catalogue des terrains, de leur statut operationnel et des reservations de creneaux.",
+  "owner": {
+    "team": "group-01-manage-field",
+    "contact": "todo@example.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@example.com:org/repo.git",
+    "path": "groups/group-01-manage-field"
+  },
+  "endpoints": [
+    {
+      "path": "/fields",
+      "method": "POST",
+      "operationId": "createField",
+      "description": "Creer un terrain",
+      "requestSchema": "./openapi.yaml#/components/schemas/CreateFieldRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/CreateFieldResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/fields",
+      "method": "GET",
+      "operationId": "listFields",
+      "description": "Lister les terrains",
+      "responseSchema": "./openapi.yaml#/components/schemas/FieldListResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/fields/{fieldId}",
+      "method": "GET",
+      "operationId": "getField",
+      "description": "Recuperer un terrain",
+      "responseSchema": "./openapi.yaml#/components/schemas/Field",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/fields/{fieldId}/status",
+      "method": "PATCH",
+      "operationId": "updateFieldStatus",
+      "description": "Mettre a jour le statut d'un terrain",
+      "requestSchema": "./openapi.yaml#/components/schemas/UpdateFieldStatusRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/Field",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/fields/{fieldId}/availability",
+      "method": "GET",
+      "operationId": "getFieldAvailability",
+      "description": "Consulter la disponibilite d'un terrain sur une periode",
+      "responseSchema": "./openapi.yaml#/components/schemas/AvailabilityResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/fields/{fieldId}/reservations",
+      "method": "POST",
+      "operationId": "createFieldReservation",
+      "description": "Reserver un terrain pour un match",
+      "requestSchema": "./openapi.yaml#/components/schemas/CreateReservationRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/Reservation",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/fields/{fieldId}/reservations/{reservationId}",
+      "method": "DELETE",
+      "operationId": "releaseFieldReservation",
+      "description": "Liberer une reservation",
+      "auth": "ApiKeyAuth"
+    }
+  ],
+  "eventsProduced": [
+    {
+      "name": "FieldCreated",
+      "schema": "./tests/schemas/field-created.schema.json",
+      "description": "Publie apres creation d'un terrain"
+    },
+    {
+      "name": "FieldStatusChanged",
+      "schema": "./tests/schemas/field-status-changed.schema.json",
+      "description": "Publie quand le statut d'un terrain change"
+    },
+    {
+      "name": "FieldReservationCreated",
+      "schema": "./tests/schemas/field-reservation-created.schema.json",
+      "description": "Publie apres reservation d'un creneau"
+    }
+  ],
+  "eventsConsumed": [
+    {
+      "name": "MatchScheduled",
+      "schema": "./tests/schemas/match-scheduled.schema.json",
+      "description": "Event potentiel du Group 02 pour reserver un creneau"
+    },
+    {
+      "name": "MatchCancelled",
+      "schema": "./tests/schemas/match-cancelled.schema.json",
+      "description": "Event potentiel du Group 02 pour liberer un creneau"
+    },
+    {
+      "name": "MatchRecorded",
+      "schema": "./tests/schemas/match-recorded.schema.json",
+      "description": "Event potentiel du Group 03 pour statistiques d'usage"
+    }
+  ],
+  "schemas": [
+    "./tests/schemas/field-dimensions.schema.json",
+    "./tests/schemas/field-surface.schema.json",
+    "./tests/schemas/time-slot.schema.json"
+  ],
+  "health": {
+    "path": "/health",
+    "method": "GET",
+    "expectedStatus": 200
+  },
+  "security": {
+    "type": "apiKey",
+    "in": "header",
+    "name": "X-API-KEY"
+  },
+  "deployment": {
+    "image": "registry.example.org/group-01-manage-field:1.0.0",
+    "replicas": 2,
+    "resources": {
+      "cpu": "500m",
+      "memory": "512Mi"
+    }
+  },
+  "ci": {
+    "validateCommand": "cd groups/group-01-manage-field && mvn -q -Dmaven.repo.local=.m2/repository test",
+    "lintOpenApi": "spectral lint openapi.yaml"
+  },
+  "contacts": [
+    {
+      "role": "PO",
+      "name": "TODO PO",
+      "email": "po@example.org"
+    },
+    {
+      "role": "Tech lead",
+      "name": "TODO TL",
+      "email": "tl@example.org"
+    }
+  ],
+  "metadata": {
+    "schemaVersion": "1.0",
+    "lastUpdated": "2026-03-05"
+  }
+}

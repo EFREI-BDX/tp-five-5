@@ -1,0 +1,50 @@
+@startuml
+
+package "Field Context (Group 01)" {
+  [Field Service]
+  [Field DB]
+  [Reservation Policy]
+}
+interface "Field API" as FieldAPI
+queue "Event Bus" as EventBus
+
+package "Match Context (Group 02)" {
+  [Manage Match Service]
+}
+
+package "Record Context (Group 03)" {
+  [Record Match Service]
+}
+
+package "Summary Context (Group 04)" {
+  [Summarize Match Service]
+}
+
+package "Player Context (Group 05)" {
+  [Manage Player Service]
+}
+
+package "Team Context (Group 06)" {
+  [Manage Team Service]
+}
+
+FieldAPI - [Field Service]
+[Field Service] --> [Field DB]
+[Field Service] --> [Reservation Policy]
+
+[Manage Match Service] --> FieldAPI : checkAvailability + reserve/release
+[Record Match Service] --> FieldAPI : readFieldMetadata
+[Summarize Match Service] --> FieldAPI : readFieldMetadata
+[Manage Player Service] --> FieldAPI : list/searchFields
+[Manage Team Service] --> FieldAPI : list/searchFields
+
+[Field Service] --> EventBus : FieldCreated\nFieldStatusChanged\nFieldReservationCreated
+EventBus --> [Manage Match Service] : FieldStatusChanged
+EventBus --> [Record Match Service] : FieldReservationCreated
+EventBus --> [Summarize Match Service] : FieldStatusChanged
+
+[Manage Match Service] --> EventBus : MatchScheduled\nMatchCancelled
+[Record Match Service] --> EventBus : MatchRecorded
+EventBus --> [Field Service] : MatchScheduled\nMatchCancelled\nMatchRecorded
+
+@enduml
