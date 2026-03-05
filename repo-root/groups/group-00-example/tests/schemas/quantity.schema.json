@@ -1,0 +1,13 @@
+{
+  "$id": "https://example.org/schemas/quantity.schema.json",
+  "title": "Quantity",
+  "type": "object",
+  "properties": {
+    "quantity": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": ["quantity"],
+  "additionalProperties": false
+}

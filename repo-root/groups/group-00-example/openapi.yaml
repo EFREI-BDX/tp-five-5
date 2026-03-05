@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Character Management API
+  version: 1.0.0
+  description: API contract pour la gestion des personnages, inventaire et événements (RPG).
+servers:
+  - url: https://api.example.org
+    description: Base URL (remplacer selon environnement)
+
+paths:
+  /characters:
+    post:
+      summary: Créer un personnage
+      operationId: createCharacter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCharacterRequest'
+      responses:
+        '201':
+          description: Personnage créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCharacterResponse'
+        '400':
+          description: Requête invalide
+
+  /characters/{id}:
+    get:
+      summary: Récupérer un personnage
+      operationId: getCharacter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Détails du personnage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Character'
+        '404':
+          description: Personnage non trouvé
+
+  /characters/{id}/inventory:
+    post:
+      summary: Ajouter un item à l'inventaire d'un personnage
+      operationId: addItemToInventory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddItemRequest'
+      responses:
+        '200':
+          description: Item ajouté
+        '400':
+          description: Requête invalide
+        '404':
+          description: Personnage non trouvé
+
+components:
+  schemas:
+    CreateCharacterRequest:
+      type: object
+      properties:
+        name:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
+      required:
+        - name
+
+    CreateCharacterResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+        - id
+        - name
+
+    Character:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        inventory:
+          type: array
+          items:
+            $ref: '#/components/schemas/InventoryItem'
+
+    AddItemRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+        quantity:
+          $ref: './tests/schemas/quantity.schema.json'
+      required:
+        - itemId
+        - quantity
+
+    InventoryItem:
+      type: object
+      properties:
+        itemId:
+          type: string
+        quantity:
+          $ref: './tests/schemas/quantity.schema.json'
+        stats:
+          $ref: './tests/schemas/item-stats.schema.json'
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+
+security:
+  - ApiKeyAuth: [ ]

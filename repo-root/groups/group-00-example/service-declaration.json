@@ -1,0 +1,109 @@
+{
+  "serviceId": "group-xx-character-management",
+  "name": "Character Management",
+  "version": "1.0.0",
+  "description": "Service responsable de la création et gestion des personnages et publication des events liés à l'inventaire.",
+  "owner": {
+    "team": "group-xx-xxxxxxxx",
+    "contact": "todo@example.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@example.com:org/repo.git",
+    "path": "groups/group-xx-xxxxxxxx"
+  },
+  "endpoints": [
+    {
+      "path": "/characters",
+      "method": "POST",
+      "operationId": "createCharacter",
+      "description": "Créer un personnage",
+      "requestSchema": "./openapi.yaml#/components/schemas/CreateCharacterRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/CreateCharacterResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/characters/{id}",
+      "method": "GET",
+      "operationId": "getCharacter",
+      "description": "Récupérer un personnage",
+      "responseSchema": "./openapi.yaml#/components/schemas/Character",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/characters/{id}/inventory",
+      "method": "POST",
+      "operationId": "addItemToInventory",
+      "description": "Ajouter un item à l'inventaire d'un personnage",
+      "requestSchema": "./openapi.yaml#/components/schemas/AddItemRequest",
+      "auth": "ApiKeyAuth"
+    }
+  ],
+  "eventsProduced": [
+    {
+      "name": "CharacterCreated",
+      "schema": "./tests/schemas/character-created.schema.json",
+      "description": "Publié après création d'un personnage; contient id, ownerId, name, timestamp, traceId"
+    },
+    {
+      "name": "ItemAdded",
+      "schema": "./tests/schemas/item-added.schema.json",
+      "description": "Publié quand un item est ajouté à l'inventaire"
+    },
+    {
+      "name": "ItemEquipped",
+      "schema": "./tests/schemas/item-equipped.schema.json",
+      "description": "Publié quand un item est équipé"
+    }
+  ],
+  "eventsConsumed": [
+    {
+      "name": "InventorySyncRequest",
+      "schema": "./tests/schemas/inventory-sync-request.schema.json",
+      "description": "Exemple d'event consommé pour synchronisation (optionnel)"
+    }
+  ],
+  "schemas": [
+    "./tests/schemas/quantity.schema.json",
+    "./tests/schemas/item-stats.schema.json",
+    "./tests/schemas/equipment-slot.schema.json"
+  ],
+  "health": {
+    "path": "/health",
+    "method": "GET",
+    "expectedStatus": 200
+  },
+  "security": {
+    "type": "apiKey",
+    "in": "header",
+    "name": "X-API-KEY"
+  },
+  "deployment": {
+    "image": "registry.example.org/group-xx-character-management:1.0.0",
+    "replicas": 2,
+    "resources": {
+      "cpu": "500m",
+      "memory": "512Mi"
+    }
+  },
+  "ci": {
+    "validateCommand": "cd groups/group-xx-xxxxxxxx && mvn -DskipTests=false test",
+    "lintOpenApi": "spectral lint openapi.yaml"
+  },
+  "contacts": [
+    {
+      "role": "PO",
+      "name": "TODO PO",
+      "email": "po@example.org"
+    },
+    {
+      "role": "Tech lead",
+      "name": "TODO TL",
+      "email": "tl@example.org"
+    }
+  ],
+  "metadata": {
+    "schemaVersion": "1.0",
+    "lastUpdated": "2026-03-04"
+  }
+}
