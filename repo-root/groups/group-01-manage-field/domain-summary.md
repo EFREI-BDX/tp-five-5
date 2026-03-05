@@ -6,10 +6,9 @@ des matchs et la coherence des donnees partagees avec les autres bounded context
 
 **Ubiquitous language**
 
-- **Field** - entite representant un terrain (id, nom, statut, surface, dimensions, adresse).
+- **Field** - entite representant un terrain (id, nom, statut, surface, adresse).
 - **Reservation** - bloc de disponibilite associe a un terrain et un match.
 - **TimeSlot** - Value Object immuable qui decrit un creneau temporel (`startAt`, `endAt`).
-- **FieldDimensions** - VO immuable (`lengthMeters`, `widthMeters`).
 - **FieldSurface** - VO immuable qui contraint le type de surface.
 - **FieldStatus** - etat operationnel d'un terrain (`active`, `maintenance`, `unavailable`).
 - **Event** - message metier publie sur le bus (`FieldCreated`, `FieldStatusChanged`, `FieldReservationCreated`).
@@ -19,9 +18,6 @@ des matchs et la coherence des donnees partagees avec les autres bounded context
 
 - **Field.id** doit etre un UUID unique.
 - **Field.name** et **Field.address** ne peuvent pas etre vides.
-- **FieldDimensions.lengthMeters** doit etre entre 25 et 50.
-- **FieldDimensions.widthMeters** doit etre entre 15 et 35.
-- **FieldDimensions.lengthMeters** doit etre strictement superieur a **widthMeters**.
 - **FieldSurface.surface** doit appartenir a l'enumeration autorisee.
 - Les reservations d'un meme terrain ne doivent jamais se chevaucher.
 - Un terrain non `active` ne peut pas recevoir de nouvelle reservation.

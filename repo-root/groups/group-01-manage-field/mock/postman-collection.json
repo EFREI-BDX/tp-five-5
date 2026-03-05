@@ -33,7 +33,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Field A\",\n  \"venueName\": \"Arena Central\",\n  \"address\": \"10 rue du Five, Paris\",\n  \"dimensions\": {\n    \"lengthMeters\": 40,\n    \"widthMeters\": 20\n  },\n  \"surface\": {\n    \"surface\": \"synthetic_turf\"\n  }\n}"
+              "raw": "{\n  \"name\": \"Field A\",\n  \"venueName\": \"Arena Central\",\n  \"address\": \"10 rue du Five, Paris\",\n  \"surface\": {\n    \"surface\": \"synthetic_turf\"\n  }\n}"
             }
           }
         },

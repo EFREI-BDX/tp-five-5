@@ -30,5 +30,5 @@ Source of truth: catalogue des terrains, statut operationnel et non-chevauchemen
 **Invariants**
 
 - field.status in {active, maintenance, unavailable}
-- field.dimensions.lengthMeters > field.dimensions.widthMeters
+- field.name is NonEmptyString
 - reservation slots for one field must not overlap

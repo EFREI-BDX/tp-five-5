@@ -242,11 +242,9 @@ components:
           $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
         address:
           $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
-        dimensions:
-          $ref: './tests/schemas/field-dimensions.schema.json'
         surface:
           $ref: './tests/schemas/field-surface.schema.json'
-      required: [name, venueName, address, dimensions, surface]
+      required: [name, venueName, address, surface]
 
     CreateFieldResponse:
       type: object
@@ -270,8 +268,6 @@ components:
           type: string
         address:
           type: string
-        dimensions:
-          $ref: './tests/schemas/field-dimensions.schema.json'
         surface:
           $ref: './tests/schemas/field-surface.schema.json'
         status:
@@ -285,7 +281,6 @@ components:
         - name
         - venueName
         - address
-        - dimensions
         - surface
         - status
         - createdAt

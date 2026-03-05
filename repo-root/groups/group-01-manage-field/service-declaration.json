@@ -107,7 +107,6 @@
     }
   ],
   "schemas": [
-    "./tests/schemas/field-dimensions.schema.json",
     "./tests/schemas/field-surface.schema.json",
     "./tests/schemas/time-slot.schema.json"
   ],
