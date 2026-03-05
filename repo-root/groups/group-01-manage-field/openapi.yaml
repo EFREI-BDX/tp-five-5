@@ -1,0 +1,362 @@
+openapi: 3.0.3
+info:
+  title: Field Management API
+  version: 1.0.0
+  description: API contract for managing five fields, statuses, and reservation time slots.
+servers:
+  - url: https://api.example.org
+    description: Base URL (replace per environment)
+
+tags:
+  - name: Fields
+    description: Field lifecycle and status operations
+  - name: Reservations
+    description: Reservation operations on a field
+
+paths:
+  /fields:
+    post:
+      tags: [Fields]
+      summary: Create a field
+      operationId: createField
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFieldRequest'
+            examples:
+              default:
+                value:
+                  name: Terrain Central
+                  status: active
+      responses:
+        '201':
+          description: Field created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldCreated'
+              examples:
+                default:
+                  value:
+                    fieldId: 11111111-1111-4111-8111-111111111111
+                    name: Terrain Central
+                    status: active
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /fields/{fieldId}:
+    parameters:
+      - $ref: '#/components/parameters/FieldIdParam'
+    get:
+      tags: [Fields]
+      summary: Get a field by id
+      operationId: getField
+      responses:
+        '200':
+          description: Field details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Field'
+              examples:
+                default:
+                  value:
+                    fieldId: 11111111-1111-4111-8111-111111111111
+                    name: Terrain Central
+                    status: active
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Fields]
+      summary: Delete a field
+      operationId: deleteField
+      responses:
+        '200':
+          description: Field deleted event payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldDeleted'
+              examples:
+                default:
+                  value:
+                    fieldId: 11111111-1111-4111-8111-111111111111
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /fields/{fieldId}/status:
+    parameters:
+      - $ref: '#/components/parameters/FieldIdParam'
+    patch:
+      tags: [Fields]
+      summary: Change a field status
+      operationId: updateFieldStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFieldStatusRequest'
+            examples:
+              default:
+                value:
+                  newStatus: maintenance
+                  reason: annual control
+      responses:
+        '200':
+          description: Field status changed event payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldStatusChanged'
+              examples:
+                default:
+                  value:
+                    fieldId: 11111111-1111-4111-8111-111111111111
+                    previousStatus: active
+                    newStatus: maintenance
+                    reason: annual control
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /fields/{fieldId}/reservations:
+    parameters:
+      - $ref: '#/components/parameters/FieldIdParam'
+    post:
+      tags: [Reservations]
+      summary: Create a reservation on a field
+      operationId: createFieldReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFieldReservationRequest'
+            examples:
+              default:
+                value:
+                  slot:
+                    startAt: '2026-03-05T10:00:00Z'
+                    endAt: '2026-03-05T11:00:00Z'
+      responses:
+        '201':
+          description: Reservation created event payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldReservationCreated'
+              examples:
+                default:
+                  value:
+                    reservationId: 22222222-2222-4222-8222-222222222222
+                    fieldId: 11111111-1111-4111-8111-111111111111
+                    slot:
+                      startAt: '2026-03-05T10:00:00Z'
+                      endAt: '2026-03-05T11:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /fields/{fieldId}/reservations/{reservationId}:
+    parameters:
+      - $ref: '#/components/parameters/FieldIdParam'
+      - $ref: '#/components/parameters/ReservationIdParam'
+    delete:
+      tags: [Reservations]
+      summary: Delete a reservation
+      operationId: deleteFieldReservation
+      responses:
+        '200':
+          description: Reservation deleted event payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FieldReservationDeleted'
+              examples:
+                default:
+                  value:
+                    reservationId: 22222222-2222-4222-8222-222222222222
+                    fieldId: 11111111-1111-4111-8111-111111111111
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  parameters:
+    FieldIdParam:
+      name: fieldId
+      in: path
+      required: true
+      schema:
+        $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+    ReservationIdParam:
+      name: reservationId
+      in: path
+      required: true
+      schema:
+        $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+
+  responses:
+    BadRequest:
+      description: Invalid request payload or parameter format
+      content:
+        application/json:
+          schema:
+            $ref: '../../openapi/common/schemas.yaml#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '../../openapi/common/schemas.yaml#/components/schemas/ErrorResponse'
+    UnprocessableEntity:
+      description: Domain business rule violation
+      content:
+        application/json:
+          schema:
+            $ref: '../../openapi/common/schemas.yaml#/components/schemas/ErrorResponse'
+
+  schemas:
+    FieldStatus:
+      type: string
+      enum:
+        - active
+        - maintenance
+        - unavailable
+
+    TimeSlot:
+      type: object
+      description: "Business rule enforced in domain code: endAt must be strictly greater than startAt."
+      properties:
+        startAt:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/Timestamp'
+        endAt:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/Timestamp'
+      required:
+        - startAt
+        - endAt
+      additionalProperties: false
+
+    Field:
+      type: object
+      properties:
+        fieldId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        name:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
+        status:
+          $ref: '#/components/schemas/FieldStatus'
+      required:
+        - fieldId
+        - name
+        - status
+      additionalProperties: false
+
+    CreateFieldRequest:
+      type: object
+      properties:
+        name:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
+        status:
+          $ref: '#/components/schemas/FieldStatus'
+      required:
+        - name
+      additionalProperties: false
+
+    UpdateFieldStatusRequest:
+      type: object
+      properties:
+        newStatus:
+          $ref: '#/components/schemas/FieldStatus'
+        reason:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
+      required:
+        - newStatus
+      additionalProperties: false
+
+    CreateFieldReservationRequest:
+      type: object
+      properties:
+        slot:
+          $ref: '#/components/schemas/TimeSlot'
+      required:
+        - slot
+      additionalProperties: false
+
+    FieldCreated:
+      type: object
+      properties:
+        fieldId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        name:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
+        status:
+          $ref: '#/components/schemas/FieldStatus'
+      required:
+        - fieldId
+        - name
+        - status
+      additionalProperties: false
+
+    FieldDeleted:
+      type: object
+      properties:
+        fieldId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+      required:
+        - fieldId
+      additionalProperties: false
+
+    FieldStatusChanged:
+      type: object
+      properties:
+        fieldId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        previousStatus:
+          $ref: '#/components/schemas/FieldStatus'
+        newStatus:
+          $ref: '#/components/schemas/FieldStatus'
+        reason:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/NonEmptyString'
+      required:
+        - fieldId
+        - previousStatus
+        - newStatus
+      additionalProperties: false
+
+    FieldReservationCreated:
+      type: object
+      properties:
+        reservationId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        fieldId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        slot:
+          $ref: '#/components/schemas/TimeSlot'
+      required:
+        - reservationId
+        - fieldId
+        - slot
+      additionalProperties: false
+
+    FieldReservationDeleted:
+      type: object
+      properties:
+        reservationId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        fieldId:
+          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+      required:
+        - reservationId
+        - fieldId
+      additionalProperties: false
