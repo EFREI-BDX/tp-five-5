@@ -1,0 +1,60 @@
+openapi: 3.0.3
+info:
+  title: TODO - API title
+  version: 1.0.0
+  description: TODO - brève description de l'API et du bounded context
+
+servers:
+  - url: https://api.example.org
+    description: TODO - base URL (dev/staging/prod)
+
+paths: {}
+
+components:
+  schemas: {}
+  parameters: {}
+  responses: {}
+  requestBodies: {}
+  securitySchemes: {}
+
+tags: []
+externalDocs:
+  description: TODO - documentation externe
+  url: TODO
+
+# Placeholders et recommandations :
+# - Ajouter vos endpoints sous "paths" :
+#     /resource:
+#       get:
+#         summary: TODO
+#         responses:
+#           '200':
+#             $ref: '#/components/responses/Ok'
+#
+# - Définir schémas réutilisables sous components/schemas.
+# - Pour réutiliser JSON Schema stockés dans tests/schemas, utilisez $ref relatifs :
+#     $ref: './tests/schemas/quantity.schema.json'
+#
+# - Définir réponses communes sous components/responses (ex. BadRequest, NotFound).
+# - Déclarer securitySchemes si nécessaire (ApiKey, BearerAuth, OAuth2).
+#
+# Exemple minimal d'ajout (commenté) :
+#
+# components:
+#   schemas:
+#     ExampleVO:
+#       type: object
+#       properties:
+#         id:
+#           type: string
+#         name:
+#           type: string
+#       required: [id, name]
+#
+#   responses:
+#     Ok:
+#       description: Succès
+#       content:
+#         application/json:
+#           schema:
+#             $ref: '#/components/schemas/ExampleVO'
