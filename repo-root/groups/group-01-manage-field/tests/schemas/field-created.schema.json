@@ -18,22 +18,12 @@
         "maintenance",
         "unavailable"
       ]
-    },
-    "timestamp": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "traceId": {
-      "type": "string",
-      "minLength": 1
     }
   },
   "required": [
     "fieldId",
     "name",
-    "status",
-    "timestamp",
-    "traceId"
+    "status"
   ],
   "additionalProperties": false
 }
