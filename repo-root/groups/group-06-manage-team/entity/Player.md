@@ -6,14 +6,12 @@
 
 - id — *VO Id*
 - name — *VO Name*
-- sexe - *VO Sexe*
 - team - *Team*
 
 **Invariants**
 
 - id doit être non vide
 - name doit être non vide
-- sexe doit être non vide
 
 **Format JSON attendu**
 
