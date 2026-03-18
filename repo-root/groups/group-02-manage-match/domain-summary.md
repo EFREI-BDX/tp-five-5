@@ -9,9 +9,8 @@ Gérer la création et l'état des matchs sportifs afin de permettre la planific
 - **Team** — équipe participant à un match (id, tag, label, teamState).
 - **Field** — lieu où se déroule un match (id, label).
 - **Period** — période ou durée du match.
-- **Statut** — état actuel du match (planifié, en cours, terminé, annulé).
 - **Tag** — identifiant court d'une équipe.
-- **MatchState** — état actuel d'un match matchState (pas démarré, en cours, terminé, annulé).
+- **MatchState** — état actuel d'un match matchState (planifié, en cours, terminé, annulé).
 - **TeamState** — état actuel d'une équipe (incomplète, complète et dissoute).
 
 **Principales invariants métier**
@@ -22,7 +21,7 @@ Gérer la création et l'état des matchs sportifs afin de permettre la planific
 - **Team.id** doit être un identifiant unique.
 - **Team.tag** ne peut pas être vide et doit être unique dans le système et contenir 3 caractères ou moins.
 - **Team.label** ne peut pas être vide.
-- **Team.teamState** doit appartenir à l'énumération autorisée (`active`, `inactive`, `suspended`).
+- **Team.teamState** doit appartenir à l'énumération autorisée (incomplète, complète et dissoute).
 - **Field.id** doit être un identifiant unique.
 - **Field.label** ne peut pas être vide.
 - Un match doit avoir exactement deux équipes participantes.

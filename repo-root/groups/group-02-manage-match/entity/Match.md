@@ -14,8 +14,8 @@
 - id doit être non vide
 - period doit être non vide
 - statut doit être non vide
-- teamA et teamB doivent être non vide.
-- field doit être non vide.
+- teamA et teamB doivent être non vide, différentes et pas dissoutes.
+- field doit être non vide et disponible.
 - matchState est dynamique en fonction de la période si on est avant, c'est planned si on est pendant, ça doit être 
 in_progress, si on est après ça doit être completed s'il à été annulé ça passe en cancelled.
 
