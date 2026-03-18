@@ -1,0 +1,13 @@
+{
+  "$id": "https://five.example.org/schemas/timestamp.schema.json",
+  "title": "Timestamp",
+  "type": "object",
+  "properties": {
+    "value": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["value"],
+  "additionalProperties": false
+}

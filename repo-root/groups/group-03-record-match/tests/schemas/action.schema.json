@@ -1,0 +1,13 @@
+{
+  "$id": "https://five.example.org/schemas/action.schema.json",
+  "title": "Action",
+  "type": "object",
+  "properties": {
+    "value": {
+      "type": "string",
+      "enum": ["goal", "foul", "yellowCard", "redCard", "kickOff", "endMatch"]
+    }
+  },
+  "required": ["value"],
+  "additionalProperties": false
+}

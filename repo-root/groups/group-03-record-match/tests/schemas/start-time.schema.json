@@ -1,0 +1,13 @@
+{
+  "$id": "https://five.example.org/schemas/start-time.schema.json",
+  "title": "StartTime",
+  "type": "object",
+  "properties": {
+    "value": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["value"],
+  "additionalProperties": false
+}
