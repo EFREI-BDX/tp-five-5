@@ -1,0 +1,12 @@
+{
+  "$id": "https://example.org/schemas/item-stats.schema.json",
+  "title": "ItemStats",
+  "type": "object",
+  "properties": {
+    "attack": { "type": "integer", "minimum": 0 },
+    "defense": { "type": "integer", "minimum": 0 },
+    "weight": { "type": "number", "minimum": 0 }
+  },
+  "required": ["attack", "defense", "weight"],
+  "additionalProperties": false
+}

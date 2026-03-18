@@ -1,0 +1,22 @@
+{
+  "$id": "https://example.org/schemas/equipment-slot.schema.json",
+  "title": "EquipmentSlot",
+  "type": "object",
+  "properties": {
+    "slot": {
+      "type": "string",
+      "enum": [
+        "head",
+        "body",
+        "mainHand",
+        "offHand",
+        "legs",
+        "feet"
+      ]
+    }
+  },
+  "required": [
+    "slot"
+  ],
+  "additionalProperties": false
+}

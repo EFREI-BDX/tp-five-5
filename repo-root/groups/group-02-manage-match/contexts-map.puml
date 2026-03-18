@@ -1,0 +1,30 @@
+@startuml
+
+package "Player Context" {
+  [Player Service]
+}
+interface "Player API" as PlayerAPI
+
+package "Character Context" {
+  [Character Service]
+  [Character DB]
+  [ACL Player Adapter]
+}
+interface "Character API" as CharacterAPI
+
+package "Inventory Context" {
+  [Inventory Service]
+}
+interface "Inventory API" as InventoryAPI
+
+CharacterAPI - [Character Service]
+[Character Service] --> [Character DB]
+[Character Service] --> [ACL Player Adapter]
+[Character Service] -> InventoryAPI: use
+
+InventoryAPI - [Inventory Service]
+
+PlayerAPI -- [Player Service]
+[ACL Player Adapter] --> PlayerAPI: use
+
+@enduml

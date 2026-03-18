@@ -1,0 +1,256 @@
+{
+  "info": {
+    "name": "Character Management - JDR (with examples)",
+    "description": "Collection avec Examples pour mock Postman. Remplacer {{baseUrl}}, {{apiKey}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.1"
+  },
+  "item": [
+    {
+      "name": "Create Character",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Arthas\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/characters",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "characters"
+          ]
+        },
+        "description": "Créer un personnage."
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"name\": \"Arthas\" }"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/characters",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "characters"
+              ]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\": \"Arthas\"\n}",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        {
+          "name": "400 Bad Request",
+          "originalRequest": {},
+          "status": "Bad Request",
+          "code": 400,
+          "body": "{ \"error\": \"ValidationError\", \"message\": \"name must be at least 3 characters\" }",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get Character",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/characters/:id",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "characters",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          ]
+        },
+        "description": "Récupère le personnage par id."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/characters/123e4567-e89b-12d3-a456-426614174000"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\": \"Arthas\",\n  \"inventory\": [{ \"itemId\": \"sword-001\", \"quantity\": 1 }]\n}",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        {
+          "name": "404 Not Found",
+          "originalRequest": {},
+          "status": "Not Found",
+          "code": 404,
+          "body": "{ \"error\": \"NotFound\", \"message\": \"Character not found\" }",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Add Item to Inventory",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"itemId\": \"potion-001\",\n  \"quantity\": 3\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/characters/:id/inventory",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "characters",
+            ":id",
+            "inventory"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "123e4567-e89b-12d3-a456-426614174000"
+            }
+          ]
+        },
+        "description": "Ajoute un item à l'inventaire."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"itemId\": \"potion-001\", \"quantity\": 3 }"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/characters/123e4567-e89b-12d3-a456-426614174000/inventory"
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "body": "{ \"message\": \"Item added\", \"characterId\": \"123e4567-e89b-12d3-a456-426614174000\", \"itemId\": \"potion-001\", \"quantity\": 3 }",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        {
+          "name": "400 Bad Request",
+          "originalRequest": {},
+          "status": "Bad Request",
+          "code": 400,
+          "body": "{ \"error\": \"ValidationError\", \"message\": \"quantity must be >= 1\" }",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.example.org"
+    },
+    {
+      "key": "apiKey",
+      "value": "REPLACE_WITH_KEY"
+    },
+    {
+      "key": "lastCharacterId",
+      "value": ""
+    }
+  ]
+}

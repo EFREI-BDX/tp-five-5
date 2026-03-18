@@ -1,0 +1,21 @@
+@startuml
+|Player|
+start
+:Remplir formulaire "Create Character";
+:Soumettre POST /characters;
+|Character Management|
+:Valider données (nom unique, stats valides);
+if (Validation OK?) then (oui)
+  :Créer Character en base;
+  :Publier event CharacterCreated;
+  fork
+    :Répondre 201 au Player;
+  fork again
+    |Notifications|
+    :Envoyer email de bienvenue;
+  end fork
+else (non)
+  :Répondre 400 avec erreurs;
+endif
+stop
+@enduml
