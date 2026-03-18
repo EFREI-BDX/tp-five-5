@@ -1,58 +1,31 @@
-# Entité `terrain_status`
+# terrain_status
 
-## Attributs
+**Resume metier**
 
-| Nom     | Type   | Obligatoire | Rôle                  |
-| ------- | ------ | ----------: | --------------------- |
-| `id`    | UUID   |         oui | identifiant technique |
-| `code`  | string |         oui | code unique du statut |
-| `label` | string |         oui | libellé lisible       |
+Donnee de reference pour le statut d'un terrain.
 
-## Invariants
+**Attributs**
 
-- `id` est unique.
-- `code` est unique.
-- `code` est en minuscules.
-- Valeurs : `active`, `inactive`, `maintenance`.
+- **id** - *UUID* - identifiant technique
+- **code** - *string* - `active`, `inactive`, `maintenance`
+- **label** - *string* - libelle lisible
 
-## Format JSON attendu
+**Invariants**
 
-### Schéma
-```json
-{
-  "id": "uuid",
-  "code": "string",
-  "label": "string"
-}
-```
+- `id` est unique
+- `code` est unique
+- `code` est en minuscules
+- `code` appartient a l'enumeration autorisee
 
-### Fixture valide
-```json
-{
-  "id": "11111111-1111-4111-8111-111111111111",
-  "code": "active",
-  "label": "Actif"
-}
-```
+**Format JSON attendu**
 
-### Fixture invalide
-```json
-{
-  "id": "not-a-uuid",
-  "code": "ACTIVE",
-  "label": "Actif"
-}
-```
+- **Schema** : `tests/schemas/terrain-status.schema.json`
+- **Fixture valide** : `tests/fixtures/terrain-status.valid.json`
+- **Fixture invalide** : `tests/fixtures/terrain-status.invalid.json`
 
-## Tests minimaux attendus
+**Tests minimaux attendus**
 
-- accepte un UUID valide
-- refuse un UUID invalide
-- refuse un `code` dupliqué
-- refuse un `code` en majuscules si la règle impose minuscules
-
-## Génération des fixtures
-
-- générer un UUID
-- choisir un `code` métier connu
-- renseigner un `label` lisible
+- **createValid** - un statut valide est accepte
+- **createInvalidThrows** - un UUID ou un code invalide est rejete
+- **jsonRoundtrip** - la serialisation conserve les champs
+- **schemaValidation** - la fixture valide passe, la fixture invalide echoue

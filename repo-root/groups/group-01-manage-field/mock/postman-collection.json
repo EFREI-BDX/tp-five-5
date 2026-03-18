@@ -1,0 +1,266 @@
+{
+  "info": {
+    "name": "Manage Field",
+    "description": "Collection de reference. Remplacer {{baseUrl}} et {{apiKey}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "List Terrain Statuses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/v1/terrain-statuses",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "terrain-statuses"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "status": "OK",
+          "code": 200,
+          "body": "[\n  {\n    \"id\": \"11111111-1111-4111-8111-111111111111\",\n    \"code\": \"active\",\n    \"label\": \"Actif\"\n  }\n]",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Create Terrain",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Terrain A\",\n  \"status_id\": \"11111111-1111-4111-8111-111111111111\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/terrains",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "terrains"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"id\": \"22222222-2222-4222-8222-222222222222\",\n  \"name\": \"Terrain A\",\n  \"status_id\": \"11111111-1111-4111-8111-111111111111\"\n}",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Update Terrain Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status_id\": \"55555555-5555-4555-8555-555555555555\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/terrains/:terrain_id/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "terrains",
+            ":terrain_id",
+            "status"
+          ],
+          "variable": [
+            {
+              "key": "terrain_id",
+              "value": "22222222-2222-4222-8222-222222222222"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"22222222-2222-4222-8222-222222222222\",\n  \"name\": \"Terrain A\",\n  \"status_id\": \"55555555-5555-4555-8555-555555555555\"\n}",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Create Terrain Reservation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status_id\": \"33333333-3333-4333-8333-333333333333\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/terrains/:terrain_id/reservations",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "terrains",
+            ":terrain_id",
+            "reservations"
+          ],
+          "variable": [
+            {
+              "key": "terrain_id",
+              "value": "22222222-2222-4222-8222-222222222222"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "status": "Created",
+          "code": 201,
+          "body": "{\n  \"id\": \"44444444-4444-4444-8444-444444444444\",\n  \"terrain_id\": \"22222222-2222-4222-8222-222222222222\",\n  \"status_id\": \"33333333-3333-4333-8333-333333333333\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Update Reservation Status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "X-API-KEY",
+            "value": "{{apiKey}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status_id\": \"66666666-6666-4666-8666-666666666666\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/v1/terrains/:terrain_id/reservations/:reservation_id/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "v1",
+            "terrains",
+            ":terrain_id",
+            "reservations",
+            ":reservation_id",
+            "status"
+          ],
+          "variable": [
+            {
+              "key": "terrain_id",
+              "value": "22222222-2222-4222-8222-222222222222"
+            },
+            {
+              "key": "reservation_id",
+              "value": "44444444-4444-4444-8444-444444444444"
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "status": "OK",
+          "code": 200,
+          "body": "{\n  \"id\": \"44444444-4444-4444-8444-444444444444\",\n  \"terrain_id\": \"22222222-2222-4222-8222-222222222222\",\n  \"status_id\": \"66666666-6666-4666-8666-666666666666\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.example.org"
+    },
+    {
+      "key": "apiKey",
+      "value": "REPLACE_WITH_KEY"
+    }
+  ]
+}

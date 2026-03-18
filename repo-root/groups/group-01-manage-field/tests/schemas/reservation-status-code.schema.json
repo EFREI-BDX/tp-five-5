@@ -1,0 +1,10 @@
+{
+  "$id": "https://example.org/schemas/reservation-status-code.schema.json",
+  "title": "ReservationStatusCode",
+  "type": "string",
+  "enum": [
+    "pending",
+    "confirmed",
+    "cancelled"
+  ]
+}

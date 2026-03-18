@@ -1,0 +1,115 @@
+{
+  "serviceId": "group-01-manage-field",
+  "name": "Manage Field",
+  "version": "1.0.0",
+  "description": "Service source de verite pour les terrains, leurs statuts et les reservations.",
+  "owner": {
+    "team": "group-01-manage-field",
+    "contact": "todo@example.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@example.org:school/jadtpddd.git",
+    "path": "repo-root/groups/group-01-manage-field"
+  },
+  "endpoints": [
+    {
+      "path": "/v1/terrain-statuses",
+      "method": "GET",
+      "operationId": "listTerrainStatuses",
+      "responseSchema": "./tests/schemas/terrain-status-list.schema.json",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/v1/reservation-statuses",
+      "method": "GET",
+      "operationId": "listReservationStatuses",
+      "responseSchema": "./tests/schemas/reservation-status-list.schema.json",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/v1/terrains",
+      "method": "POST",
+      "operationId": "createTerrain",
+      "requestSchema": "./openapi.yaml#/components/schemas/CreateTerrainRequest",
+      "responseSchema": "./tests/schemas/terrain.schema.json",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/v1/terrains/{terrain_id}",
+      "method": "GET",
+      "operationId": "getTerrain",
+      "responseSchema": "./tests/schemas/terrain.schema.json",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/v1/terrains/{terrain_id}/status",
+      "method": "PATCH",
+      "operationId": "updateTerrainStatus",
+      "requestSchema": "./openapi.yaml#/components/schemas/UpdateTerrainStatusRequest",
+      "responseSchema": "./tests/schemas/terrain.schema.json",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/v1/terrains/{terrain_id}/reservations",
+      "method": "POST",
+      "operationId": "createTerrainReservation",
+      "requestSchema": "./openapi.yaml#/components/schemas/CreateTerrainReservationRequest",
+      "responseSchema": "./tests/schemas/terrain-reservation.schema.json",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/v1/terrains/{terrain_id}/reservations/{reservation_id}/status",
+      "method": "PATCH",
+      "operationId": "updateTerrainReservationStatus",
+      "requestSchema": "./openapi.yaml#/components/schemas/UpdateReservationStatusRequest",
+      "responseSchema": "./tests/schemas/terrain-reservation.schema.json",
+      "auth": "ApiKeyAuth"
+    }
+  ],
+  "eventsProduced": [
+    {
+      "name": "TerrainCreated",
+      "schema": "./tests/schemas/terrain-created.event.schema.json"
+    },
+    {
+      "name": "TerrainStatusChanged",
+      "schema": "./tests/schemas/terrain-status-changed.event.schema.json"
+    },
+    {
+      "name": "TerrainReservationCreated",
+      "schema": "./tests/schemas/terrain-reservation-created.event.schema.json"
+    },
+    {
+      "name": "TerrainReservationStatusChanged",
+      "schema": "./tests/schemas/terrain-reservation-status-changed.event.schema.json"
+    }
+  ],
+  "eventsConsumed": [],
+  "schemas": [
+    "./tests/schemas/terrain-name.schema.json",
+    "./tests/schemas/terrain-status-code.schema.json",
+    "./tests/schemas/reservation-status-code.schema.json",
+    "./tests/schemas/time-slot.schema.json",
+    "./tests/schemas/terrain-status-list.schema.json",
+    "./tests/schemas/reservation-status-list.schema.json",
+    "./tests/schemas/terrain-status.schema.json",
+    "./tests/schemas/reservation-status.schema.json",
+    "./tests/schemas/terrain.schema.json",
+    "./tests/schemas/terrain-reservation.schema.json"
+  ],
+  "health": {
+    "path": "/health",
+    "method": "GET",
+    "expectedStatus": 200
+  },
+  "security": {
+    "type": "apiKey",
+    "in": "header",
+    "name": "X-API-KEY"
+  },
+  "metadata": {
+    "schemaVersion": "1.0",
+    "lastUpdated": "2026-03-18"
+  }
+}

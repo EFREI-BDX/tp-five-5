@@ -1,35 +1,32 @@
-# Domain Summary - Field Management
+# Domain Summary - Manage Field
 
 **Objectif metier**
-Gerer le cycle de vie des terrains de five (creation, statut, suppression) et les reservations de creneaux, afin
-d'exposer une source de verite unique pour la disponibilite des terrains et de publier des evenements de domaine
-consommables par les autres contextes (booking, planning, notifications).
+
+Gerer les terrains, leurs statuts de disponibilite et les reservations de creneaux afin de fournir une source de
+verite partagee aux autres groupes.
 
 **Ubiquitous language**
 
-- **Field** - entite representant un terrain (`fieldId`, `name`, `status`).
-- **FieldStatus** - etat courant du terrain: `active`, `maintenance`, `unavailable`.
-- **Reservation** - allocation d'un `TimeSlot` sur un terrain, identifiee par `reservationId`.
-- **TimeSlot** - intervalle temporel (`startAt`, `endAt`) porte par la reservation.
-- **Value Object (VO)** - objets immuables et sans identite: `TimeSlot`, payloads d'evenements.
-- **Event** - message metier publie apres une transition de domaine (`FieldCreated`, `FieldStatusChanged`, etc.).
-- **Command** - requete API synchrone initiant une intention metier (create field, change status, reserve slot).
-- **Aggregate** - racine transactionnelle `Field`, responsable de la coherence locale statut/reservations.
+- **Terrain** - terrain reservable identifie par `id`, `name`, `status_id`.
+- **TerrainStatus** - statut de reference d'un terrain: `active`, `inactive`, `maintenance`.
+- **ReservationStatus** - statut de reference d'une reservation: `pending`, `confirmed`, `cancelled`.
+- **TerrainReservation** - reservation d'un terrain sur un intervalle `start_at` / `end_at`.
+- **TimeSlot** - value object representant un creneau temporel.
+- **Event** - message publie apres creation ou changement de statut.
 
 **Principales invariants metier**
 
-- **Field.fieldId** et **Reservation.reservationId** doivent etre des UUID valides.
-- **Field.name** doit etre non vide, avec une regle metier supplementaire: pas uniquement des espaces.
-- **Field.status** doit etre dans l'enumeration autorisee (`active`, `maintenance`, `unavailable`).
-- **TimeSlot.startAt** et **TimeSlot.endAt** doivent etre au format `date-time` ISO-8601.
-- **TimeSlot.endAt** doit etre strictement superieur a **TimeSlot.startAt**.
-- Un evenement **FieldStatusChanged** doit respecter **previousStatus != newStatus**.
-- Si **reason** est present dans un changement de statut, sa valeur doit etre non vide.
+- Tous les `id` et `*_id` sont des UUID valides.
+- `terrain.name` est obligatoire et unique.
+- `terrain.status_id` doit referencer un `terrain_status` existant.
+- `terrain_reservation.status_id` doit referencer un `reservation_status` existant.
+- `start_at` doit etre strictement inferieur a `end_at`.
+- Deux reservations du meme terrain ne se chevauchent pas si leur statut est `pending` ou `confirmed`.
+- Une reservation `cancelled` n'occupe plus le creneau.
 
 **Principaux events produits**
 
-- **FieldCreated** - payload minimal: `fieldId`, `name`, `status`.
-- **FieldDeleted** - payload minimal: `fieldId`.
-- **FieldStatusChanged** - payload minimal: `fieldId`, `previousStatus`, `newStatus`, `reason?`.
-- **FieldReservationCreated** - payload minimal: `reservationId`, `fieldId`, `slot`.
-- **FieldReservationDeleted** - payload minimal: `reservationId`, `fieldId`.
+- **TerrainCreated** - `terrain_id`, `name`, `status_id`, `occurred_at`, `trace_id`
+- **TerrainStatusChanged** - `terrain_id`, `previous_status_id`, `status_id`, `occurred_at`, `trace_id`
+- **TerrainReservationCreated** - `reservation_id`, `terrain_id`, `status_id`, `start_at`, `end_at`, `occurred_at`, `trace_id`
+- **TerrainReservationStatusChanged** - `reservation_id`, `terrain_id`, `previous_status_id`, `status_id`, `occurred_at`, `trace_id`

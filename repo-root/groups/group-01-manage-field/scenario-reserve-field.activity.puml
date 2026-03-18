@@ -1,0 +1,18 @@
+@startuml
+|Booking|
+start
+:Choisir un terrain et un creneau;
+:Soumettre POST /v1/terrains/{terrain_id}/reservations;
+|Manage Field|
+:Verifier terrain actif;
+:Verifier start_at < end_at;
+:Verifier absence de chevauchement actif;
+if (Validation OK ?) then (oui)
+  :Creer la reservation;
+  :Publier TerrainReservationCreated;
+  :Repondre 201;
+else (non)
+  :Repondre 400 ou 409;
+endif
+stop
+@enduml

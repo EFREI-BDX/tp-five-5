@@ -1,56 +1,31 @@
-# Entité `reservation_status`
+# reservation_status
 
-## Attributs
+**Resume metier**
 
-| Nom     | Type   | Obligatoire | Rôle                  |
-| ------- | ------ | ----------: | --------------------- |
-| `id`    | UUID   |         oui | identifiant technique |
-| `code`  | string |         oui | code unique du statut |
-| `label` | string |         oui | libellé lisible       |
+Donnee de reference pour le statut d'une reservation.
 
-## Invariants
+**Attributs**
 
-- `id` est unique.
-- `code` est unique.
-- `code` est en minuscules.
-- Valeurs : `pending`, `confirmed`, `cancelled`.
+- **id** - *UUID* - identifiant technique
+- **code** - *string* - `pending`, `confirmed`, `cancelled`
+- **label** - *string* - libelle lisible
 
-## Format JSON attendu
+**Invariants**
 
-### Schéma
-```json
-{
-  "id": "uuid",
-  "code": "string",
-  "label": "string"
-}
-```
+- `id` est unique
+- `code` est unique
+- `code` est en minuscules
+- `code` appartient a l'enumeration autorisee
 
-### Fixture valide
-```json
-{
-  "id": "33333333-3333-4333-8333-333333333333",
-  "code": "confirmed",
-  "label": "Confirmée"
-}
-```
+**Format JSON attendu**
 
-### Fixture invalide
-```json
-{
-  "id": "33333333-3333-4333-8333-333333333333",
-  "code": "CONFIRMED",
-  "label": "Confirmée"
-}
-```
+- **Schema** : `tests/schemas/reservation-status.schema.json`
+- **Fixture valide** : `tests/fixtures/reservation-status.valid.json`
+- **Fixture invalide** : `tests/fixtures/reservation-status.invalid.json`
 
-## Tests minimaux attendus
+**Tests minimaux attendus**
 
-- accepte un statut valide
-- refuse un `code` dupliqué
-- refuse un `code` hors format attendu
-
-## Génération des fixtures
-
-- générer les fixtures de référence une seule fois
-- prévoir au minimum : `pending`, `confirmed`, `cancelled`
+- **createValid** - un statut valide est accepte
+- **createInvalidThrows** - un code invalide est rejete
+- **jsonRoundtrip** - la serialisation conserve les champs
+- **schemaValidation** - la fixture valide passe, la fixture invalide echoue

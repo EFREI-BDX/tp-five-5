@@ -2,38 +2,34 @@
 
 **Contexte**
 
-Service responsable de la gestion du catalogue des terrains de five: creation, mise a jour du statut,
-disponibilite et reservations de creneaux.
+Source de verite pour le catalogue des terrains de five et les reservations associees.
 
 **Membres**
 
 - **Nom Prenom** - identifiant GitHub
 
-## Stack et livrables attendus
+## Perimetre
 
-- **Stack choisie** : TODO (ex. Java Spring Boot, Node.js, Kotlin, etc.)
-- **Livrables obligatoires** :
-    - `domain-summary.md`
-    - `contexts-map.md`
-    - `value-object/*.md` (un fichier par VO)
-    - `openapi.yaml`
-    - `mock/postman-collection.json`
-    - `tests/schemas/*.schema.json`
-    - `tests/fixtures/*.valid.json` et `*.invalid.json`
-    - `CONTRIBUTION.md`
+- `terrain_status`
+- `reservation_status`
+- `terrain`
+- `terrain_reservation`
 
----
-
-**Livrables attendus**
+## Livrables
 
 - `domain-summary.md`
 - `contexts-map.md`
-- `value-object/*.md` (un fichier par VO)
+- `contexts-map.puml`
+- `entity/*.md`
+- `value-object/*.md`
 - `openapi.yaml`
+- `service-declaration.json`
 - `mock/postman-collection.json`
-- `tests/schemas/*.schema.json` et `tests/fixtures/*.valid.json` / `*.invalid.json`
+- `tests/schemas/*.schema.json`
+- `tests/fixtures/*.json`
 - `CONTRIBUTION.md`
 
-**Commandes utiles**
-
 **Notes**
+
+- Les statuts sont des donnees de reference.
+- Deux reservations actives ne se chevauchent pas sur un meme terrain.

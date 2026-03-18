@@ -1,0 +1,25 @@
+{
+  "$id": "https://example.org/schemas/reservation-status.schema.json",
+  "title": "ReservationStatus",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "code": {
+      "$ref": "./reservation-status-code.schema.json"
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": ".*\\S.*"
+    }
+  },
+  "required": [
+    "id",
+    "code",
+    "label"
+  ],
+  "additionalProperties": false
+}

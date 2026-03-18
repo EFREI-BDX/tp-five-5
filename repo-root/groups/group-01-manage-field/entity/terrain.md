@@ -1,58 +1,31 @@
-# Entité `terrain`
+# terrain
 
-## Attributs
+**Resume metier**
 
-| Nom         | Type   | Obligatoire | Rôle                               |
-| ----------- | ------ | ----------: | ---------------------------------- |
-| `id`        | UUID   |         oui | identifiant technique              |
-| `name`      | string |         oui | nom du terrain                     |
-| `status_id` | UUID   |         oui | référence vers `terrain_status.id` |
+Terrain reservable du catalogue.
 
-## Invariants
+**Attributs**
 
-- `id` est unique.
-- `name` est obligatoire.
-- `name` est unique.
-- `status_id` doit exister dans `terrain_status`.
+- **id** - *UUID* - identifiant technique
+- **name** - *string* - nom metier du terrain
+- **status_id** - *UUID* - reference vers `terrain_status.id`
 
-## Format JSON attendu
+**Invariants**
 
-### Schéma
-```json
-{
-  "id": "uuid",
-  "name": "string",
-  "status_id": "uuid"
-}
-```
+- `id` est unique
+- `name` est obligatoire
+- `name` est unique
+- `status_id` reference un `terrain_status` existant
 
-### Fixture valide
-```json
-{
-  "id": "22222222-2222-4222-8222-222222222222",
-  "name": "Terrain A",
-  "status_id": "11111111-1111-4111-8111-111111111111"
-}
-```
+**Format JSON attendu**
 
-### Fixture invalide
-```json
-{
-  "id": "22222222-2222-4222-8222-222222222222",
-  "name": "",
-  "status_id": "unknown-status-id"
-}
-```
+- **Schema** : `tests/schemas/terrain.schema.json`
+- **Fixture valide** : `tests/fixtures/terrain.valid.json`
+- **Fixture invalide** : `tests/fixtures/terrain.invalid.json`
 
-## Tests minimaux attendus
+**Tests minimaux attendus**
 
-- accepte un terrain valide
-- refuse un nom vide
-- refuse un nom dupliqué
-- refuse un `status_id` inexistant
-
-## Génération des fixtures
-
-- générer un UUID
-- générer un nom métier simple : `Terrain A`, `Terrain B`
-- réutiliser un `status_id` existant
+- **createValid** - un terrain valide est accepte
+- **createInvalidThrows** - un nom vide ou un `status_id` invalide est rejete
+- **jsonRoundtrip** - la serialisation conserve les champs
+- **schemaValidation** - la fixture valide passe, la fixture invalide echoue
