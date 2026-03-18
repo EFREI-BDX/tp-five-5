@@ -1,13 +1,13 @@
 {
-  "$id": "https://example.org/schemas/terrain-reservation.schema.json",
-  "title": "TerrainReservation",
+  "$id": "https://example.org/schemas/field-reservation-created.event.schema.json",
+  "title": "FieldReservationCreated",
   "type": "object",
   "properties": {
-    "id": {
+    "reservation_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
-    "terrain_id": {
+    "field_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
@@ -22,14 +22,24 @@
     "end_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "required": [
-    "id",
-    "terrain_id",
+    "reservation_id",
+    "field_id",
     "status_id",
     "start_at",
-    "end_at"
+    "end_at",
+    "occurred_at",
+    "trace_id"
   ],
   "additionalProperties": false
 }

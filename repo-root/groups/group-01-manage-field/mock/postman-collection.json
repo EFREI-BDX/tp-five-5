@@ -1,13 +1,13 @@
 {
   "info": {
-    "name": "Manage Field",
-    "description": "Collection de reference. Remplacer {{baseUrl}} et {{apiKey}}.",
+    "name": "Field Management",
+    "description": "Reference collection. Replace {{baseUrl}} and {{apiKey}}.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "version": "1.0.0"
   },
   "item": [
     {
-      "name": "List Terrain Statuses",
+      "name": "List Field Statuses",
       "request": {
         "method": "GET",
         "header": [
@@ -21,13 +21,13 @@
           }
         ],
         "url": {
-          "raw": "{{baseUrl}}/v1/terrain-statuses",
+          "raw": "{{baseUrl}}/v1/field-statuses",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "v1",
-            "terrain-statuses"
+            "field-statuses"
           ]
         }
       },
@@ -36,7 +36,7 @@
           "name": "200 OK",
           "status": "OK",
           "code": 200,
-          "body": "[\n  {\n    \"id\": \"11111111-1111-4111-8111-111111111111\",\n    \"code\": \"active\",\n    \"label\": \"Actif\"\n  }\n]",
+          "body": "[\n  {\n    \"id\": \"11111111-1111-4111-8111-111111111111\",\n    \"code\": \"active\",\n    \"label\": \"Active\"\n  }\n]",
           "header": [
             {
               "key": "Content-Type",
@@ -47,7 +47,7 @@
       ]
     },
     {
-      "name": "Create Terrain",
+      "name": "Create Field",
       "request": {
         "method": "POST",
         "header": [
@@ -62,16 +62,16 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Terrain A\",\n  \"status_id\": \"11111111-1111-4111-8111-111111111111\"\n}"
+          "raw": "{\n  \"name\": \"Field A\",\n  \"status_id\": \"11111111-1111-4111-8111-111111111111\"\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/v1/terrains",
+          "raw": "{{baseUrl}}/v1/fields",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "v1",
-            "terrains"
+            "fields"
           ]
         }
       },
@@ -80,7 +80,7 @@
           "name": "201 Created",
           "status": "Created",
           "code": 201,
-          "body": "{\n  \"id\": \"22222222-2222-4222-8222-222222222222\",\n  \"name\": \"Terrain A\",\n  \"status_id\": \"11111111-1111-4111-8111-111111111111\"\n}",
+          "body": "{\n  \"id\": \"22222222-2222-4222-8222-222222222222\",\n  \"name\": \"Field A\",\n  \"status_id\": \"11111111-1111-4111-8111-111111111111\"\n}",
           "header": [
             {
               "key": "Content-Type",
@@ -91,7 +91,7 @@
       ]
     },
     {
-      "name": "Update Terrain Status",
+      "name": "Update Field Status",
       "request": {
         "method": "PATCH",
         "header": [
@@ -109,19 +109,19 @@
           "raw": "{\n  \"status_id\": \"55555555-5555-4555-8555-555555555555\"\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/v1/terrains/:terrain_id/status",
+          "raw": "{{baseUrl}}/v1/fields/:field_id/status",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "v1",
-            "terrains",
-            ":terrain_id",
+            "fields",
+            ":field_id",
             "status"
           ],
           "variable": [
             {
-              "key": "terrain_id",
+              "key": "field_id",
               "value": "22222222-2222-4222-8222-222222222222"
             }
           ]
@@ -132,7 +132,7 @@
           "name": "200 OK",
           "status": "OK",
           "code": 200,
-          "body": "{\n  \"id\": \"22222222-2222-4222-8222-222222222222\",\n  \"name\": \"Terrain A\",\n  \"status_id\": \"55555555-5555-4555-8555-555555555555\"\n}",
+          "body": "{\n  \"id\": \"22222222-2222-4222-8222-222222222222\",\n  \"name\": \"Field A\",\n  \"status_id\": \"55555555-5555-4555-8555-555555555555\"\n}",
           "header": [
             {
               "key": "Content-Type",
@@ -143,7 +143,7 @@
       ]
     },
     {
-      "name": "Create Terrain Reservation",
+      "name": "Create Field Reservation",
       "request": {
         "method": "POST",
         "header": [
@@ -161,19 +161,19 @@
           "raw": "{\n  \"status_id\": \"33333333-3333-4333-8333-333333333333\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/v1/terrains/:terrain_id/reservations",
+          "raw": "{{baseUrl}}/v1/fields/:field_id/reservations",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "v1",
-            "terrains",
-            ":terrain_id",
+            "fields",
+            ":field_id",
             "reservations"
           ],
           "variable": [
             {
-              "key": "terrain_id",
+              "key": "field_id",
               "value": "22222222-2222-4222-8222-222222222222"
             }
           ]
@@ -184,7 +184,7 @@
           "name": "201 Created",
           "status": "Created",
           "code": 201,
-          "body": "{\n  \"id\": \"44444444-4444-4444-8444-444444444444\",\n  \"terrain_id\": \"22222222-2222-4222-8222-222222222222\",\n  \"status_id\": \"33333333-3333-4333-8333-333333333333\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}",
+          "body": "{\n  \"id\": \"44444444-4444-4444-8444-444444444444\",\n  \"field_id\": \"22222222-2222-4222-8222-222222222222\",\n  \"status_id\": \"33333333-3333-4333-8333-333333333333\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}",
           "header": [
             {
               "key": "Content-Type",
@@ -213,21 +213,21 @@
           "raw": "{\n  \"status_id\": \"66666666-6666-4666-8666-666666666666\"\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/v1/terrains/:terrain_id/reservations/:reservation_id/status",
+          "raw": "{{baseUrl}}/v1/fields/:field_id/reservations/:reservation_id/status",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "v1",
-            "terrains",
-            ":terrain_id",
+            "fields",
+            ":field_id",
             "reservations",
             ":reservation_id",
             "status"
           ],
           "variable": [
             {
-              "key": "terrain_id",
+              "key": "field_id",
               "value": "22222222-2222-4222-8222-222222222222"
             },
             {
@@ -242,7 +242,7 @@
           "name": "200 OK",
           "status": "OK",
           "code": 200,
-          "body": "{\n  \"id\": \"44444444-4444-4444-8444-444444444444\",\n  \"terrain_id\": \"22222222-2222-4222-8222-222222222222\",\n  \"status_id\": \"66666666-6666-4666-8666-666666666666\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}",
+          "body": "{\n  \"id\": \"44444444-4444-4444-8444-444444444444\",\n  \"field_id\": \"22222222-2222-4222-8222-222222222222\",\n  \"status_id\": \"66666666-6666-4666-8666-666666666666\",\n  \"start_at\": \"2026-03-18T10:00:00Z\",\n  \"end_at\": \"2026-03-18T11:00:00Z\"\n}",
           "header": [
             {
               "key": "Content-Type",

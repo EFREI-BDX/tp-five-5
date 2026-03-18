@@ -1,30 +1,46 @@
 @startuml
 
-package "Backoffice Context" {
-  [Admin Service]
+package "group-02-manage-match" {
+  [Match Service]
 }
-interface "Admin API" as AdminAPI
 
-package "Booking Context" {
-  [Booking Service]
+package "group-03-record-match" {
+  [Record Match Service]
 }
-interface "Booking API" as BookingAPI
 
-package "Manage Field Context" {
-  [Terrain Service]
-  [Terrain DB]
+package "group-04-summarize-match" {
+  [Summarize Match Service]
 }
-interface "Terrain API" as TerrainAPI
+
+package "group-05-manage-player" {
+  [Player Service]
+}
+
+package "group-06-manage-team" {
+  [Team Service]
+}
+
+package "Field Management Context" {
+  [Field Service]
+  [Field DB]
+}
+interface "Field API" as FieldAPI
 interface "Event Bus" as EventBus
 
-AdminAPI - [Admin Service]
-[Admin Service] --> TerrainAPI: use
+[Match Service] --> FieldAPI: use
 
-BookingAPI - [Booking Service]
-[Booking Service] --> TerrainAPI: use
+FieldAPI - [Field Service]
+[Field Service] --> [Field DB]
+[Field Service] --> EventBus: publish
 
-TerrainAPI - [Terrain Service]
-[Terrain Service] --> [Terrain DB]
-[Terrain Service] --> EventBus: publish
+[Record Match Service] ..> [Match Service]: indirect
+[Summarize Match Service] ..> [Match Service]: indirect
+
+note right of [Field Service]
+Owns only:
+- fields
+- field statuses
+- slot occupancy
+end note
 
 @enduml

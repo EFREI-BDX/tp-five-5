@@ -1,8 +1,0 @@
-{
-  "$id": "https://example.org/schemas/terrain-status-list.schema.json",
-  "title": "TerrainStatusList",
-  "type": "array",
-  "items": {
-    "$ref": "./terrain-status.schema.json"
-  }
-}

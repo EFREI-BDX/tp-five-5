@@ -1,13 +1,14 @@
 {
-  "$id": "https://example.org/schemas/terrain-reservation-created.event.schema.json",
-  "title": "TerrainReservationCreated",
+  "$id": "https://example.org/schemas/field-reservation.schema.json",
+  "title": "FieldReservation",
+  "description": "Field slot occupancy record. Player, team, and match-result ownership are outside this context.",
   "type": "object",
   "properties": {
-    "reservation_id": {
+    "id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
-    "terrain_id": {
+    "field_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
@@ -22,24 +23,14 @@
     "end_at": {
       "type": "string",
       "format": "date-time"
-    },
-    "occurred_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "trace_id": {
-      "type": "string",
-      "minLength": 1
     }
   },
   "required": [
-    "reservation_id",
-    "terrain_id",
+    "id",
+    "field_id",
     "status_id",
     "start_at",
-    "end_at",
-    "occurred_at",
-    "trace_id"
+    "end_at"
   ],
   "additionalProperties": false
 }

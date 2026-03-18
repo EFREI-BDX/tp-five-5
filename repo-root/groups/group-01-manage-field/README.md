@@ -1,21 +1,21 @@
 # group-01-manage-field
 
-**Contexte**
+**Context**
 
-Source de verite pour le catalogue des terrains de five et les reservations associees.
+Source of truth for the five-a-side field catalog and related reservations.
 
-**Membres**
+**Members**
 
-- **Nom Prenom** - identifiant GitHub
+- **Full Name** - GitHub handle
 
-## Perimetre
+## Scope
 
-- `terrain_status`
+- `field_status`
 - `reservation_status`
-- `terrain`
-- `terrain_reservation`
+- `field`
+- `field_reservation`
 
-## Livrables
+## Deliverables
 
 - `domain-summary.md`
 - `contexts-map.md`
@@ -31,5 +31,6 @@ Source de verite pour le catalogue des terrains de five et les reservations asso
 
 **Notes**
 
-- Les statuts sont des donnees de reference.
-- Deux reservations actives ne se chevauchent pas sur un meme terrain.
+- Statuses are reference data.
+- Two active reservations cannot overlap on the same field.
+- This context does not own players, teams, matches, or match results.

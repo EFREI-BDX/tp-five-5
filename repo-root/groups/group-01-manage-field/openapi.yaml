@@ -1,129 +1,130 @@
 openapi: 3.0.3
 info:
-  title: Manage Field API
+  title: Field Management API
   version: 1.0.0
-  description: Contrat HTTP pour les terrains, leurs statuts et les reservations.
+  description: HTTP contract for fields, field statuses, and field slot occupancy.
 servers:
   - url: https://api.example.org
     description: Base URL
 
 tags:
   - name: Reference Data
-  - name: Terrains
+  - name: Fields
   - name: Reservations
 
 paths:
-  /v1/terrain-statuses:
+  /v1/field-statuses:
     get:
       tags: [Reference Data]
-      summary: Lister les statuts de terrain
-      operationId: listTerrainStatuses
+      summary: List field statuses
+      operationId: listFieldStatuses
       responses:
         '200':
-          description: Liste des statuts de terrain
+          description: Field status list
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/terrain-status-list.schema.json'
+                $ref: './tests/schemas/field-status-list.schema.json'
 
   /v1/reservation-statuses:
     get:
       tags: [Reference Data]
-      summary: Lister les statuts de reservation
+      summary: List reservation statuses
       operationId: listReservationStatuses
       responses:
         '200':
-          description: Liste des statuts de reservation
+          description: Reservation status list
           content:
             application/json:
               schema:
                 $ref: './tests/schemas/reservation-status-list.schema.json'
 
-  /v1/terrains:
+  /v1/fields:
     post:
-      tags: [Terrains]
-      summary: Creer un terrain
-      operationId: createTerrain
+      tags: [Fields]
+      summary: Create a field
+      operationId: createField
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateTerrainRequest'
+              $ref: '#/components/schemas/CreateFieldRequest'
       responses:
         '201':
-          description: Terrain cree
+          description: Field created
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/terrain.schema.json'
+                $ref: './tests/schemas/field.schema.json'
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
           $ref: '#/components/responses/Conflict'
 
-  /v1/terrains/{terrain_id}:
+  /v1/fields/{field_id}:
     parameters:
-      - $ref: '#/components/parameters/TerrainIdParam'
+      - $ref: '#/components/parameters/FieldIdParam'
     get:
-      tags: [Terrains]
-      summary: Recuperer un terrain
-      operationId: getTerrain
+      tags: [Fields]
+      summary: Get a field
+      operationId: getField
       responses:
         '200':
-          description: Terrain
+          description: Field
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/terrain.schema.json'
+                $ref: './tests/schemas/field.schema.json'
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /v1/terrains/{terrain_id}/status:
+  /v1/fields/{field_id}/status:
     parameters:
-      - $ref: '#/components/parameters/TerrainIdParam'
+      - $ref: '#/components/parameters/FieldIdParam'
     patch:
-      tags: [Terrains]
-      summary: Changer le statut d'un terrain
-      operationId: updateTerrainStatus
+      tags: [Fields]
+      summary: Change a field status
+      operationId: updateFieldStatus
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTerrainStatusRequest'
+              $ref: '#/components/schemas/UpdateFieldStatusRequest'
       responses:
         '200':
-          description: Terrain mis a jour
+          description: Updated field
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/terrain.schema.json'
+                $ref: './tests/schemas/field.schema.json'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
 
-  /v1/terrains/{terrain_id}/reservations:
+  /v1/fields/{field_id}/reservations:
     parameters:
-      - $ref: '#/components/parameters/TerrainIdParam'
+      - $ref: '#/components/parameters/FieldIdParam'
     post:
       tags: [Reservations]
-      summary: Creer une reservation de terrain
-      operationId: createTerrainReservation
+      summary: Reserve a field slot
+      description: Primary synchronous contract used by Match Management to lock a field slot.
+      operationId: createFieldReservation
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateTerrainReservationRequest'
+              $ref: '#/components/schemas/CreateFieldReservationRequest'
       responses:
         '201':
-          description: Reservation creee
+          description: Field slot reserved
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/terrain-reservation.schema.json'
+                $ref: './tests/schemas/field-reservation.schema.json'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -131,14 +132,15 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
-  /v1/terrains/{terrain_id}/reservations/{reservation_id}/status:
+  /v1/fields/{field_id}/reservations/{reservation_id}/status:
     parameters:
-      - $ref: '#/components/parameters/TerrainIdParam'
+      - $ref: '#/components/parameters/FieldIdParam'
       - $ref: '#/components/parameters/ReservationIdParam'
     patch:
       tags: [Reservations]
-      summary: Changer le statut d'une reservation
-      operationId: updateTerrainReservationStatus
+      summary: Change a reservation status
+      description: Update the status of an existing field slot reservation.
+      operationId: updateFieldReservationStatus
       requestBody:
         required: true
         content:
@@ -147,11 +149,11 @@ paths:
               $ref: '#/components/schemas/UpdateReservationStatusRequest'
       responses:
         '200':
-          description: Reservation mise a jour
+          description: Updated field slot reservation
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/terrain-reservation.schema.json'
+                $ref: './tests/schemas/field-reservation.schema.json'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -159,8 +161,8 @@ paths:
 
 components:
   parameters:
-    TerrainIdParam:
-      name: terrain_id
+    FieldIdParam:
+      name: field_id
       in: path
       required: true
       schema:
@@ -174,30 +176,30 @@ components:
 
   responses:
     BadRequest:
-      description: Requete invalide
+      description: Invalid request
       content:
         application/json:
           schema:
             $ref: '../../openapi/common/schemas.yaml#/components/schemas/ErrorResponse'
     NotFound:
-      description: Ressource introuvable
+      description: Resource not found
       content:
         application/json:
           schema:
             $ref: '../../openapi/common/schemas.yaml#/components/schemas/ErrorResponse'
     Conflict:
-      description: Regle metier violee
+      description: Business rule violation
       content:
         application/json:
           schema:
             $ref: '../../openapi/common/schemas.yaml#/components/schemas/ErrorResponse'
 
   schemas:
-    CreateTerrainRequest:
+    CreateFieldRequest:
       type: object
       properties:
         name:
-          $ref: './tests/schemas/terrain-name.schema.json'
+          $ref: './tests/schemas/field-name.schema.json#/properties/name'
         status_id:
           $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
       required:
@@ -205,7 +207,7 @@ components:
         - status_id
       additionalProperties: false
 
-    UpdateTerrainStatusRequest:
+    UpdateFieldStatusRequest:
       type: object
       properties:
         status_id:
@@ -214,15 +216,15 @@ components:
         - status_id
       additionalProperties: false
 
-    CreateTerrainReservationRequest:
+    CreateFieldReservationRequest:
       type: object
       properties:
         status_id:
           $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
         start_at:
-          $ref: '../../openapi/common/schemas.yaml#/components/schemas/Timestamp'
+          $ref: './tests/schemas/time-slot.schema.json#/properties/start_at'
         end_at:
-          $ref: '../../openapi/common/schemas.yaml#/components/schemas/Timestamp'
+          $ref: './tests/schemas/time-slot.schema.json#/properties/end_at'
       required:
         - status_id
         - start_at

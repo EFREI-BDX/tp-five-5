@@ -1,14 +1,14 @@
 {
-  "$id": "https://example.org/schemas/reservation-status-code.schema.json",
-  "title": "ReservationStatusCode",
+  "$id": "https://example.org/schemas/field-status-code.schema.json",
+  "title": "FieldStatusCode",
   "type": "object",
   "properties": {
     "code": {
       "type": "string",
       "enum": [
-        "pending",
-        "confirmed",
-        "cancelled"
+        "active",
+        "inactive",
+        "maintenance"
       ]
     }
   },

@@ -1,28 +1,28 @@
 # TimeSlot
 
-**Resume metier**
+**Business summary**
 
-Creneau de reservation porte par `terrain_reservation`.
+Reservation slot carried by `field_reservation`.
 
-**Attributs**
+**Attributes**
 
-- **start_at** - *date-time* - debut du creneau
-- **end_at** - *date-time* - fin du creneau
+- **start_at** - *date-time* - slot start
+- **end_at** - *date-time* - slot end
 
 **Invariants**
 
-- `start_at` et `end_at` sont au format ISO 8601
+- `start_at` and `end_at` use ISO 8601 format
 - `start_at < end_at`
 
-**Format JSON attendu**
+**Expected JSON format**
 
 - **Schema** : `tests/schemas/time-slot.schema.json`
-- **Fixture valide** : `tests/fixtures/time-slot.valid.json`
-- **Fixture invalide** : `tests/fixtures/time-slot.invalid.json`
+- **Valid fixture** : `tests/fixtures/time-slot.valid.json`
+- **Invalid fixture** : `tests/fixtures/time-slot.invalid.json`
 
-**Tests minimaux attendus**
+**Minimum expected tests**
 
-- **createValid** - un creneau coherent est accepte
-- **createInvalidThrows** - `start_at >= end_at` est rejete
-- **jsonRoundtrip** - la serialisation conserve les dates
-- **schemaValidation** - la fixture valide passe, la fixture invalide echoue
+- **createValid** - accepts a valid slot
+- **createInvalidThrows** - rejects `start_at >= end_at`
+- **jsonRoundtrip** - serialization preserves the dates
+- **schemaValidation** - the valid fixture passes, the invalid fixture fails

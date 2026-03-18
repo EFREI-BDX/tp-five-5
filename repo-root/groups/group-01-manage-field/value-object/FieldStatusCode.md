@@ -1,12 +1,12 @@
-# ReservationStatusCode
+# FieldStatusCode
 
 **Business summary**
 
-Business code carried by `reservation_status`.
+Business code carried by `field_status`.
 
 **JSON representation**
 
-- object with one `code` property in `pending`, `confirmed`, `cancelled`
+- object with one `code` property in `active`, `inactive`, `maintenance`
 
 **Invariants**
 
@@ -15,9 +15,9 @@ Business code carried by `reservation_status`.
 
 **Expected JSON format**
 
-- **Schema** : `tests/schemas/reservation-status-code.schema.json`
-- **Valid fixture** : `tests/fixtures/reservation-status-code.valid.json`
-- **Invalid fixture** : `tests/fixtures/reservation-status-code.invalid.json`
+- **Schema** : `tests/schemas/field-status-code.schema.json`
+- **Valid fixture** : `tests/fixtures/field-status-code.valid.json`
+- **Invalid fixture** : `tests/fixtures/field-status-code.invalid.json`
 
 **Minimum expected tests**
 

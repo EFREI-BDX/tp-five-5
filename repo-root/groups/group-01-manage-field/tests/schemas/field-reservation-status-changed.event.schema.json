@@ -1,13 +1,13 @@
 {
-  "$id": "https://example.org/schemas/terrain-reservation-status-changed.event.schema.json",
-  "title": "TerrainReservationStatusChanged",
+  "$id": "https://example.org/schemas/field-reservation-status-changed.event.schema.json",
+  "title": "FieldReservationStatusChanged",
   "type": "object",
   "properties": {
     "reservation_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
-    "terrain_id": {
+    "field_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
@@ -30,7 +30,7 @@
   },
   "required": [
     "reservation_id",
-    "terrain_id",
+    "field_id",
     "previous_status_id",
     "status_id",
     "occurred_at",

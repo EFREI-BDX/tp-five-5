@@ -1,34 +1,24 @@
 {
-  "$id": "https://example.org/schemas/terrain-created.event.schema.json",
-  "title": "TerrainCreated",
+  "$id": "https://example.org/schemas/field.schema.json",
+  "title": "Field",
   "type": "object",
   "properties": {
-    "terrain_id": {
+    "id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
     "name": {
-      "$ref": "./terrain-name.schema.json"
+      "$ref": "./field-name.schema.json#/properties/name"
     },
     "status_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-    },
-    "occurred_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "trace_id": {
-      "type": "string",
-      "minLength": 1
     }
   },
   "required": [
-    "terrain_id",
+    "id",
     "name",
-    "status_id",
-    "occurred_at",
-    "trace_id"
+    "status_id"
   ],
   "additionalProperties": false
 }

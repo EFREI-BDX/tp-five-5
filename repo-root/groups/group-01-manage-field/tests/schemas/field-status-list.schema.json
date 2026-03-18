@@ -1,0 +1,8 @@
+{
+  "$id": "https://example.org/schemas/field-status-list.schema.json",
+  "title": "FieldStatusList",
+  "type": "array",
+  "items": {
+    "$ref": "./field-status.schema.json"
+  }
+}

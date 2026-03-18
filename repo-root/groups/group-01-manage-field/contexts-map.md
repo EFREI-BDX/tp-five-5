@@ -1,27 +1,35 @@
-# Contexts Map - Manage Field
+# Contexts Map - Field Management
 
 **Boundary**
 
-Source of truth: metadonnees des terrains, statuts de reference et reservations de creneaux.
+Source of truth for field metadata, reference statuses, and slot occupancy.
 
-**APIs exposees**
+**Exposed APIs**
 
-- `GET /v1/terrain-statuses` - lister les statuts de terrain
-- `GET /v1/reservation-statuses` - lister les statuts de reservation
-- `POST /v1/terrains` - creer un terrain
-- `GET /v1/terrains/{terrain_id}` - recuperer un terrain
-- `PATCH /v1/terrains/{terrain_id}/status` - changer le statut d'un terrain
-- `POST /v1/terrains/{terrain_id}/reservations` - creer une reservation
-- `PATCH /v1/terrains/{terrain_id}/reservations/{reservation_id}/status` - changer le statut d'une reservation
+- `GET /v1/field-statuses` - list field statuses
+- `GET /v1/reservation-statuses` - list reservation statuses
+- `POST /v1/fields` - create a field
+- `GET /v1/fields/{field_id}` - get one field
+- `PATCH /v1/fields/{field_id}/status` - change a field status
+- `POST /v1/fields/{field_id}/reservations` - reserve a field slot
+- `PATCH /v1/fields/{field_id}/reservations/{reservation_id}/status` - change a reservation status
 
-**APIs consommees**
+**Direct relations with other groups**
 
-- Aucune dependance synchrone obligatoire documentee.
-- Les autres groupes consomment prioritairement les events de domaine.
+- `group-02-manage-match` - direct synchronous consumer of field lookup and field slot reservation APIs.
+- `group-03-record-match` - no direct synchronous relation expected.
+- `group-04-summarize-match` - no direct synchronous relation expected.
+- `group-05-manage-player` - owns player data outside this context.
+- `group-06-manage-team` - owns team data outside this context.
+
+**Consumed APIs**
+
+- No mandatory synchronous dependency is documented for Field Management itself.
 
 **Invariants**
 
-- `name` est un `TerrainName` non vide.
-- `status_id` doit pointer vers une donnee de reference existante.
+- `name` is a non-empty `FieldName`.
+- `status_id` must point to existing reference data.
 - `start_at < end_at`.
-- Pas de chevauchement de reservations actives sur un meme terrain.
+- Active reservations cannot overlap on the same field.
+- `field_reservation` does not model player, team, or match result ownership.

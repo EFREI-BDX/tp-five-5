@@ -1,18 +1,18 @@
 @startuml
-|Booking|
+|Match Management|
 start
-:Choisir un terrain et un creneau;
-:Soumettre POST /v1/terrains/{terrain_id}/reservations;
-|Manage Field|
-:Verifier terrain actif;
-:Verifier start_at < end_at;
-:Verifier absence de chevauchement actif;
-if (Validation OK ?) then (oui)
-  :Creer la reservation;
-  :Publier TerrainReservationCreated;
-  :Repondre 201;
-else (non)
-  :Repondre 400 ou 409;
+:Select a field and a slot;
+:Submit POST /v1/fields/{field_id}/reservations;
+|Field Management|
+:Check that the field is active;
+:Check start_at < end_at;
+:Check that no active overlap exists;
+if (Validation OK?) then (yes)
+  :Create the reservation;
+  :Publish FieldReservationCreated;
+  :Return 201;
+else (no)
+  :Return 400 or 409;
 endif
 stop
 @enduml

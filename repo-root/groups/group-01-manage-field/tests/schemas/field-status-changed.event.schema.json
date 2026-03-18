@@ -1,9 +1,9 @@
 {
-  "$id": "https://example.org/schemas/terrain-status-changed.event.schema.json",
-  "title": "TerrainStatusChanged",
+  "$id": "https://example.org/schemas/field-status-changed.event.schema.json",
+  "title": "FieldStatusChanged",
   "type": "object",
   "properties": {
-    "terrain_id": {
+    "field_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
@@ -25,7 +25,7 @@
     }
   },
   "required": [
-    "terrain_id",
+    "field_id",
     "previous_status_id",
     "status_id",
     "occurred_at",

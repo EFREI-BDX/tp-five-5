@@ -1,13 +1,13 @@
-# reservation_status
+# field_status
 
 **Business summary**
 
-Reference data for a field slot reservation status.
+Reference data for a field status.
 
 **Attributes**
 
 - **id** - *UUID* - technical identifier
-- **code** - *string* - `pending`, `confirmed`, `cancelled`
+- **code** - *string* - `active`, `inactive`, `maintenance`
 - **label** - *string* - display label
 
 **Invariants**
@@ -19,13 +19,13 @@ Reference data for a field slot reservation status.
 
 **Expected JSON format**
 
-- **Schema** : `tests/schemas/reservation-status.schema.json`
-- **Valid fixture** : `tests/fixtures/reservation-status.valid.json`
-- **Invalid fixture** : `tests/fixtures/reservation-status.invalid.json`
+- **Schema** : `tests/schemas/field-status.schema.json`
+- **Valid fixture** : `tests/fixtures/field-status.valid.json`
+- **Invalid fixture** : `tests/fixtures/field-status.invalid.json`
 
 **Minimum expected tests**
 
 - **createValid** - accepts a valid status
-- **createInvalidThrows** - rejects an invalid code
+- **createInvalidThrows** - rejects an invalid UUID or code
 - **jsonRoundtrip** - serialization preserves fields
 - **schemaValidation** - the valid fixture passes, the invalid fixture fails
