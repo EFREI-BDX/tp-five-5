@@ -35,6 +35,6 @@ C04 .up.> Event
 
 C05 .up.> Team
 
-06 .down.> Player
+C06 .down.> Player
 
 @enduml
