@@ -1,15 +1,16 @@
 @startuml
 |Match Management|
 start
-:Select a field and a slot;
+:Select a field, a date, and a time slot;
 :Submit POST /v1/fields/{field_id}/reservations;
 |Field Management|
 :Check that the field is active;
-:Check start_at < end_at;
+:Check that times use full-hour or half-hour boundaries;
+:Check that duration is 60, 90, or 120 minutes;
 :Check that no active overlap exists;
 if (Validation OK?) then (yes)
   :Create the reservation;
-  :Publish FieldReservationCreated;
+  :Publish ReservationCreated;
   :Return 201;
 else (no)
   :Return 400 or 409;

@@ -2,7 +2,7 @@
 
 **Business summary**
 
-Reference data for a field slot reservation status.
+Reference data for a reservation status.
 
 **Attributes**
 

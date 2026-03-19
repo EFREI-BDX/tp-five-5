@@ -1,0 +1,43 @@
+{
+  "$id": "https://example.org/schemas/reservation.schema.json",
+  "title": "Reservation",
+  "description": "Reservation record for one field on a same-day slot. Player, team, and match ownership are outside this context.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "field_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "status_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "date": {
+      "$ref": "./time-slot.schema.json#/definitions/date"
+    },
+    "start_time": {
+      "$ref": "./time-slot.schema.json#/definitions/start_time"
+    },
+    "end_time": {
+      "$ref": "./time-slot.schema.json#/definitions/end_time"
+    }
+  },
+  "required": [
+    "id",
+    "field_id",
+    "status_id",
+    "date",
+    "start_time",
+    "end_time"
+  ],
+  "allOf": [
+    {
+      "$ref": "./time-slot.schema.json#/definitions/duration_rules"
+    }
+  ],
+  "additionalProperties": false
+}

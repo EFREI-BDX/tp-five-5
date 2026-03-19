@@ -13,7 +13,7 @@ Source of truth for the five-a-side field catalog and related reservations.
 - `field_status`
 - `reservation_status`
 - `field`
-- `field_reservation`
+- `reservation`
 
 ## Deliverables
 
@@ -32,5 +32,8 @@ Source of truth for the five-a-side field catalog and related reservations.
 **Notes**
 
 - Statuses are reference data.
+- Reservations use a single `date` with `start_time` and `end_time`.
+- Reservation times must start on a full hour or half hour.
+- Allowed reservation durations are `60`, `90`, or `120` minutes.
 - Two active reservations cannot overlap on the same field.
 - This context does not own players, teams, matches, or match results.

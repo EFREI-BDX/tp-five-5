@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: Field Management API
-  version: 1.0.0
-  description: HTTP contract for fields, field statuses, and field slot occupancy.
+  version: 2.0.0
+  description: HTTP contract for fields, field statuses, reservations, and field availability.
 servers:
   - url: https://api.example.org
     description: Base URL
@@ -62,6 +62,26 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /v1/fields/available:
+    get:
+      tags: [Fields]
+      summary: List available fields
+      description: Return active fields that are not blocked by a pending or confirmed reservation on the requested slot. The slot must stay on a single date, start on a full hour or half hour, and last 60, 90, or 120 minutes.
+      operationId: listAvailableFields
+      parameters:
+        - $ref: '#/components/parameters/ReservationDateQueryParam'
+        - $ref: '#/components/parameters/ReservationStartTimeQueryParam'
+        - $ref: '#/components/parameters/ReservationEndTimeQueryParam'
+      responses:
+        '200':
+          description: Available field list
+          content:
+            application/json:
+              schema:
+                $ref: './tests/schemas/field-list.schema.json'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /v1/fields/{field_id}:
     parameters:
       - $ref: '#/components/parameters/FieldIdParam'
@@ -109,22 +129,22 @@ paths:
       - $ref: '#/components/parameters/FieldIdParam'
     post:
       tags: [Reservations]
-      summary: Reserve a field slot
-      description: Primary synchronous contract used by Match Management to lock a field slot.
-      operationId: createFieldReservation
+      summary: Create a reservation
+      description: Primary synchronous contract used by Match Management to reserve a field on a same-day slot aligned on half-hour boundaries.
+      operationId: createReservation
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateFieldReservationRequest'
+              $ref: '#/components/schemas/CreateReservationRequest'
       responses:
         '201':
-          description: Field slot reserved
+          description: Reservation created
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/field-reservation.schema.json'
+                $ref: './tests/schemas/reservation.schema.json'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -139,8 +159,8 @@ paths:
     patch:
       tags: [Reservations]
       summary: Change a reservation status
-      description: Update the status of an existing field slot reservation.
-      operationId: updateFieldReservationStatus
+      description: Update the status of an existing reservation.
+      operationId: updateReservationStatus
       requestBody:
         required: true
         content:
@@ -149,11 +169,11 @@ paths:
               $ref: '#/components/schemas/UpdateReservationStatusRequest'
       responses:
         '200':
-          description: Updated field slot reservation
+          description: Updated reservation
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/field-reservation.schema.json'
+                $ref: './tests/schemas/reservation.schema.json'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -173,6 +193,27 @@ components:
       required: true
       schema:
         $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+    ReservationDateQueryParam:
+      name: date
+      in: query
+      required: true
+      description: Same-day reservation date in `YYYY-MM-DD` format.
+      schema:
+        $ref: './tests/schemas/time-slot.schema.json#/definitions/date'
+    ReservationStartTimeQueryParam:
+      name: start_time
+      in: query
+      required: true
+      description: Reservation start time in `HH:MM` format on a full hour or half hour.
+      schema:
+        $ref: './tests/schemas/time-slot.schema.json#/definitions/start_time'
+    ReservationEndTimeQueryParam:
+      name: end_time
+      in: query
+      required: true
+      description: Reservation end time in `HH:MM` format on a full hour or half hour.
+      schema:
+        $ref: './tests/schemas/time-slot.schema.json#/definitions/end_time'
 
   responses:
     BadRequest:
@@ -216,20 +257,8 @@ components:
         - status_id
       additionalProperties: false
 
-    CreateFieldReservationRequest:
-      type: object
-      properties:
-        status_id:
-          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
-        start_at:
-          $ref: './tests/schemas/time-slot.schema.json#/properties/start_at'
-        end_at:
-          $ref: './tests/schemas/time-slot.schema.json#/properties/end_at'
-      required:
-        - status_id
-        - start_at
-        - end_at
-      additionalProperties: false
+    CreateReservationRequest:
+      $ref: './tests/schemas/create-reservation-request.schema.json'
 
     UpdateReservationStatusRequest:
       type: object

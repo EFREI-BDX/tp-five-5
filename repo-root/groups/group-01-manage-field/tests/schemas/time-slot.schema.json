@@ -1,20 +1,1195 @@
 {
   "$id": "https://example.org/schemas/time-slot.schema.json",
   "title": "TimeSlot",
+  "description": "Same-day reservation slot. Start times must use full-hour or half-hour boundaries, and allowed durations are 60, 90, or 120 minutes.",
+  "definitions": {
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "start_time": {
+      "type": "string",
+      "enum": [
+        "00:00",
+        "00:30",
+        "01:00",
+        "01:30",
+        "02:00",
+        "02:30",
+        "03:00",
+        "03:30",
+        "04:00",
+        "04:30",
+        "05:00",
+        "05:30",
+        "06:00",
+        "06:30",
+        "07:00",
+        "07:30",
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+        "20:00",
+        "20:30",
+        "21:00",
+        "21:30",
+        "22:00",
+        "22:30"
+      ]
+    },
+    "end_time": {
+      "type": "string",
+      "enum": [
+        "01:00",
+        "01:30",
+        "02:00",
+        "02:30",
+        "03:00",
+        "03:30",
+        "04:00",
+        "04:30",
+        "05:00",
+        "05:30",
+        "06:00",
+        "06:30",
+        "07:00",
+        "07:30",
+        "08:00",
+        "08:30",
+        "09:00",
+        "09:30",
+        "10:00",
+        "10:30",
+        "11:00",
+        "11:30",
+        "12:00",
+        "12:30",
+        "13:00",
+        "13:30",
+        "14:00",
+        "14:30",
+        "15:00",
+        "15:30",
+        "16:00",
+        "16:30",
+        "17:00",
+        "17:30",
+        "18:00",
+        "18:30",
+        "19:00",
+        "19:30",
+        "20:00",
+        "20:30",
+        "21:00",
+        "21:30",
+        "22:00",
+        "22:30",
+        "23:00",
+        "23:30"
+      ]
+    },
+    "duration_rules": {
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "00:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "01:00",
+                  "01:30",
+                  "02:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "00:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "01:30",
+                  "02:00",
+                  "02:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "01:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "02:00",
+                  "02:30",
+                  "03:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "01:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "02:30",
+                  "03:00",
+                  "03:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "02:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "03:00",
+                  "03:30",
+                  "04:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "02:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "03:30",
+                  "04:00",
+                  "04:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "03:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "04:00",
+                  "04:30",
+                  "05:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "03:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "04:30",
+                  "05:00",
+                  "05:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "04:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "05:00",
+                  "05:30",
+                  "06:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "04:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "05:30",
+                  "06:00",
+                  "06:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "05:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "06:00",
+                  "06:30",
+                  "07:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "05:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "06:30",
+                  "07:00",
+                  "07:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "06:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "07:00",
+                  "07:30",
+                  "08:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "06:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "07:30",
+                  "08:00",
+                  "08:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "07:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "08:00",
+                  "08:30",
+                  "09:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "07:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "08:30",
+                  "09:00",
+                  "09:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "08:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "09:00",
+                  "09:30",
+                  "10:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "08:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "09:30",
+                  "10:00",
+                  "10:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "09:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "10:00",
+                  "10:30",
+                  "11:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "09:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "10:30",
+                  "11:00",
+                  "11:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "10:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "11:00",
+                  "11:30",
+                  "12:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "10:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "11:30",
+                  "12:00",
+                  "12:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "11:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "12:00",
+                  "12:30",
+                  "13:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "11:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "12:30",
+                  "13:00",
+                  "13:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "12:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "13:00",
+                  "13:30",
+                  "14:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "12:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "13:30",
+                  "14:00",
+                  "14:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "13:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "14:00",
+                  "14:30",
+                  "15:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "13:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "14:30",
+                  "15:00",
+                  "15:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "14:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "15:00",
+                  "15:30",
+                  "16:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "14:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "15:30",
+                  "16:00",
+                  "16:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "15:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "16:00",
+                  "16:30",
+                  "17:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "15:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "16:30",
+                  "17:00",
+                  "17:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "16:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "17:00",
+                  "17:30",
+                  "18:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "16:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "17:30",
+                  "18:00",
+                  "18:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "17:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "18:00",
+                  "18:30",
+                  "19:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "17:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "18:30",
+                  "19:00",
+                  "19:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "18:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "19:00",
+                  "19:30",
+                  "20:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "18:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "19:30",
+                  "20:00",
+                  "20:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "19:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "20:00",
+                  "20:30",
+                  "21:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "19:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "20:30",
+                  "21:00",
+                  "21:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "20:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "21:00",
+                  "21:30",
+                  "22:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "20:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "21:30",
+                  "22:00",
+                  "22:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "21:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "22:00",
+                  "22:30",
+                  "23:00"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "21:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "22:30",
+                  "23:00",
+                  "23:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "22:00"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "23:00",
+                  "23:30"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "start_time": {
+                "const": "22:30"
+              }
+            },
+            "required": [
+              "start_time"
+            ]
+          },
+          "then": {
+            "properties": {
+              "end_time": {
+                "enum": [
+                  "23:30"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
   "type": "object",
   "properties": {
-    "start_at": {
-      "type": "string",
-      "format": "date-time"
+    "date": {
+      "$ref": "#/definitions/date"
     },
-    "end_at": {
-      "type": "string",
-      "format": "date-time"
+    "start_time": {
+      "$ref": "#/definitions/start_time"
+    },
+    "end_time": {
+      "$ref": "#/definitions/end_time"
     }
   },
   "required": [
-    "start_at",
-    "end_at"
+    "date",
+    "start_time",
+    "end_time"
+  ],
+  "allOf": [
+    {
+      "$ref": "#/definitions/duration_rules"
+    }
   ],
   "additionalProperties": false
 }

@@ -2,17 +2,20 @@
 
 **Business summary**
 
-Reservation slot carried by `field_reservation`.
+Same-day reservation slot carried by `reservation`.
 
 **Attributes**
 
-- **start_at** - *date-time* - slot start
-- **end_at** - *date-time* - slot end
+- **date** - *date* - slot date
+- **start_time** - *string* - slot start time in `HH:MM`
+- **end_time** - *string* - slot end time in `HH:MM`
 
 **Invariants**
 
-- `start_at` and `end_at` use ISO 8601 format
-- `start_at < end_at`
+- `date` uses `YYYY-MM-DD`
+- `start_time` and `end_time` use full-hour or half-hour boundaries
+- the slot stays on a single date
+- allowed durations are `60`, `90`, or `120` minutes
 
 **Expected JSON format**
 
@@ -23,6 +26,6 @@ Reservation slot carried by `field_reservation`.
 **Minimum expected tests**
 
 - **createValid** - accepts a valid slot
-- **createInvalidThrows** - rejects `start_at >= end_at`
-- **jsonRoundtrip** - serialization preserves the dates
+- **createInvalidThrows** - rejects invalid time boundaries or durations
+- **jsonRoundtrip** - serialization preserves the slot
 - **schemaValidation** - the valid fixture passes, the invalid fixture fails

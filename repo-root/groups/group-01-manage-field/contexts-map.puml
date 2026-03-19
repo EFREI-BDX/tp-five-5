@@ -40,7 +40,7 @@ note right of [Field Service]
 Owns only:
 - fields
 - field statuses
-- slot occupancy
+- reservations
 end note
 
 @enduml

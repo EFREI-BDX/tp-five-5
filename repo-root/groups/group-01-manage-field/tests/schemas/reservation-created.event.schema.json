@@ -1,6 +1,6 @@
 {
-  "$id": "https://example.org/schemas/field-reservation-status-changed.event.schema.json",
-  "title": "FieldReservationStatusChanged",
+  "$id": "https://example.org/schemas/reservation-created.event.schema.json",
+  "title": "ReservationCreated",
   "type": "object",
   "properties": {
     "reservation_id": {
@@ -11,13 +11,18 @@
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
     },
-    "previous_status_id": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
-    },
     "status_id": {
       "type": "string",
       "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "date": {
+      "$ref": "./time-slot.schema.json#/definitions/date"
+    },
+    "start_time": {
+      "$ref": "./time-slot.schema.json#/definitions/start_time"
+    },
+    "end_time": {
+      "$ref": "./time-slot.schema.json#/definitions/end_time"
     },
     "occurred_at": {
       "type": "string",
@@ -31,10 +36,17 @@
   "required": [
     "reservation_id",
     "field_id",
-    "previous_status_id",
     "status_id",
+    "date",
+    "start_time",
+    "end_time",
     "occurred_at",
     "trace_id"
+  ],
+  "allOf": [
+    {
+      "$ref": "./time-slot.schema.json#/definitions/duration_rules"
+    }
   ],
   "additionalProperties": false
 }
