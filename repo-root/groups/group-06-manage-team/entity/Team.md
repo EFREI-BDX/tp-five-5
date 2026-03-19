@@ -10,7 +10,7 @@
 - players - *List of Player*
 - period - *VO Period*
 - teamLeader - *Player*
-- state - *VO State*
+- state - *VO TeamState*
 
 **Invariants**
 
