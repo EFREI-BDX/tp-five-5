@@ -1,0 +1,33 @@
+@startuml
+
+component "06 Manage Team" as C06 {
+    package "service" as Service {
+        class "TeamService" as TeamService
+        class "PlayerService" as PlayerService
+    }
+    package "Entity" as Entity {
+        entity "Team" as TeamEntity
+        entity "Player" as PlayerEntity
+    }
+    package "DTO" as DTO {
+        record "TeamDTO" as TeamDTO
+        record "PlayerDTO" as PlayerDTO
+    }
+
+
+    TeamService -up-> TeamEntity
+    TeamService -down-> TeamDTO
+    PlayerService -up-> PlayerEntity
+    PlayerService -down-> PlayerDTO
+}
+interface "Team" as Team
+
+component "05 Manage Player" as C05 {
+}
+interface "Player" as Player
+C05 -right- Player
+
+TeamService -right- Team
+PlayerService .left.>  Player : GET
+
+@enduml
