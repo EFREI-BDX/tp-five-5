@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://localhost:3306/manage_team_test
+    username: manage_team_test_user
+    password: change-me-test
+    hikari:
+      initialization-fail-timeout: 0
+
+app:
+  console:
+    enabled: false
+

@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: manage-team
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:3306/manage_team
+    username: manage_team_user
+    password: change-me
+    hikari:
+      initialization-fail-timeout: 0
+
+server:
+  port: 8080
+
+app:
+  console:
+    enabled: true
+
+logging:
+  config: classpath:log4j2-spring.xml
+
