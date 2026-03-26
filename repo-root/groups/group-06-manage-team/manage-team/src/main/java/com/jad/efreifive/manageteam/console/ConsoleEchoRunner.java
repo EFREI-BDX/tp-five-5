@@ -1,17 +1,17 @@
 package com.jad.efreifive.manageteam.console;
 
 import jakarta.annotation.PreDestroy;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import lombok.extern.log4j.Log4j2;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnProperty(name = "app.console.enabled", havingValue = "true", matchIfMissing = true)
@@ -76,10 +76,6 @@ public class ConsoleEchoRunner {
         }
         this.scanner = null;
         this.executorService = null;
-    }
-
-    public boolean isRunning() {
-        return this.running.get();
     }
 }
 
