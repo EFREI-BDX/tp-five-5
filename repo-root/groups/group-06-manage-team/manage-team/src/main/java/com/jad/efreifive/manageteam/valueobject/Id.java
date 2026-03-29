@@ -5,13 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 /**
- * Value-object représentant un identifiant unique (UUID).
- * La valeur est générée automatiquement si aucun UUID n'est fourni.
+ * Value object representing a unique identifier (UUID).
+ * The value is generated automatically when no UUID is provided.
  */
 public record Id(@NotNull UUID value) {
 
     /**
-     * Constructeur compact : valide que le UUID n'est pas null.
+     * Compact constructor validating that the UUID is not null.
      */
     public Id {
         if (value == null) {
@@ -20,23 +20,23 @@ public record Id(@NotNull UUID value) {
     }
 
     /**
-     * Fabrique une nouvelle instance avec un UUID auto-généré.
+     * Creates a new instance with an auto-generated UUID.
      */
     public static Id newId() {
         return new Id(UUID.randomUUID());
     }
 
     /**
-     * Fabrique une instance à partir d'un UUID existant.
+     * Creates an instance from an existing UUID.
      */
     public static Id of(final UUID value) {
         return new Id(value);
     }
 
     /**
-     * Fabrique une instance à partir d'une représentation textuelle d'un UUID.
+     * Creates an instance from a UUID string.
      *
-     * @throws IllegalArgumentException si la chaîne n'est pas un UUID valide
+     * @throws IllegalArgumentException if the string is not a valid UUID
      */
     public static Id of(final String value) {
         try {
@@ -46,9 +46,4 @@ public record Id(@NotNull UUID value) {
         }
     }
 
-    @Override
-    public String toString() {
-        return value.toString();
-    }
 }
-

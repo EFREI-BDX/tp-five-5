@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import java.util.Arrays;
 
 /**
- * Value-object (enum) représentant l'état d'une équipe.
+ * Value object (enum) representing a team state.
  * <ul>
- *   <li>{@link #ACTIVE} → "Active"</li>
- *   <li>{@link #INCOMPLETE} → "Incomplète"</li>
- *   <li>{@link #DISSOLVED} → "Dissoute"</li>
+ *   <li>{@link #ACTIVE} - "Active"</li>
+ *   <li>{@link #INCOMPLETE} - "Incomplète"</li>
+ *   <li>{@link #DISSOLVED} - "Dissoute"</li>
  * </ul>
  */
 public enum TeamState {
@@ -26,37 +26,37 @@ public enum TeamState {
     }
 
     /**
-     * Retourne la valeur métier affichable (ex. "Active").
+     * Returns the business value used for JSON output and display.
      */
     @JsonValue
     public String getValue() {
-        return value;
+        return this.value;
     }
 
     /**
-     * Recherche un {@link TeamState} à partir de sa valeur métier (insensible à la casse).
+     * Resolves a {@link TeamState} from its business value (case-insensitive).
      *
-     * @param value la valeur métier ("Active", "Incomplète" ou "Dissoute")
-     * @return le {@link TeamState} correspondant
-     * @throws IllegalArgumentException si la valeur ne correspond à aucun état connu
+     * @param value business value ("Active", "Incomplète", or "Dissoute")
+     * @return the matching {@link TeamState}
+     * @throws IllegalArgumentException when no matching state is found
      */
     @JsonCreator
     public static TeamState fromValue(final String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("TeamState value must not be blank");
         }
-        return Arrays.stream(values())
-                .filter(state -> state.value.equalsIgnoreCase(value))
+
+        return Arrays.stream(TeamState.values())
+                .filter(state -> state.getValue().equalsIgnoreCase(value))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Unknown TeamState value: \"" + value + "\". Allowed values: "
-                                + Arrays.stream(values()).map(TeamState::getValue).toList()
+                                + Arrays.stream(TeamState.values()).map(TeamState::getValue).toList()
                 ));
     }
 
     @Override
     public String toString() {
-        return value;
+        return this.value;
     }
 }
-

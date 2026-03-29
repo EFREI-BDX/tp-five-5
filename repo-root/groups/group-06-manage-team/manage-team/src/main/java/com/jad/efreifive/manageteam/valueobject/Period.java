@@ -5,11 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 /**
- * Value-object représentant la période de vie d'une équipe.
+ * Value object representing a team lifecycle period.
  * <ul>
- *   <li>{@code creationDate} : obligatoire, comprise entre le 2020-01-01 et aujourd'hui.</li>
- *   <li>{@code dissolutionDate} : optionnelle ; si renseignée, elle doit être >= creationDate,
- *       >= 2020-01-01 et <= aujourd'hui.</li>
+ *   <li>{@code creationDate}: required, between 2020-01-01 and today.</li>
+ *   <li>{@code dissolutionDate}: optional; when present, it must be >= creationDate,
+ *       >= 2020-01-01, and <= today.</li>
  * </ul>
  */
 public record Period(
@@ -17,11 +17,11 @@ public record Period(
         LocalDate dissolutionDate
 ) {
 
-    /** Date minimale autorisée pour toutes les dates de la période. */
+    /** Minimum allowed date for period bounds. */
     private static final LocalDate MIN_DATE = LocalDate.of(2020, 1, 1);
 
     /**
-     * Constructeur compact : valide l'ensemble des invariants métier.
+     * Compact constructor validating all business invariants.
      */
     public Period {
         final LocalDate today = LocalDate.now();
@@ -29,7 +29,7 @@ public record Period(
         if (creationDate == null) {
             throw new IllegalArgumentException("Period.creationDate must not be null");
         }
-        if (creationDate.isBefore(MIN_DATE)) {
+        if (creationDate.isBefore(Period.MIN_DATE)) {
             throw new IllegalArgumentException("Period.creationDate must be >= 2020-01-01");
         }
         if (creationDate.isAfter(today)) {
@@ -37,7 +37,7 @@ public record Period(
         }
 
         if (dissolutionDate != null) {
-            if (dissolutionDate.isBefore(MIN_DATE)) {
+            if (dissolutionDate.isBefore(Period.MIN_DATE)) {
                 throw new IllegalArgumentException("Period.dissolutionDate must be >= 2020-01-01");
             }
             if (dissolutionDate.isAfter(today)) {
@@ -50,31 +50,24 @@ public record Period(
     }
 
     /**
-     * Fabrique une période de création uniquement (équipe non encore dissoute).
+     * Creates an open period with only a creation date.
      */
     public static Period of(final LocalDate creationDate) {
         return new Period(creationDate, null);
     }
 
     /**
-     * Fabrique une période complète avec date de dissolution.
+     * Creates a closed period with creation and dissolution dates.
      */
     public static Period of(final LocalDate creationDate, final LocalDate dissolutionDate) {
         return new Period(creationDate, dissolutionDate);
     }
 
     /**
-     * Indique si l'équipe est actuellement active (pas encore dissoute).
+     * Returns whether the team is currently active.
      */
     public boolean isActive() {
-        return dissolutionDate == null || dissolutionDate.isAfter(LocalDate.now());
+        return this.dissolutionDate == null || this.dissolutionDate.isAfter(LocalDate.now());
     }
 
-    @Override
-    public String toString() {
-        return dissolutionDate == null
-                ? "from " + creationDate
-                : "from " + creationDate + " to " + dissolutionDate;
-    }
 }
-

@@ -4,11 +4,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 /**
- * Value-object représentant un nom (prénom + nom de famille).
+ * Value object representing a person's name (first name + last name).
  * <ul>
- *   <li>Chaque composant doit être non vide.</li>
- *   <li>Chaque composant doit commencer par une lettre majuscule.</li>
- *   <li>Chaque composant peut contenir des lettres, des espaces, des tirets et des apostrophes.</li>
+ *   <li>Each component must be non-empty.</li>
+ *   <li>Each component must start with an uppercase letter.</li>
+ *   <li>Each component may contain letters, spaces, hyphens, and apostrophes.</li>
  * </ul>
  */
 public record Name(
@@ -27,23 +27,23 @@ public record Name(
         String lastName
 ) {
 
-    /** Pattern partagé pour la validation dans le constructeur compact. */
+    /** Shared pattern used for constructor-level validation. */
     private static final java.util.regex.Pattern NAME_PATTERN =
             java.util.regex.Pattern.compile("\\p{Lu}[\\p{L} '\\-]*");
 
     /**
-     * Constructeur compact : valide chaque composant selon les invariants métier.
+     * Compact constructor validating each name component.
      */
     public Name {
-        validate("firstName", firstName);
-        validate("lastName", lastName);
+        Name.validate("firstName", firstName);
+        Name.validate("lastName", lastName);
     }
 
     private static void validate(final String field, final String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("Name." + field + " must not be blank");
         }
-        if (!NAME_PATTERN.matcher(value).matches()) {
+        if (!Name.NAME_PATTERN.matcher(value).matches()) {
             throw new IllegalArgumentException(
                     "Name." + field + " must start with an uppercase letter and contain only letters, spaces, hyphens or apostrophes"
             );
@@ -51,22 +51,17 @@ public record Name(
     }
 
     /**
-     * Fabrique une instance à partir du prénom et du nom.
+     * Creates an instance from first name and last name.
      */
     public static Name of(final String firstName, final String lastName) {
         return new Name(firstName, lastName);
     }
 
     /**
-     * Retourne le nom complet sous la forme "Prénom Nom".
+     * Returns the full name in the "FirstName LastName" format.
      */
     public String fullName() {
-        return firstName + " " + lastName;
+        return this.firstName + " " + this.lastName;
     }
 
-    @Override
-    public String toString() {
-        return fullName();
-    }
 }
-

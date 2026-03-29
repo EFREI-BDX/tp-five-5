@@ -4,10 +4,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 /**
- * Value-object représentant un tag (acronyme ou diminutif) d'exactement 3 caractères.
- * La valeur doit être composée uniquement de lettres majuscules (A-Z) et/ou de chiffres (0-9).
+ * Value object representing a 3-character tag (acronym or short name).
+ * The value must contain only uppercase letters (A-Z) and/or digits (0-9).
  *
- * <p>Exemples valides : {@code "PSG"}, {@code "OM1"}, {@code "AB2"}</p>
+ * <p>Valid examples: {@code "PSG"}, {@code "OM1"}, {@code "AB2"}</p>
  */
 public record Tag(
         @NotNull
@@ -22,13 +22,13 @@ public record Tag(
             java.util.regex.Pattern.compile("[A-Z0-9]{3}");
 
     /**
-     * Constructeur compact : valide la longueur et le format.
+     * Compact constructor validating tag format and length.
      */
     public Tag {
         if (value == null) {
             throw new IllegalArgumentException("Tag.value must not be null");
         }
-        if (!TAG_PATTERN.matcher(value).matches()) {
+        if (!Tag.TAG_PATTERN.matcher(value).matches()) {
             throw new IllegalArgumentException(
                     "Tag.value must be exactly 3 uppercase letters and/or digits, got: \"" + value + "\""
             );
@@ -36,15 +36,10 @@ public record Tag(
     }
 
     /**
-     * Fabrique un tag à partir d'une chaîne.
+     * Creates a tag from a string.
      */
     public static Tag of(final String value) {
         return new Tag(value);
     }
 
-    @Override
-    public String toString() {
-        return value;
-    }
 }
-

@@ -1,6 +1,5 @@
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/manage_team_dev
-    username: manage_team_dev_user
-    password: change-me-dev
-
+    url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiveteam
+    username: jad_efrei_five_2526
+    password: ${MANAGE_TEAM_DB_PASSWORD}

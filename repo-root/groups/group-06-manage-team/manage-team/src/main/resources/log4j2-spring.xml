@@ -2,18 +2,36 @@
 <Configuration monitorInterval="30">
     <Properties>
         <Property name="logPattern">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1.} - %msg%n</Property>
+        <Property name="logDir">logs</Property>
+        <Property name="appName">manage-team</Property>
     </Properties>
 
     <Appenders>
+
+        <!-- Console appender -->
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="${logPattern}"/>
         </Console>
+
+        <!-- Rolling file appender with classic naming -->
+        <RollingFile name="File"
+                     fileName="${logDir}/${appName}.log"
+                     filePattern="${logDir}/${appName}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${logPattern}"/>
+            <Policies>
+                <!-- Rotate when file exceeds 10 MB -->
+                <SizeBasedTriggeringPolicy size="10MB"/>
+            </Policies>
+            <!-- Keep the last 30 archived files -->
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
     </Appenders>
 
     <Loggers>
         <Root level="info">
             <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
         </Root>
     </Loggers>
 </Configuration>
-

@@ -3,13 +3,13 @@ package com.jad.efreifive.manageteam.valueobject;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Value-object représentant un libellé (dénomination d'une équipe).
- * La valeur doit être une chaîne non vide.
+ * Value object representing a team label.
+ * The value must be a non-empty string.
  */
 public record Label(@NotBlank String value) {
 
     /**
-     * Constructeur compact : valide que la valeur n'est pas vide ou blanche.
+     * Compact constructor validating that the value is not blank.
      */
     public Label {
         if (value == null || value.isBlank()) {
@@ -19,15 +19,10 @@ public record Label(@NotBlank String value) {
     }
 
     /**
-     * Fabrique une instance à partir d'une chaîne.
+     * Creates an instance from a string.
      */
     public static Label of(final String value) {
         return new Label(value);
     }
 
-    @Override
-    public String toString() {
-        return value;
-    }
 }
-
