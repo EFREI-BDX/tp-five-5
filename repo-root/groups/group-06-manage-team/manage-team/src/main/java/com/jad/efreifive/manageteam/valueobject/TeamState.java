@@ -36,7 +36,7 @@ public enum TeamState {
     /**
      * Resolves a {@link TeamState} from its business value (case-insensitive).
      *
-     * @param value business value ("Active", "Incomplète", or "Dissoute")
+     * @param value business values ("Active", "Incomplète", or "Dissoute")
      * @return the matching {@link TeamState}
      * @throws IllegalArgumentException when no matching state is found
      */
