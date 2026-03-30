@@ -11,7 +11,6 @@ Permettre la gestion des joueurs dans le système ERP du centre de foot à 5.
 - lastName - *VO LastName*
 - email - *VO Email*
 - phone - *VO Phone*
-- level - *VO Level*
 - gender - *VO Gender*
 - birthDate - *VO BirthDate*
 - height - *VO Height*
@@ -41,8 +40,6 @@ Permettre la gestion des joueurs dans le système ERP du centre de foot à 5.
 - createdAt doit être non vide
 - updatedAt doit être non vide
 - updatedAt doit être supérieur ou égal à createdAt
-- level doit être non vide
-- level doit appartenir à une liste de niveaux autorisés
 
 **Format JSON attendus**
 

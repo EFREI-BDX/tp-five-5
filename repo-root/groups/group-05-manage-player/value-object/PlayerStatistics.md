@@ -10,6 +10,7 @@ Représente les statistiques de performance d’un joueur dans le système.
 - goalsScored - *VO GoalsScored*
 - assists - *VO Assists*
 - wins - *VO Wins*
+- mvps - *VO MVPs*
 
 **Invariants**
 
@@ -22,6 +23,7 @@ Représente les statistiques de performance d’un joueur dans le système.
 - wins doit être non vide
 - wins doit être un nombre entier supérieur ou égal à 0
 - wins doit être inférieur ou égal à matchesPlayed
+- mvps doit être un nombre entier supérieur ou égal à 0
 
 **Format JSON attendus**
 
@@ -39,3 +41,4 @@ Représente les statistiques de performance d’un joueur dans le système.
 - Vérifier qu’un wins négatif est rejeté
 - Vérifier que wins > matchesPlayed est rejeté
 - Vérifier qu’une valeur non numérique est rejetée
+- Vérifier que mvps > matchesPlayed est rejeté

@@ -16,7 +16,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178\n}"
+          "raw": "{\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"height\": 178\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/players",
@@ -36,7 +36,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178\n}"
+              "raw": "{\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"height\": 178\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/players",
@@ -59,7 +59,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178\n}"
+              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"height\": 178\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/players",
@@ -126,7 +126,7 @@
           "status": "OK",
           "code": 200,
           "header": [{ "key": "Content-Type", "value": "application/json" }],
-          "body": "{\n  \"id\": \"player-abc-123\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178,\n  \"status\": \"actif\",\n  \"statistics\": {\n    \"matchesPlayed\": 12,\n    \"goalsScored\": 5,\n    \"assists\": 3,\n    \"wins\": 7\n  },\n  \"teamIds\": [\"team-xyz-456\"],\n  \"createdAt\": \"2026-03-18T10:00:00Z\",\n  \"updatedAt\": \"2026-03-18T10:00:00Z\"\n}"
+          "body": "{\n  \"id\": \"player-abc-123\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"height\": 178,\n  \"status\": \"actif\",\n  \"statistics\": {\n    \"matchesPlayed\": 12,\n    \"goalsScored\": 5,\n    \"assists\": 3,\n    \"wins\": 7\n  },\n  \"teamIds\": [\"team-xyz-456\"],\n  \"createdAt\": \"2026-03-18T10:00:00Z\",\n  \"updatedAt\": \"2026-03-18T10:00:00Z\"\n}"
         },
         {
           "name": "401 Unauthorized",
@@ -156,7 +156,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"phone\": \"+33698765432\",\n  \"level\": \"avancé\"\n}"
+          "raw": "{\n  \"phone\": \"+33698765432\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/players/:id",
@@ -179,7 +179,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"+33698765432\",\n  \"level\": \"avancé\"\n}"
+              "raw": "{\n  \"phone\": \"+33698765432\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/players/player-abc-123",

@@ -194,12 +194,6 @@ components:
       description: Genre déclaré du joueur.
       example: "homme"
 
-    Level:
-      type: string
-      minLength: 1
-      description: Niveau sportif du joueur (valeur appartenant à la liste autorisée par le système).
-      example: "intermédiaire"
-
     Status:
       type: string
       enum: [actif, inactif, supprimé]
@@ -264,7 +258,6 @@ components:
         - phone
         - birthDate
         - gender
-        - level
         - height
         - status
         - statistics
@@ -286,8 +279,6 @@ components:
           $ref: '#/components/schemas/BirthDate'
         gender:
           $ref: '#/components/schemas/Gender'
-        level:
-          $ref: '#/components/schemas/Level'
         height:
           $ref: '#/components/schemas/Height'
         status:
@@ -316,7 +307,6 @@ components:
         - phone
         - birthDate
         - gender
-        - level
         - height
       properties:
         firstName:
@@ -331,8 +321,6 @@ components:
           $ref: '#/components/schemas/BirthDate'
         gender:
           $ref: '#/components/schemas/Gender'
-        level:
-          $ref: '#/components/schemas/Level'
         height:
           $ref: '#/components/schemas/Height'
 
@@ -366,8 +354,6 @@ components:
           $ref: '#/components/schemas/BirthDate'
         gender:
           $ref: '#/components/schemas/Gender'
-        level:
-          $ref: '#/components/schemas/Level'
         height:
           $ref: '#/components/schemas/Height'
 
@@ -475,7 +461,6 @@ components:
             phone: "+33612345678"
             birthDate: "15/06/1995"
             gender: "homme"
-            level: "intermédiaire"
             height: 178
 
     UpdatePlayerRequest:
@@ -486,7 +471,6 @@ components:
             $ref: '#/components/schemas/UpdatePlayerRequest'
           example:
             phone: "+33698765432"
-            level: "avancé"
 
     UpdatePlayerStatisticsRequest:
       required: true
@@ -529,7 +513,6 @@ components:
             phone: "+33612345678"
             birthDate: "15/06/1995"
             gender: "homme"
-            level: "intermédiaire"
             height: 178
             status: "actif"
             statistics:
