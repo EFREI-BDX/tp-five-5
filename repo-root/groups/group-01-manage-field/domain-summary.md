@@ -16,7 +16,7 @@ groups.
 
 **Main business invariants**
 
-- All `id` and `*_id` values are valid UUIDs.
+- All `id` and `*_id` values are non-empty valid UUIDs.
 - `field.name` is required and unique.
 - `field.status_id` must reference an existing `field_status`.
 - `reservation.status_id` must reference an existing `reservation_status`.

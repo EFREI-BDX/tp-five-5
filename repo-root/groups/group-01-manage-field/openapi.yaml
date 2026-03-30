@@ -186,13 +186,13 @@ components:
       in: path
       required: true
       schema:
-        $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        $ref: './tests/schemas/id.schema.json#/properties/id'
     ReservationIdParam:
       name: reservation_id
       in: path
       required: true
       schema:
-        $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+        $ref: './tests/schemas/id.schema.json#/properties/id'
     ReservationDateQueryParam:
       name: date
       in: query
@@ -242,7 +242,7 @@ components:
         name:
           $ref: './tests/schemas/field-name.schema.json#/properties/name'
         status_id:
-          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+          $ref: './tests/schemas/id.schema.json#/properties/id'
       required:
         - name
         - status_id
@@ -252,7 +252,7 @@ components:
       type: object
       properties:
         status_id:
-          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+          $ref: './tests/schemas/id.schema.json#/properties/id'
       required:
         - status_id
       additionalProperties: false
@@ -264,7 +264,7 @@ components:
       type: object
       properties:
         status_id:
-          $ref: '../../openapi/common/schemas.yaml#/components/schemas/UUID'
+          $ref: './tests/schemas/id.schema.json#/properties/id'
       required:
         - status_id
       additionalProperties: false
