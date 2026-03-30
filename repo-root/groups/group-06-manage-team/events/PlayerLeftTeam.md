@@ -1,0 +1,64 @@
+# PlayerLeftTeam
+
+**Résumé métier**
+
+Cet évènement est émis lorsqu'un joueur quitte une équipe.
+
+Il permet d'indiquer qu'un joueur identifié par son id a quitté une équipe identifiée par son id.
+
+**Déclencheur**
+
+- Une commande ou une action métier de retrait d'un joueur d'une équipe est validée.
+- Le retrait est accepté uniquement si les invariants métier de l'équipe sont respectés.
+
+**Payload JSON**
+
+- teamId — *VO Id*
+- playerId — *VO Id*
+
+**Invariants**
+
+- teamId doit être non vide
+- teamId doit être un UUID valide
+- playerId doit être non vide
+- playerId doit être un UUID valide
+- playerId doit correspondre à un joueur existant si cette règle est retenue
+- teamId doit correspondre à une équipe existante si cette règle est retenue
+- le joueur doit appartenir à l'équipe avant son retrait si cette règle est retenue
+
+**Format JSON attendu**
+
+```json
+{
+  "teamId": "550e8400-e29b-41d4-a716-446655440000",
+  "playerId": "9d8a5fbb-8c71-4c0e-a6f0-5f9b6a4b5d12"
+}
+```
+
+- **Schéma** : `tests/schemas/PlayerLeftTeam.schema.json`
+- **Fixture valide** : `tests/fixtures/PlayerLeftTeam.valid.json`
+- **Fixture invalide** : `tests/fixtures/PlayerLeftTeam.invalid.json`
+
+**Producteur**
+
+- Aggregate / service métier de gestion d'équipe
+
+**Consommateurs possibles**
+
+- journalisation métier
+- projection de lecture
+- audit
+- synchronisation avec un autre système
+
+**Tests minimaux attendus**
+
+- vérifier qu'un payload avec teamId et playerId valides est accepté
+- vérifier qu'un payload avec un teamId invalide est rejeté
+- vérifier qu'un payload avec un playerId invalide est rejeté
+- vérifier qu'un payload avec un identifiant vide est rejeté
+
+**Remarques**
+
+Cet évènement ne représente que le fait métier "un joueur a quitté une équipe".
+Il ne contient volontairement que les données utiles à ce fait.
+
