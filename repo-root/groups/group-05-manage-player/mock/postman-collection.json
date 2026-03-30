@@ -1,2 +1,400 @@
 {
+  "info": {
+    "name": "Player Management API (with examples)",
+    "description": "Collection Postman avec exemples pour mock. Remplacer {{baseUrl}} et {{apiKey}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Create Player",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/players",
+          "host": ["{{baseUrl}}"],
+          "path": ["players"]
+        },
+        "description": "Créer un nouveau joueur dans le système."
+      },
+      "response": [
+        {
+          "name": "201 Created",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players",
+              "host": ["{{baseUrl}}"],
+              "path": ["players"]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"player-abc-123\",\n  \"status\": \"actif\",\n  \"createdAt\": \"2026-03-18T10:00:00Z\"\n}"
+        },
+        {
+          "name": "400 Bad Request — Validation",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players",
+              "host": ["{{baseUrl}}"],
+              "path": ["players"]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"VALIDATION_ERROR\",\n  \"message\": \"Les données fournies sont invalides.\",\n  \"details\": [\n    { \"field\": \"firstName\", \"issue\": \"Le prénom ne peut pas être vide.\" },\n    { \"field\": \"email\", \"issue\": \"Format email invalide.\" }\n  ]\n}"
+        },
+        {
+          "name": "401 Unauthorized",
+          "originalRequest": {},
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"UNAUTHORIZED\",\n  \"message\": \"Clé API manquante ou invalide.\"\n}"
+        },
+        {
+          "name": "409 Conflict — Email déjà utilisé",
+          "originalRequest": {},
+          "status": "Conflict",
+          "code": 409,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"PLAYER_ALREADY_EXISTS\",\n  \"message\": \"Un joueur avec cet email existe déjà.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Player",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Accept", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/players/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["players", ":id"],
+          "variable": [
+            { "key": "id", "value": "{{lastPlayerId}}" }
+          ]
+        },
+        "description": "Récupérer le profil complet d'un joueur par son identifiant."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/players/player-abc-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["players", "player-abc-123"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"player-abc-123\",\n  \"firstName\": \"Jean\",\n  \"lastName\": \"Dupont\",\n  \"email\": \"jean.dupont@example.com\",\n  \"phone\": \"+33612345678\",\n  \"birthDate\": \"15/06/1995\",\n  \"gender\": \"homme\",\n  \"level\": \"intermédiaire\",\n  \"height\": 178,\n  \"status\": \"actif\",\n  \"statistics\": {\n    \"matchesPlayed\": 12,\n    \"goalsScored\": 5,\n    \"assists\": 3,\n    \"wins\": 7\n  },\n  \"teamIds\": [\"team-xyz-456\"],\n  \"createdAt\": \"2026-03-18T10:00:00Z\",\n  \"updatedAt\": \"2026-03-18T10:00:00Z\"\n}"
+        },
+        {
+          "name": "401 Unauthorized",
+          "originalRequest": {},
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"UNAUTHORIZED\",\n  \"message\": \"Clé API manquante ou invalide.\"\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "originalRequest": {},
+          "status": "Not Found",
+          "code": 404,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"PLAYER_NOT_FOUND\",\n  \"message\": \"Le joueur avec l'identifiant demandé est introuvable.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Player",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"phone\": \"+33698765432\",\n  \"level\": \"avancé\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/players/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["players", ":id"],
+          "variable": [
+            { "key": "id", "value": "{{lastPlayerId}}" }
+          ]
+        },
+        "description": "Mettre à jour les informations d'un joueur. Seuls les champs fournis sont mis à jour."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"+33698765432\",\n  \"level\": \"avancé\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players/player-abc-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["players", "player-abc-123"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"player-abc-123\",\n  \"updatedAt\": \"2026-03-18T11:30:00Z\"\n}"
+        },
+        {
+          "name": "400 Bad Request — Validation",
+          "originalRequest": {},
+          "status": "Bad Request",
+          "code": 400,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"VALIDATION_ERROR\",\n  \"message\": \"Les données fournies sont invalides.\",\n  \"details\": [\n    { \"field\": \"email\", \"issue\": \"Format email invalide.\" }\n  ]\n}"
+        },
+        {
+          "name": "401 Unauthorized",
+          "originalRequest": {},
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"UNAUTHORIZED\",\n  \"message\": \"Clé API manquante ou invalide.\"\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "originalRequest": {},
+          "status": "Not Found",
+          "code": 404,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"PLAYER_NOT_FOUND\",\n  \"message\": \"Le joueur avec l'identifiant demandé est introuvable.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Delete Player",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/players/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["players", ":id"],
+          "variable": [
+            { "key": "id", "value": "{{lastPlayerId}}" }
+          ]
+        },
+        "description": "Suppression logique d'un joueur — le statut passe à 'supprimé'."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/players/player-abc-123",
+              "host": ["{{baseUrl}}"],
+              "path": ["players", "player-abc-123"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"player-abc-123\",\n  \"status\": \"supprimé\",\n  \"updatedAt\": \"2026-03-18T12:00:00Z\"\n}"
+        },
+        {
+          "name": "401 Unauthorized",
+          "originalRequest": {},
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"UNAUTHORIZED\",\n  \"message\": \"Clé API manquante ou invalide.\"\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "originalRequest": {},
+          "status": "Not Found",
+          "code": 404,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"PLAYER_NOT_FOUND\",\n  \"message\": \"Le joueur avec l'identifiant demandé est introuvable.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Update Player Statistics",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"matchesPlayed\": 15,\n  \"goalsScored\": 7,\n  \"assists\": 4,\n  \"wins\": 9\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/players/:id/statistics",
+          "host": ["{{baseUrl}}"],
+          "path": ["players", ":id", "statistics"],
+          "variable": [
+            { "key": "id", "value": "{{lastPlayerId}}" }
+          ]
+        },
+        "description": "Mettre à jour les statistiques de performance d'un joueur."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matchesPlayed\": 15,\n  \"goalsScored\": 7,\n  \"assists\": 4,\n  \"wins\": 9\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players/player-abc-123/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["players", "player-abc-123", "statistics"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"id\": \"player-abc-123\",\n  \"statistics\": {\n    \"matchesPlayed\": 15,\n    \"goalsScored\": 7,\n    \"assists\": 4,\n    \"wins\": 9\n  },\n  \"updatedAt\": \"2026-03-18T13:00:00Z\"\n}"
+        },
+        {
+          "name": "400 Bad Request — wins > matchesPlayed",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matchesPlayed\": 5,\n  \"goalsScored\": 2,\n  \"assists\": 1,\n  \"wins\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players/player-abc-123/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["players", "player-abc-123", "statistics"]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"VALIDATION_ERROR\",\n  \"message\": \"Les données fournies sont invalides.\",\n  \"details\": [\n    { \"field\": \"wins\", \"issue\": \"wins ne peut pas être supérieur à matchesPlayed.\" }\n  ]\n}"
+        },
+        {
+          "name": "400 Bad Request — Valeur négative",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-KEY", "value": "{{apiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"matchesPlayed\": -1,\n  \"goalsScored\": 0,\n  \"assists\": 0,\n  \"wins\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/players/player-abc-123/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["players", "player-abc-123", "statistics"]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"VALIDATION_ERROR\",\n  \"message\": \"Les données fournies sont invalides.\",\n  \"details\": [\n    { \"field\": \"matchesPlayed\", \"issue\": \"matchesPlayed doit être supérieur ou égal à 0.\" }\n  ]\n}"
+        },
+        {
+          "name": "401 Unauthorized",
+          "originalRequest": {},
+          "status": "Unauthorized",
+          "code": 401,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"UNAUTHORIZED\",\n  \"message\": \"Clé API manquante ou invalide.\"\n}"
+        },
+        {
+          "name": "404 Not Found",
+          "originalRequest": {},
+          "status": "Not Found",
+          "code": 404,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"code\": \"PLAYER_NOT_FOUND\",\n  \"message\": \"Le joueur avec l'identifiant demandé est introuvable.\"\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.example.org"
+    },
+    {
+      "key": "apiKey",
+      "value": "REPLACE_WITH_KEY"
+    },
+    {
+      "key": "lastPlayerId",
+      "value": "player-abc-123"
+    }
+  ]
 }

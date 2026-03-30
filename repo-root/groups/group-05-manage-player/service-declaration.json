@@ -1,2 +1,135 @@
 {
+  "serviceId": "group-05-manage-player",
+  "name": "Player Management",
+  "version": "1.0.0",
+  "description": "Service responsable de la création et gestion des joueurs ainsi que de la publication des events liés aux profils joueurs et à leurs statistiques.",
+  "owner": {
+    "team": "group-05-manage-player",
+    "contact": "todo@example.org"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@example.com:org/repo.git",
+    "path": "groups/group-05-manage-player"
+  },
+  "endpoints": [
+    {
+      "path": "/players",
+      "method": "POST",
+      "operationId": "createPlayer",
+      "description": "Créer un joueur",
+      "requestSchema": "./openapi.yaml#/components/schemas/CreatePlayerRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/CreatePlayerResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/players/{id}",
+      "method": "GET",
+      "operationId": "getPlayer",
+      "description": "Récupérer un joueur",
+      "responseSchema": "./openapi.yaml#/components/schemas/Player",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/players/{id}",
+      "method": "PUT",
+      "operationId": "updatePlayer",
+      "description": "Mettre à jour un joueur",
+      "requestSchema": "./openapi.yaml#/components/schemas/UpdatePlayerRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/UpdatePlayerResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/players/{id}",
+      "method": "DELETE",
+      "operationId": "deletePlayer",
+      "description": "Supprimer logiquement un joueur",
+      "responseSchema": "./openapi.yaml#/components/schemas/DeletePlayerResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/players/{id}/statistics",
+      "method": "POST",
+      "operationId": "updatePlayerStatistics",
+      "description": "Mettre à jour les statistiques d’un joueur",
+      "requestSchema": "./openapi.yaml#/components/schemas/UpdatePlayerStatisticsRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/UpdatePlayerStatisticsResponse",
+      "auth": "ApiKeyAuth"
+    }
+  ],
+  "eventsProduced": [
+    {
+      "name": "PlayerCreated",
+      "schema": "./tests/schemas/player-created.schema.json",
+      "description": "Publié après création d’un joueur ; contient id, firstName, lastName, email, status, timestamp, traceId"
+    },
+    {
+      "name": "PlayerUpdated",
+      "schema": "./tests/schemas/player-updated.schema.json",
+      "description": "Publié après mise à jour du profil d’un joueur"
+    },
+    {
+      "name": "PlayerDeleted",
+      "schema": "./tests/schemas/player-deleted.schema.json",
+      "description": "Publié après suppression logique d’un joueur"
+    },
+    {
+      "name": "PlayerStatisticsUpdated",
+      "schema": "./tests/schemas/player-statistics-updated.schema.json",
+      "description": "Publié après mise à jour des statistiques d’un joueur"
+    }
+  ],
+  "eventsConsumed": [
+    {
+      "name": "MatchFinished",
+      "schema": "./tests/schemas/match-finished.schema.json",
+      "description": "Event consommé pour mettre à jour automatiquement les statistiques des joueurs après un match"
+    }
+  ],
+  "schemas": [
+    "./tests/schemas/player.schema.json",
+    "./tests/schemas/player-status.schema.json",
+    "./tests/schemas/player-statistics.schema.json",
+    "./tests/schemas/gender.schema.json",
+    "./tests/schemas/height.schema.json",
+    "./tests/schemas/team-id.schema.json"
+  ],
+  "health": {
+    "path": "/health",
+    "method": "GET",
+    "expectedStatus": 200
+  },
+  "security": {
+    "type": "apiKey",
+    "in": "header",
+    "name": "X-API-KEY"
+  },
+  "deployment": {
+    "image": "registry.example.org/group-xx-player-management:1.0.0",
+    "replicas": 2,
+    "resources": {
+      "cpu": "500m",
+      "memory": "512Mi"
+    }
+  },
+  "ci": {
+    "validateCommand": "cd groups/group-xx-player-management && mvn -DskipTests=false test",
+    "lintOpenApi": "spectral lint openapi.yaml"
+  },
+  "contacts": [
+    {
+      "role": "PO",
+      "name": "TODO PO",
+      "email": "po@example.org"
+    },
+    {
+      "role": "Tech lead",
+      "name": "TODO TL",
+      "email": "tl@example.org"
+    }
+  ],
+  "metadata": {
+    "schemaVersion": "1.0",
+    "lastUpdated": "2026-03-18"
+  }
 }

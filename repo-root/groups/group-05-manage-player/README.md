@@ -4,9 +4,13 @@
 
 **Membres**
 
-- **Nom Prénom** — identifiant GitHub
+- **LUXEY Aurélien** — identifiant GitHub
+- **BERGER Florian** — identifiant GitHub
+- **IBOS Geoffrey** — identifiant GitHub
+- **DEBEURET Oscar** — identifiant GitHub
+- **MAURY Louis** — identifiant GitHub
 
-**Stack choisie** :
+**Stack choisie** : manage player
 
 **Livrables attendus**
 

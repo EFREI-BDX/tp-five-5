@@ -1,60 +1,645 @@
 openapi: 3.0.3
 info:
-  title: TODO - API title
+  title: Player Management API
   version: 1.0.0
-  description: TODO - br�ve description de l'API et du bounded context
+  description: >
+    API du service Player Management — responsable de la création, consultation,
+    mise à jour et suppression logique des profils joueurs, ainsi que de la gestion
+    de leurs statistiques dans le système ERP du centre de foot à 5.
 
 servers:
   - url: https://api.example.org
-    description: TODO - base URL (dev/staging/prod)
+    description: Serveur principal (prod)
 
-paths: {}
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Players
+    description: Opérations sur les joueurs
+  - name: PlayerStatistics
+    description: Opérations sur les statistiques d'un joueur
+
+paths:
+
+  /players:
+    post:
+      tags: [Players]
+      operationId: createPlayer
+      summary: Créer un joueur
+      description: Crée un nouveau joueur dans le système et publie un événement PlayerCreated.
+      requestBody:
+        $ref: '#/components/requestBodies/CreatePlayerRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/CreatePlayerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /players/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PlayerId'
+
+    get:
+      tags: [Players]
+      operationId: getPlayer
+      summary: Récupérer un joueur
+      description: Retourne le profil complet d'un joueur à partir de son identifiant.
+      responses:
+        '200':
+          $ref: '#/components/responses/GetPlayerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Players]
+      operationId: updatePlayer
+      summary: Mettre à jour un joueur
+      description: Met à jour les informations du profil d'un joueur et publie un événement PlayerUpdated.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatePlayerRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdatePlayerResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Players]
+      operationId: deletePlayer
+      summary: Supprimer logiquement un joueur
+      description: >
+        Passe le statut du joueur à `supprimé` (suppression logique).
+        Le joueur n'est pas physiquement retiré de la base.
+        Publie un événement PlayerDeleted.
+      responses:
+        '200':
+          $ref: '#/components/responses/DeletePlayerResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /players/{id}/statistics:
+    parameters:
+      - $ref: '#/components/parameters/PlayerId'
+
+    post:
+      tags: [PlayerStatistics]
+      operationId: updatePlayerStatistics
+      summary: Mettre à jour les statistiques d'un joueur
+      description: >
+        Met à jour les statistiques de performance d'un joueur (matchs joués, buts, passes, victoires).
+        Publie un événement PlayerStatisticsUpdated.
+      requestBody:
+        $ref: '#/components/requestBodies/UpdatePlayerStatisticsRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/UpdatePlayerStatisticsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
-  schemas: {}
-  parameters: {}
-  responses: {}
-  requestBodies: {}
-  securitySchemes: {}
 
-tags: []
+  # ─────────────────────────────────────────────
+  # SCHEMAS — Value Objects primitifs
+  # ─────────────────────────────────────────────
+  schemas:
+
+    # --- Identifiants ---
+    Id:
+      type: string
+      minLength: 1
+      pattern: '^\S.*\S$|^\S$'
+      description: Identifiant unique d'un joueur. Non vide, sans espaces seuls.
+      example: "player-abc-123"
+
+    TeamId:
+      type: string
+      minLength: 1
+      pattern: '^\S.*\S$|^\S$'
+      description: Identifiant unique d'une équipe. Non vide, sans espaces seuls.
+      example: "team-xyz-456"
+
+    # --- Identité ---
+    FirstName:
+      type: string
+      minLength: 1
+      maxLength: 100
+      pattern: '^\S.*\S$|^\S$'
+      description: Prénom du joueur (1–100 caractères, non vide).
+      example: "Jean"
+
+    LastName:
+      type: string
+      minLength: 1
+      maxLength: 100
+      pattern: '^\S.*\S$|^\S$'
+      description: Nom du joueur (1–100 caractères, non vide).
+      example: "Dupont"
+
+    Email:
+      type: string
+      format: email
+      minLength: 1
+      description: Adresse email valide du joueur.
+      example: "jean.dupont@example.com"
+
+    Phone:
+      type: string
+      minLength: 1
+      pattern: '^\+?[0-9\s\-().]{7,20}$'
+      description: Numéro de téléphone valide du joueur.
+      example: "+33612345678"
+
+    BirthDate:
+      type: string
+      pattern: '^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$'
+      description: Date de naissance au format JJ/MM/AAAA. Ne peut pas être dans le futur.
+      example: "15/06/1995"
+
+    Height:
+      type: number
+      exclusiveMinimum: 0
+      description: Taille du joueur en centimètres. Strictement positive.
+      example: 178
+
+    Gender:
+      type: string
+      enum: [homme, femme, non binaire, non spécifié]
+      description: Genre déclaré du joueur.
+      example: "homme"
+
+    Level:
+      type: string
+      minLength: 1
+      description: Niveau sportif du joueur (valeur appartenant à la liste autorisée par le système).
+      example: "intermédiaire"
+
+    Status:
+      type: string
+      enum: [actif, inactif, supprimé]
+      description: État métier du joueur dans le système.
+      example: "actif"
+
+    DateTime:
+      type: string
+      format: date-time
+      description: Date et heure au format ISO 8601 (ex. 2026-03-18T10:00:00Z).
+      example: "2026-03-18T10:00:00Z"
+
+    # --- Statistiques (VO atomiques) ---
+    MatchesPlayed:
+      type: integer
+      minimum: 0
+      description: Nombre de matchs joués. Entier >= 0.
+      example: 12
+
+    GoalsScored:
+      type: integer
+      minimum: 0
+      description: Nombre de buts marqués. Entier >= 0.
+      example: 5
+
+    Assists:
+      type: integer
+      minimum: 0
+      description: Nombre de passes décisives. Entier >= 0.
+      example: 3
+
+    Wins:
+      type: integer
+      minimum: 0
+      description: Nombre de victoires. Entier >= 0. Doit être <= matchesPlayed.
+      example: 7
+
+    # --- Value Objects composites ---
+    PlayerStatistics:
+      type: object
+      description: Statistiques de performance d'un joueur.
+      required: [matchesPlayed, goalsScored, assists, wins]
+      properties:
+        matchesPlayed:
+          $ref: '#/components/schemas/MatchesPlayed'
+        goalsScored:
+          $ref: '#/components/schemas/GoalsScored'
+        assists:
+          $ref: '#/components/schemas/Assists'
+        wins:
+          $ref: '#/components/schemas/Wins'
+
+    # --- Agrégat Player (lecture complète) ---
+    Player:
+      type: object
+      description: Profil complet d'un joueur.
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - phone
+        - birthDate
+        - gender
+        - level
+        - height
+        - status
+        - statistics
+        - teamIds
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        firstName:
+          $ref: '#/components/schemas/FirstName'
+        lastName:
+          $ref: '#/components/schemas/LastName'
+        email:
+          $ref: '#/components/schemas/Email'
+        phone:
+          $ref: '#/components/schemas/Phone'
+        birthDate:
+          $ref: '#/components/schemas/BirthDate'
+        gender:
+          $ref: '#/components/schemas/Gender'
+        level:
+          $ref: '#/components/schemas/Level'
+        height:
+          $ref: '#/components/schemas/Height'
+        status:
+          $ref: '#/components/schemas/Status'
+        statistics:
+          $ref: '#/components/schemas/PlayerStatistics'
+        teamIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamId'
+          description: Liste des identifiants des équipes auxquelles le joueur a participé.
+          example: ["team-xyz-456", "team-abc-789"]
+        createdAt:
+          $ref: '#/components/schemas/DateTime'
+        updatedAt:
+          $ref: '#/components/schemas/DateTime'
+
+    # --- Requêtes / Réponses ---
+    CreatePlayerRequest:
+      type: object
+      description: Corps de la requête pour créer un joueur.
+      required:
+        - firstName
+        - lastName
+        - email
+        - phone
+        - birthDate
+        - gender
+        - level
+        - height
+      properties:
+        firstName:
+          $ref: '#/components/schemas/FirstName'
+        lastName:
+          $ref: '#/components/schemas/LastName'
+        email:
+          $ref: '#/components/schemas/Email'
+        phone:
+          $ref: '#/components/schemas/Phone'
+        birthDate:
+          $ref: '#/components/schemas/BirthDate'
+        gender:
+          $ref: '#/components/schemas/Gender'
+        level:
+          $ref: '#/components/schemas/Level'
+        height:
+          $ref: '#/components/schemas/Height'
+
+    CreatePlayerResponse:
+      type: object
+      description: Réponse après création d'un joueur.
+      required: [id, status, createdAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        status:
+          $ref: '#/components/schemas/Status'
+        createdAt:
+          $ref: '#/components/schemas/DateTime'
+
+    UpdatePlayerRequest:
+      type: object
+      description: >
+        Corps de la requête pour mettre à jour un joueur.
+        Tous les champs sont optionnels — seuls les champs fournis sont mis à jour.
+      properties:
+        firstName:
+          $ref: '#/components/schemas/FirstName'
+        lastName:
+          $ref: '#/components/schemas/LastName'
+        email:
+          $ref: '#/components/schemas/Email'
+        phone:
+          $ref: '#/components/schemas/Phone'
+        birthDate:
+          $ref: '#/components/schemas/BirthDate'
+        gender:
+          $ref: '#/components/schemas/Gender'
+        level:
+          $ref: '#/components/schemas/Level'
+        height:
+          $ref: '#/components/schemas/Height'
+
+    UpdatePlayerResponse:
+      type: object
+      description: Réponse après mise à jour d'un joueur.
+      required: [id, updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        updatedAt:
+          $ref: '#/components/schemas/DateTime'
+
+    DeletePlayerResponse:
+      type: object
+      description: Réponse après suppression logique d'un joueur.
+      required: [id, status, updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        status:
+          $ref: '#/components/schemas/Status'
+        updatedAt:
+          $ref: '#/components/schemas/DateTime'
+
+    UpdatePlayerStatisticsRequest:
+      type: object
+      description: Corps de la requête pour mettre à jour les statistiques d'un joueur.
+      required: [matchesPlayed, goalsScored, assists, wins]
+      properties:
+        matchesPlayed:
+          $ref: '#/components/schemas/MatchesPlayed'
+        goalsScored:
+          $ref: '#/components/schemas/GoalsScored'
+        assists:
+          $ref: '#/components/schemas/Assists'
+        wins:
+          $ref: '#/components/schemas/Wins'
+
+    UpdatePlayerStatisticsResponse:
+      type: object
+      description: Réponse après mise à jour des statistiques d'un joueur.
+      required: [id, statistics, updatedAt]
+      properties:
+        id:
+          $ref: '#/components/schemas/Id'
+        statistics:
+          $ref: '#/components/schemas/PlayerStatistics'
+        updatedAt:
+          $ref: '#/components/schemas/DateTime'
+
+    # --- Erreurs ---
+    ErrorResponse:
+      type: object
+      description: Corps d'une réponse d'erreur standard.
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Code d'erreur métier ou technique.
+          example: "PLAYER_NOT_FOUND"
+        message:
+          type: string
+          description: Message lisible décrivant l'erreur.
+          example: "Le joueur avec l'identifiant demandé est introuvable."
+        details:
+          type: array
+          description: Liste optionnelle de détails supplémentaires (ex. erreurs de validation par champ).
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: "email"
+              issue:
+                type: string
+                example: "Format email invalide."
+
+  # ─────────────────────────────────────────────
+  # PARAMETERS
+  # ─────────────────────────────────────────────
+  parameters:
+    PlayerId:
+      name: id
+      in: path
+      required: true
+      description: Identifiant unique du joueur.
+      schema:
+        $ref: '#/components/schemas/Id'
+
+  # ─────────────────────────────────────────────
+  # REQUEST BODIES
+  # ─────────────────────────────────────────────
+  requestBodies:
+    CreatePlayerRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreatePlayerRequest'
+          example:
+            firstName: "Jean"
+            lastName: "Dupont"
+            email: "jean.dupont@example.com"
+            phone: "+33612345678"
+            birthDate: "15/06/1995"
+            gender: "homme"
+            level: "intermédiaire"
+            height: 178
+
+    UpdatePlayerRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePlayerRequest'
+          example:
+            phone: "+33698765432"
+            level: "avancé"
+
+    UpdatePlayerStatisticsRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePlayerStatisticsRequest'
+          example:
+            matchesPlayed: 15
+            goalsScored: 7
+            assists: 4
+            wins: 9
+
+  # ─────────────────────────────────────────────
+  # RESPONSES
+  # ─────────────────────────────────────────────
+  responses:
+    CreatePlayerResponse:
+      description: Joueur créé avec succès.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CreatePlayerResponse'
+          example:
+            id: "player-abc-123"
+            status: "actif"
+            createdAt: "2026-03-18T10:00:00Z"
+
+    GetPlayerResponse:
+      description: Profil complet du joueur.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Player'
+          example:
+            id: "player-abc-123"
+            firstName: "Jean"
+            lastName: "Dupont"
+            email: "jean.dupont@example.com"
+            phone: "+33612345678"
+            birthDate: "15/06/1995"
+            gender: "homme"
+            level: "intermédiaire"
+            height: 178
+            status: "actif"
+            statistics:
+              matchesPlayed: 12
+              goalsScored: 5
+              assists: 3
+              wins: 7
+            teamIds: ["team-xyz-456"]
+            createdAt: "2026-03-18T10:00:00Z"
+            updatedAt: "2026-03-18T10:00:00Z"
+
+    UpdatePlayerResponse:
+      description: Joueur mis à jour avec succès.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePlayerResponse'
+          example:
+            id: "player-abc-123"
+            updatedAt: "2026-03-18T11:30:00Z"
+
+    DeletePlayerResponse:
+      description: Joueur supprimé logiquement avec succès.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DeletePlayerResponse'
+          example:
+            id: "player-abc-123"
+            status: "supprimé"
+            updatedAt: "2026-03-18T12:00:00Z"
+
+    UpdatePlayerStatisticsResponse:
+      description: Statistiques du joueur mises à jour avec succès.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdatePlayerStatisticsResponse'
+          example:
+            id: "player-abc-123"
+            statistics:
+              matchesPlayed: 15
+              goalsScored: 7
+              assists: 4
+              wins: 9
+            updatedAt: "2026-03-18T13:00:00Z"
+
+    BadRequest:
+      description: Requête invalide — données manquantes ou format incorrect.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "VALIDATION_ERROR"
+            message: "Les données fournies sont invalides."
+            details:
+              - field: "email"
+                issue: "Format email invalide."
+
+    Unauthorized:
+      description: Authentification requise — clé API manquante ou invalide.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "UNAUTHORIZED"
+            message: "Clé API manquante ou invalide."
+
+    NotFound:
+      description: Ressource introuvable.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "PLAYER_NOT_FOUND"
+            message: "Le joueur avec l'identifiant demandé est introuvable."
+
+    Conflict:
+      description: Conflit — ressource déjà existante (ex. email déjà utilisé).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "PLAYER_ALREADY_EXISTS"
+            message: "Un joueur avec cet email existe déjà."
+
+    InternalServerError:
+      description: Erreur serveur interne.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: "INTERNAL_SERVER_ERROR"
+            message: "Une erreur inattendue s'est produite."
+
+  # ─────────────────────────────────────────────
+  # SECURITY SCHEMES
+  # ─────────────────────────────────────────────
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+      description: Clé API transmise dans le header X-API-KEY pour authentifier les requêtes.
+
 externalDocs:
-  description: TODO - documentation externe
-  url: TODO
-
-# Placeholders et recommandations :
-# - Ajouter vos endpoints sous "paths" :
-#     /resource:
-#       get:
-#         summary: TODO
-#         responses:
-#           '200':
-#             $ref: '#/components/responses/Ok'
-#
-# - D�finir sch�mas r�utilisables sous components/schemas.
-# - Pour r�utiliser JSON Schema stock�s dans tests/schemas, utilisez $ref relatifs :
-#     $ref: './tests/schemas/quantity.schema.json'
-#
-# - D�finir r�ponses communes sous components/responses (ex. BadRequest, NotFound).
-# - D�clarer securitySchemes si n�cessaire (ApiKey, BearerAuth, OAuth2).
-#
-# Exemple minimal d'ajout (comment�) :
-#
-# components:
-#   schemas:
-#     ExampleVO:
-#       type: object
-#       properties:
-#         id:
-#           type: string
-#         name:
-#           type: string
-#       required: [id, name]
-#
-#   responses:
-#     Ok:
-#       description: Succ�s
-#       content:
-#         application/json:
-#           schema:
-#             $ref: '#/components/schemas/ExampleVO'
+  description: Documentation du service Player Management
+  url: https://docs.example.org/player-management
