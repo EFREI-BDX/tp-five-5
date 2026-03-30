@@ -15,8 +15,9 @@ CREATE TABLE fiveteam.team
 
 CREATE TABLE fiveteam.player
 (
-    id     binary(16) not null primary key,
-    teamId binary(16) null,
+    id          binary(16)   not null primary key,
+    displayName varchar(255) not null,
+    teamId      binary(16)   null,
     foreign key (teamId) references fiveteam.team (id)
 );
 
@@ -30,8 +31,9 @@ SELECT `fiveteam`.`team`.`id`              AS `id`,
 FROM `fiveteam`.`team`;
 
 CREATE VIEW fiveteam.PlayerView AS
-SELECT `fiveteam`.`player`.`id`     AS `id`,
-       `fiveteam`.`player`.`teamId` AS `teamId`
+SELECT `fiveteam`.`player`.`id`          AS `id`,
+       `fiveteam`.`player`.`displayName` AS `displayName`,
+       `fiveteam`.`player`.`teamId`      AS `teamId`
 FROM `fiveteam`.`player`;
 
 GRANT SELECT ON fiveteam.TeamView TO 'jad_efrei_five_2526'@'%';
