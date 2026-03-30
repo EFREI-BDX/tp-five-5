@@ -1,18 +1,20 @@
 services:
   mariadb:
-    image: mariadb:10.11.11
-    container_name: fivefield-mariadb
+    image: ${MARIADB_IMAGE:-mariadb:10.11.11}
+    container_name: ${MARIADB_CONTAINER_NAME:-fivefield-mariadb}
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${MARIADB_PORT:-3306}:3306"
     environment:
-      MARIADB_ROOT_PASSWORD: fivefield-root
-      MARIADB_DATABASE: fivefield
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-fivefield-root}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-fivefield}
+      MARIADB_USER: ${MARIADB_USER:-fivefield}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-fivefield}
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "-uroot", "-pfivefield-root"]
+      test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MARIADB_ROOT_PASSWORD:-fivefield-root}"]
       interval: 10s
       timeout: 5s
       retries: 10
