@@ -86,13 +86,18 @@
 
 **Résumé métier**
 
-Événement reçu lorsqu’un match envoie une information concernant un joueur.
+Événement reçu lorsqu'un match envoie une information concernant un joueur (mise à jour des statistiques).
 
 **Payload**
 
-- teamId - *String*
-- data - *Object* (information liée au joueur)
+- playerId - *String*
+- matchesPlayed - *Integer*
+- goalsScored - *Integer*
+- assists - *Integer*
+- wins - *Integer*
+- draws - *Integer*
+- mvps - *Integer*
 
 **Réception**
 
-- Réception d’une donnée provenant d’un match
+- Réception de statistiques mises à jour d'un joueur depuis un match
