@@ -1,1 +1,18 @@
-spring.application.name=managefield
+spring:
+  config:
+    import: optional:file:.env[.properties],optional:file:./managefield/.env[.properties]
+  application:
+    name: managefield
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/fivefield}
+    username: ${DB_USERNAME:fivefield}
+    password: ${DB_PASSWORD:fivefield}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
