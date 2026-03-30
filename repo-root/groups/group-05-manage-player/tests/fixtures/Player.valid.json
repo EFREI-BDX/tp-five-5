@@ -1,0 +1,22 @@
+{
+  "id": "PLAYER-001",
+  "firstName": "Jean",
+  "lastName": "Dupont",
+  "email": "jean.dupont@example.com",
+  "phone": "+33612345678",
+  "gender": "homme",
+  "birthDate": "15/05/1990",
+  "height": 178.5,
+  "teamIds": ["TEAM-001", "TEAM-002"],
+  "statistics": {
+    "matchesPlayed": 42,
+    "goalsScored": 15,
+    "assists": 8,
+    "wins": 28,
+    "draws": 6,
+    "mvps": 5
+  },
+  "status": "actif",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-03-20T15:30:00Z"
+}

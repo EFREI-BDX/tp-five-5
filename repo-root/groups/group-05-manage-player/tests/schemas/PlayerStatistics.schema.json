@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "matchesPlayed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "goalsScored": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "assists": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "wins": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "draws": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "mvps": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": ["matchesPlayed", "goalsScored", "assists", "wins", "draws", "mvps"],
+  "additionalProperties": false
+}
