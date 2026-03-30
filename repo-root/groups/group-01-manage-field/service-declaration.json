@@ -28,14 +28,6 @@
       "auth": "ApiKeyAuth"
     },
     {
-      "path": "/v1/fields",
-      "method": "POST",
-      "operationId": "createField",
-      "requestSchema": "./openapi.yaml#/components/schemas/CreateFieldRequest",
-      "responseSchema": "./tests/schemas/field.schema.json",
-      "auth": "ApiKeyAuth"
-    },
-    {
       "path": "/v1/fields/available",
       "method": "GET",
       "operationId": "listAvailableFields",

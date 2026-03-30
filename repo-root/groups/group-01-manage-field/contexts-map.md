@@ -8,7 +8,6 @@ Source of truth for field metadata, reference statuses, reservations, and slot a
 
 - `GET /v1/field-statuses` - list field statuses
 - `GET /v1/reservation-statuses` - list reservation statuses
-- `POST /v1/fields` - create a field
 - `GET /v1/fields/available` - list fields available for a requested slot
 - `GET /v1/fields/{field_id}` - get one field
 - `PATCH /v1/fields/{field_id}/status` - change a field status

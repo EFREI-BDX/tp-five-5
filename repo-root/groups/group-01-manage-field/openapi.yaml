@@ -39,29 +39,6 @@ paths:
               schema:
                 $ref: './tests/schemas/reservation-status-list.schema.json'
 
-  /v1/fields:
-    post:
-      tags: [Fields]
-      summary: Create a field
-      operationId: createField
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateFieldRequest'
-      responses:
-        '201':
-          description: Field created
-          content:
-            application/json:
-              schema:
-                $ref: './tests/schemas/field.schema.json'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '409':
-          $ref: '#/components/responses/Conflict'
-
   /v1/fields/available:
     get:
       tags: [Fields]
@@ -236,18 +213,6 @@ components:
             $ref: '../../openapi/common/schemas.yaml#/components/schemas/ErrorResponse'
 
   schemas:
-    CreateFieldRequest:
-      type: object
-      properties:
-        name:
-          $ref: './tests/schemas/field-name.schema.json#/properties/name'
-        status_id:
-          $ref: './tests/schemas/id.schema.json#/properties/id'
-      required:
-        - name
-        - status_id
-      additionalProperties: false
-
     UpdateFieldStatusRequest:
       type: object
       properties:
