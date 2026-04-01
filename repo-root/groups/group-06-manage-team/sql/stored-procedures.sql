@@ -9,6 +9,8 @@ DROP PROCEDURE IF EXISTS fiveteam.teamPlayersCountCheck;
 
 DROP PROCEDURE IF EXISTS fiveteam.playerDisplayNameCheck;
 
+DROP FUNCTION IF EXISTS fiveteam.TeamStateToJavaLabel;
+
 DROP PROCEDURE IF EXISTS fiveteam.teamCreate;
 DROP PROCEDURE IF EXISTS fiveteam.teamDissolve;
 DROP PROCEDURE IF EXISTS fiveteam.teamRestore;
@@ -22,6 +24,12 @@ DROP PROCEDURE IF EXISTS fiveteam.playerUpdate;
 DROP PROCEDURE IF EXISTS fiveteam.playerDelete;
 DROP PROCEDURE IF EXISTS fiveteam.playerAssignTeam;
 DROP PROCEDURE IF EXISTS fiveteam.playerUnassignTeam;
+
+DROP PROCEDURE IF EXISTS fiveteam.teamGetAll;
+DROP PROCEDURE IF EXISTS fiveteam.teamGetById;
+DROP PROCEDURE IF EXISTS fiveteam.playerGetAll;
+DROP PROCEDURE IF EXISTS fiveteam.playerGetById;
+DROP PROCEDURE IF EXISTS fiveteam.playerGetByTeamId;
 
 DELIMITER //
 
@@ -117,6 +125,18 @@ BEGIN
     END IF;
 END //
 
+CREATE FUNCTION fiveteam.TeamStateToJavaLabel(_state CHAR(1))
+    RETURNS VARCHAR(20)
+    DETERMINISTIC
+BEGIN
+    RETURN CASE _state
+               WHEN 'A' THEN 'Active'
+               WHEN 'I' THEN 'Incomplète'
+               WHEN 'D' THEN 'Dissoute'
+               ELSE 'Incomplète'
+        END;
+END //
+
 CREATE PROCEDURE fiveteam.teamCreate(IN _id VARCHAR(36),
                                      IN _label VARCHAR(255),
                                      IN _tag VARCHAR(3),
@@ -161,12 +181,12 @@ BEGIN
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
-    IF (SELECT dissolutionDate FROM fiveteam.team WHERE id = _id) IS NOT NULL THEN
+    IF (SELECT dissolutionDate FROM fiveteam.team WHERE id = @id) IS NOT NULL THEN
         SET errorMessage_ = CONCAT('Team with id ', _id, ' is already dissolved');
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
-    SELECT creationDate INTO @creationDate FROM fiveteam.team WHERE id = _id;
+    SELECT creationDate INTO @creationDate FROM fiveteam.team WHERE id = @id;
     CALL fiveteam.teamDateCheck(@creationDate, _dissolutionDate, errorMessage_);
     UPDATE fiveteam.team
     SET dissolutionDate = _dissolutionDate,
@@ -460,6 +480,63 @@ BEGIN
           AND state = 'A';
     END IF;
 END //
+
+CREATE PROCEDURE fiveteam.teamGetAll()
+BEGIN
+    SELECT fiveteam.BinaryToUUID(team.id)            AS id,
+           team.label                                AS label,
+           team.tag                                  AS tag,
+           team.creationDate                         AS creationDate,
+           team.dissolutionDate                      AS dissolutionDate,
+           fiveteam.BinaryToUUID(team.idTeamLeader)  AS idTeamLeader,
+           fiveteam.TeamStateToJavaLabel(team.state) AS state
+    FROM fiveteam.team
+    ORDER BY team.creationDate DESC, team.label;
+END //
+
+CREATE PROCEDURE fiveteam.teamGetById(IN _id VARCHAR(36))
+BEGIN
+    SELECT fiveteam.BinaryToUUID(team.id)            AS id,
+           team.label                                AS label,
+           team.tag                                  AS tag,
+           team.creationDate                         AS creationDate,
+           team.dissolutionDate                      AS dissolutionDate,
+           fiveteam.BinaryToUUID(team.idTeamLeader)  AS idTeamLeader,
+           fiveteam.TeamStateToJavaLabel(team.state) AS state
+    FROM fiveteam.team
+    WHERE team.id = fiveteam.UUIDToBinary(_id)
+    LIMIT 1;
+END //
+
+CREATE PROCEDURE fiveteam.playerGetAll()
+BEGIN
+    SELECT fiveteam.BinaryToUUID(player.id)     AS id,
+           player.displayName                   AS displayName,
+           fiveteam.BinaryToUUID(player.idTeam) AS idTeam
+    FROM fiveteam.player
+    ORDER BY player.displayName;
+END //
+
+CREATE PROCEDURE fiveteam.playerGetById(IN _id VARCHAR(36))
+BEGIN
+    SELECT fiveteam.BinaryToUUID(player.id)     AS id,
+           player.displayName                   AS displayName,
+           fiveteam.BinaryToUUID(player.idTeam) AS idTeam
+    FROM fiveteam.player
+    WHERE player.id = fiveteam.UUIDToBinary(_id)
+    LIMIT 1;
+END //
+
+CREATE PROCEDURE fiveteam.playerGetByTeamId(IN _idTeam VARCHAR(36))
+BEGIN
+    SELECT fiveteam.BinaryToUUID(player.id)     AS id,
+           player.displayName                   AS displayName,
+           fiveteam.BinaryToUUID(player.idTeam) AS idTeam
+    FROM fiveteam.player
+    WHERE player.idTeam = fiveteam.UUIDToBinary(_idTeam)
+    ORDER BY player.displayName;
+END //
+
 DELIMITER ;
 
 GRANT EXECUTE ON PROCEDURE fiveteam.teamCreate TO 'jad_efrei_five_2526'@'%';
@@ -474,4 +551,9 @@ GRANT EXECUTE ON PROCEDURE fiveteam.playerUpdate TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerDelete TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerAssignTeam TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerUnassignTeam TO 'jad_efrei_five_2526'@'%';
-
+GRANT EXECUTE ON PROCEDURE fiveteam.teamGetAll TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.teamGetById TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.playerGetAll TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.playerGetById TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.playerGetByTeamId TO 'jad_efrei_five_2526'@'%';
+FLUSH PRIVILEGES;
