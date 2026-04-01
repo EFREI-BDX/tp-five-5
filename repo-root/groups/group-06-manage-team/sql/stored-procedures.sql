@@ -23,6 +23,11 @@ DROP PROCEDURE IF EXISTS fiveteam.playerDelete;
 DROP PROCEDURE IF EXISTS fiveteam.playerAssignTeam;
 DROP PROCEDURE IF EXISTS fiveteam.playerUnassignTeam;
 
+DROP PROCEDURE IF EXISTS fiveteam.teamGetAll;
+DROP PROCEDURE IF EXISTS fiveteam.teamGetById;
+DROP PROCEDURE IF EXISTS fiveteam.playerGetAll;
+DROP PROCEDURE IF EXISTS fiveteam.playerGetById;
+
 DELIMITER //
 
 CREATE FUNCTION fiveteam.BinaryToUUID(IN _id BINARY(16)) RETURNS VARCHAR(36)
@@ -460,6 +465,57 @@ BEGIN
           AND state = 'A';
     END IF;
 END //
+
+CREATE PROCEDURE fiveteam.teamGetAll()
+BEGIN
+    SELECT fiveteam.BinaryToUUID(team.id)           AS id,
+           team.label                               AS label,
+           team.tag                                 AS tag,
+           team.creationDate                        AS creationDate,
+           team.dissolutionDate                     AS dissolutionDate,
+           fiveteam.BinaryToUUID(team.idTeamLeader) AS idTeamLeader,
+           team.state                               AS state
+    FROM fiveteam.team
+    ORDER BY team.creationDate DESC, team.label;
+END //
+
+CREATE PROCEDURE fiveteam.teamGetById(
+    IN _id VARCHAR(36)
+)
+BEGIN
+    SELECT fiveteam.BinaryToUUID(team.id)           AS id,
+           team.label                               AS label,
+           team.tag                                 AS tag,
+           team.creationDate                        AS creationDate,
+           team.dissolutionDate                     AS dissolutionDate,
+           fiveteam.BinaryToUUID(team.idTeamLeader) AS idTeamLeader,
+           team.state                               AS state
+    FROM fiveteam.team
+    WHERE team.id = fiveteam.UUIDToBinary(_id)
+    LIMIT 1;
+END //
+
+CREATE PROCEDURE fiveteam.playerGetAll()
+BEGIN
+    SELECT fiveteam.BinaryToUUID(player.id)     AS id,
+           player.displayName                   AS displayName,
+           fiveteam.BinaryToUUID(player.idTeam) AS idTeam
+    FROM fiveteam.player
+    ORDER BY player.displayName;
+END //
+
+CREATE PROCEDURE fiveteam.playerGetById(
+    IN _id VARCHAR(36)
+)
+BEGIN
+    SELECT fiveteam.BinaryToUUID(player.id)     AS id,
+           player.displayName                   AS displayName,
+           fiveteam.BinaryToUUID(player.idTeam) AS idTeam
+    FROM fiveteam.player
+    WHERE player.id = fiveteam.UUIDToBinary(_id)
+    LIMIT 1;
+END //
+
 DELIMITER ;
 
 GRANT EXECUTE ON PROCEDURE fiveteam.teamCreate TO 'jad_efrei_five_2526'@'%';
@@ -474,4 +530,8 @@ GRANT EXECUTE ON PROCEDURE fiveteam.playerUpdate TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerDelete TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerAssignTeam TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerUnassignTeam TO 'jad_efrei_five_2526'@'%';
-
+GRANT EXECUTE ON PROCEDURE fiveteam.teamGetAll TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.teamGetById TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.playerGetAll TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.playerGetById TO 'jad_efrei_five_2526'@'%';
+FLUSH PRIVILEGES;
