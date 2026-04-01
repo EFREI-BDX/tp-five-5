@@ -17,16 +17,14 @@ import java.time.LocalDate;
 @NamedStoredProcedureQueries({
         @NamedStoredProcedureQuery(
                 name = "TeamEntity.teamGetAll",
-                procedureName = "fiveteam.teamGetAll",
-                resultSetMapping = "TeamResultSet"
+                procedureName = "fiveteam.teamGetAll"
         ),
         @NamedStoredProcedureQuery(
                 name = "TeamEntity.teamGetById",
                 procedureName = "fiveteam.teamGetById",
                 parameters = {
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class)
-                },
-                resultSetMapping = "TeamResultSet"
+                }
         ),
         @NamedStoredProcedureQuery(
                 name = "TeamEntity.teamCreate",
@@ -75,21 +73,6 @@ import java.time.LocalDate;
                 }
         )
 })
-@SqlResultSetMapping(
-        name = "TeamResultSet",
-        classes = @ConstructorResult(
-                targetClass = TeamEntity.class,
-                columns = {
-                        @ColumnResult(name = "id", type = String.class),
-                        @ColumnResult(name = "label", type = String.class),
-                        @ColumnResult(name = "tag", type = String.class),
-                        @ColumnResult(name = "creationDate", type = LocalDate.class),
-                        @ColumnResult(name = "dissolutionDate", type = LocalDate.class),
-                        @ColumnResult(name = "idTeamLeader", type = String.class),
-                        @ColumnResult(name = "state", type = String.class)
-                }
-        )
-)
 public class TeamEntity {
 
     @Id
@@ -115,4 +98,3 @@ public class TeamEntity {
     private String state;
 
 }
-

@@ -15,24 +15,21 @@ import lombok.Setter;
 @NamedStoredProcedureQueries({
         @NamedStoredProcedureQuery(
                 name = "PlayerEntity.playerGetAll",
-                procedureName = "fiveteam.playerGetAll",
-                resultSetMapping = "PlayerResultSet"
+                procedureName = "fiveteam.playerGetAll"
         ),
         @NamedStoredProcedureQuery(
                 name = "PlayerEntity.playerGetById",
                 procedureName = "fiveteam.playerGetById",
                 parameters = {
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class)
-                },
-                resultSetMapping = "PlayerResultSet"
+                }
         ),
         @NamedStoredProcedureQuery(
                 name = "PlayerEntity.playerGetByTeamId",
                 procedureName = "fiveteam.playerGetByTeamId",
                 parameters = {
                         @StoredProcedureParameter(mode = ParameterMode.IN, name = "_idTeam", type = String.class)
-                },
-                resultSetMapping = "PlayerResultSet"
+                }
         ),
         @NamedStoredProcedureQuery(
                 name = "PlayerEntity.playerCreate",
@@ -78,17 +75,6 @@ import lombok.Setter;
                 }
         )
 })
-@SqlResultSetMapping(
-        name = "PlayerResultSet",
-        classes = @ConstructorResult(
-                targetClass = PlayerEntity.class,
-                columns = {
-                        @ColumnResult(name = "id", type = String.class),
-                        @ColumnResult(name = "displayName", type = String.class),
-                        @ColumnResult(name = "idTeam", type = String.class)
-                }
-        )
-)
 public class PlayerEntity {
 
     @Id
@@ -102,4 +88,3 @@ public class PlayerEntity {
     private String idTeam;
 
 }
-
