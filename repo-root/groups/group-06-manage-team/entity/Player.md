@@ -5,7 +5,7 @@
 **Attributs**
 
 - id — *VO Id*
-- name — *VO Name*
+- displayName — *VO Name*
 - team - *Team*
 
 **Invariants**
