@@ -4,75 +4,16 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "team", schema = "fiveteam")
+@Immutable
+@Table(name = "TeamView", schema = "fiveteam")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@NamedStoredProcedureQueries({
-        @NamedStoredProcedureQuery(
-                name = "TeamEntity.teamGetAll",
-                procedureName = "fiveteam.teamGetAll"
-        ),
-        @NamedStoredProcedureQuery(
-                name = "TeamEntity.teamGetById",
-                procedureName = "fiveteam.teamGetById",
-                parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class)
-                }
-        ),
-        @NamedStoredProcedureQuery(
-                name = "TeamEntity.teamCreate",
-                procedureName = "fiveteam.teamCreate",
-                parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_label", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_tag", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_creationDate", type = LocalDate.class),
-                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "errorMessage_", type = String.class)
-                }
-        ),
-        @NamedStoredProcedureQuery(
-                name = "TeamEntity.teamDissolve",
-                procedureName = "fiveteam.teamDissolve",
-                parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_dissolutionDate", type = LocalDate.class),
-                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "errorMessage_", type = String.class)
-                }
-        ),
-        @NamedStoredProcedureQuery(
-                name = "TeamEntity.teamRestore",
-                procedureName = "fiveteam.teamRestore",
-                parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "errorMessage_", type = String.class)
-                }
-        ),
-        @NamedStoredProcedureQuery(
-                name = "TeamEntity.teamChangeName",
-                procedureName = "fiveteam.teamChangeName",
-                parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_newLabel", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "errorMessage_", type = String.class)
-                }
-        ),
-        @NamedStoredProcedureQuery(
-                name = "TeamEntity.teamChangeTag",
-                procedureName = "fiveteam.teamChangeTag",
-                parameters = {
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_id", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.IN, name = "_newTag", type = String.class),
-                        @StoredProcedureParameter(mode = ParameterMode.OUT, name = "errorMessage_", type = String.class)
-                }
-        )
-})
 public class TeamEntity {
 
     @Id
