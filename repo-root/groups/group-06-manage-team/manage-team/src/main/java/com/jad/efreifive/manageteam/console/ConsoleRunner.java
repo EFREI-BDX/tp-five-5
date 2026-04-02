@@ -36,7 +36,8 @@ public class ConsoleRunner {
     private ExecutorService executorService;
     private Scanner scanner;
 
-    public ConsoleRunner(final TeamService teamService, final PlayerService playerService, final ObjectMapper objectMapper) {
+    public ConsoleRunner(final TeamService teamService, final PlayerService playerService,
+                         final ObjectMapper objectMapper) {
         this.teamService = teamService;
         this.playerService = playerService;
         this.objectMapper = objectMapper;
@@ -90,7 +91,7 @@ public class ConsoleRunner {
             return;
         }
 
-        final String command = args.get(0).toLowerCase();
+        final String command = args.getFirst().toLowerCase();
 
         switch (command) {
             case "help" -> this.printHelp();
@@ -117,6 +118,71 @@ public class ConsoleRunner {
         }
     }
 
+    private List<String> tokenize(final String input) {
+        final List<String> tokens = new ArrayList<>();
+        final StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < input.length(); i++) {
+            final char c = input.charAt(i);
+            if (c == '"') {
+                inQuotes = !inQuotes;
+                continue;
+            }
+            if (Character.isWhitespace(c) && !inQuotes) {
+                if (!current.isEmpty()) {
+                    tokens.add(current.toString());
+                    current.setLength(0);
+                }
+                continue;
+            }
+            current.append(c);
+        }
+
+        if (!current.isEmpty()) {
+            tokens.add(current.toString());
+        }
+
+        return tokens;
+    }
+
+    private void printHelp() {
+        System.out.println("""
+                           Available commands:
+                             help
+                             quit | exit
+                           
+                             team-list
+                             team-get <teamId>
+                             team-create <id> <label> <tag> <creationDate(yyyy-MM-dd)>
+                             team-dissolve <id> <dissolutionDate(yyyy-MM-dd)>
+                             team-restore <id>
+                             team-rename <id> <newLabel>
+                             team-retag <id> <newTag>
+                           
+                             player-list
+                             player-get <playerId>
+                             player-list-by-team <teamId>
+                             player-create <id> <displayName>
+                             player-update <id> <displayName>
+                             player-delete <id>
+                             player-assign <playerId> <teamId>
+                             player-unassign <playerId>
+                           
+                           Tip: use quotes for values with spaces.
+                             team-create 11111111-2222-3333-4444-555555555555 "Equipe Test" TST 2026-04-02
+                             player-create 22222222-3333-4444-5555-666666666666 "Player Test\"""");
+    }
+
+    private void printPretty(final Object value) {
+        try {
+            System.out.println(this.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(value));
+        } catch (final JsonProcessingException exception) {
+            ConsoleRunner.log.warn("Pretty print failed", exception);
+            System.out.println(value);
+        }
+    }
+
     private void teamGet(final List<String> args) {
         this.requireArgs(args, 2, "team-get <teamId>");
         final TeamDto dto = this.teamService.findById(UUID.fromString(args.get(1)));
@@ -130,7 +196,7 @@ public class ConsoleRunner {
                 args.get(2),
                 args.get(3),
                 LocalDate.parse(args.get(4))
-        );
+                               );
         System.out.println("OK");
     }
 
@@ -139,7 +205,7 @@ public class ConsoleRunner {
         this.teamService.dissolve(
                 UUID.fromString(args.get(1)),
                 LocalDate.parse(args.get(2))
-        );
+                                 );
         System.out.println("OK");
     }
 
@@ -202,70 +268,9 @@ public class ConsoleRunner {
         System.out.println("OK");
     }
 
-    private void printHelp() {
-        System.out.println("Available commands:\n"
-                + "  help\n"
-                + "  quit | exit\n\n"
-                + "  team-list\n"
-                + "  team-get <teamId>\n"
-                + "  team-create <id> <label> <tag> <creationDate(yyyy-MM-dd)>\n"
-                + "  team-dissolve <id> <dissolutionDate(yyyy-MM-dd)>\n"
-                + "  team-restore <id>\n"
-                + "  team-rename <id> <newLabel>\n"
-                + "  team-retag <id> <newTag>\n\n"
-                + "  player-list\n"
-                + "  player-get <playerId>\n"
-                + "  player-list-by-team <teamId>\n"
-                + "  player-create <id> <displayName>\n"
-                + "  player-update <id> <displayName>\n"
-                + "  player-delete <id>\n"
-                + "  player-assign <playerId> <teamId>\n"
-                + "  player-unassign <playerId>\n\n"
-                + "Tip: use quotes for values with spaces.\n"
-                + "  team-create 11111111-2222-3333-4444-555555555555 \"Equipe Test\" TST 2026-04-02\n"
-                + "  player-create 22222222-3333-4444-5555-666666666666 \"Player Test\"");
-    }
-
     private void requireArgs(final List<String> args, final int expected, final String usage) {
         if (args.size() < expected) {
             throw new IllegalArgumentException("Usage: " + usage);
-        }
-    }
-
-    private List<String> tokenize(final String input) {
-        final List<String> tokens = new ArrayList<>();
-        final StringBuilder current = new StringBuilder();
-        boolean inQuotes = false;
-
-        for (int i = 0; i < input.length(); i++) {
-            final char c = input.charAt(i);
-            if (c == '"') {
-                inQuotes = !inQuotes;
-                continue;
-            }
-            if (Character.isWhitespace(c) && !inQuotes) {
-                if (!current.isEmpty()) {
-                    tokens.add(current.toString());
-                    current.setLength(0);
-                }
-                continue;
-            }
-            current.append(c);
-        }
-
-        if (!current.isEmpty()) {
-            tokens.add(current.toString());
-        }
-
-        return tokens;
-    }
-
-    private void printPretty(final Object value) {
-        try {
-            System.out.println(this.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(value));
-        } catch (final JsonProcessingException exception) {
-            ConsoleRunner.log.warn("Pretty print failed", exception);
-            System.out.println(String.valueOf(value));
         }
     }
 

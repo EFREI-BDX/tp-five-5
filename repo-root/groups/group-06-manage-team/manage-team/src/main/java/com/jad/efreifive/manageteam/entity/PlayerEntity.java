@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
+@SuppressWarnings("DefaultAnnotationParam")
 @Entity
 @Immutable
 @Table(name = "PlayerView", schema = "fiveteam")
