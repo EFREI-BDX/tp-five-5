@@ -7,14 +7,12 @@
 - id — *VO Id*
 - tag — *VO Tag*
 - label — *VO Label*
-- teamState — *VO TeamState*
 
 **Invariants**
 
 - id doit être non vide
 - tag doit être non vide
 - label doit être non vide
-- state doit être non vide
 
 **Format JSON attendu**
 
