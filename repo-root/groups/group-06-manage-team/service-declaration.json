@@ -1,0 +1,83 @@
+{
+  "serviceId": "groupe-06-manage-team",
+  "name": "Manage Team",
+  "version": "1.0.0",
+  "description": "Service responsable de la gestion des équipes, y compris la création d'équipes, l'ajout et la suppression de membres",
+  "owner": {
+    "team": "groupe-06-manage-team",
+    "contact": "jeanaymeric@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "path": "groups/group-06-manage-team"
+  },
+  "endpoints": [
+    {
+      "path": "/teams",
+      "method": "POST",
+      "operationId": "createTeam",
+      "description": "Créer une nouvelle équipe",
+      "requestSchema": "./openapi.yaml#/components/schemas/CreateTeamRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/CreateTeamResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/teams/{teamId}/members",
+      "method": "POST",
+      "operationId": "addTeamMember",
+      "description": "Ajouter un membre à une équipe",
+      "requestSchema": "./openapi.yaml#/components/schemas/AddTeamMemberRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/AddTeamMemberResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/teams/{teamId}/members/{memberId}",
+      "method": "DELETE",
+      "operationId": "removeTeamMember",
+      "description": "Supprimer un membre d'une équipe",
+      "auth": "ApiKeyAuth",
+      "responseSchema": "./openapi.yaml#/components/schemas/RemoveTeamMemberResponse"
+    },
+    {
+      "path": "/teams/{teamId}",
+      "method": "GET",
+      "operationId": "getTeam",
+      "description": "Récupérer les détails d'une équipe",
+      "responseSchema": "./openapi.yaml#/components/schemas/TeamDetailsResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/teams/{teamId}/members",
+      "method": "GET",
+      "operationId": "getTeamMembers",
+      "description": "Récupérer la liste des membres d'une équipe",
+      "responseSchema": "./openapi.yaml#/components/schemas/TeamMembersResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/teams",
+      "method": "GET",
+      "operationId": "listTeams",
+      "description": "Récupérer la liste de toutes les équipes",
+      "responseSchema": "./openapi.yaml#/components/schemas/ListTeamsResponse",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/teams/{teamId}",
+      "method": "DELETE",
+      "operationId": "deleteTeam",
+      "description": "Supprimer une équipe",
+      "auth": "ApiKeyAuth",
+      "responseSchema": "./openapi.yaml#/components/schemas/DeleteTeamResponse"
+    },
+    {
+      "path": "/teams/{teamId}",
+      "method": "UPDATE",
+      "operationId": "updateTeam",
+      "description": "Mettre à jour les informations d'une équipe",
+      "requestSchema": "./openapi.yaml#/components/schemas/UpdateTeamRequest",
+      "responseSchema": "./openapi.yaml#/components/schemas/UpdateTeamResponse",
+      "auth": "ApiKeyAuth"
+    }
+  ]
+}

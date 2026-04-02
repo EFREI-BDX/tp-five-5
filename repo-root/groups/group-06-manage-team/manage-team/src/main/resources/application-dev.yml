@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiveteam
+    username: jad_efrei_five_2526
+    password: ${MANAGE_TEAM_DB_PASSWORD}

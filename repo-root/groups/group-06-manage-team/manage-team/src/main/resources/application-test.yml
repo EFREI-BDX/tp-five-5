@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiveteam-test
+    username: jad_efrei_five_2526
+    password: ${MANAGE_TEAM_DB_PASSWORD}
+    hikari:
+      initialization-fail-timeout: 0
+
+app:
+  console:
+    enabled: false
+
