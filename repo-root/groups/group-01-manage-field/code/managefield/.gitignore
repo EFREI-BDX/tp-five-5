@@ -35,3 +35,5 @@ build/
 
 .m2
 .mvn
+/.mvn/
+/.m2/
