@@ -16,3 +16,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  jackson:
+    default-property-inclusion: non_null
+
+managefield:
+  security:
+    api-key: ${API_KEY:managefield-dev-token}
