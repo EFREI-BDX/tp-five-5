@@ -34,6 +34,4 @@ build/
 .vscode/
 
 .m2
-.mvn
-/.mvn/
 /.m2/

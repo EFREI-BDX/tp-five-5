@@ -2,11 +2,11 @@ package com.jad.efreifive.managefield.repository;
 
 import com.jad.efreifive.managefield.entity.ReservationEntity;
 import com.jad.efreifive.managefield.vo.Id;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.jad.efreifive.managefield.vo.TimeSlot;
 
-import java.util.Optional;
+public interface ReservationEntityRepository {
 
-public interface ReservationEntityRepository extends JpaRepository<ReservationEntity, Id> {
+    ReservationEntity create(Id fieldId, Id statusId, TimeSlot timeSlot);
 
-    Optional<ReservationEntity> findByIdAndFieldId(Id id, Id fieldId);
+    ReservationEntity updateStatus(Id fieldId, Id reservationId, Id statusId);
 }

@@ -4,7 +4,7 @@ info:
   version: 2.0.0
   description: HTTP contract for fields, field statuses, reservations, and field availability.
 servers:
-  - url: https://api.example.org
+  - url: http://localhost:8080
     description: Base URL
 
 tags:
