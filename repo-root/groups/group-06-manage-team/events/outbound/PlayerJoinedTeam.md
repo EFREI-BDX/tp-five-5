@@ -1,15 +1,15 @@
-# PlayerLeftTeam
+# PlayerJoinedTeam
 
 **Résumé métier**
 
-Cet évènement est émis lorsqu'un joueur quitte une équipe.
+Cet évènement est émis lorsqu'un joueur rejoint une équipe.
 
-Il permet d'indiquer qu'un joueur identifié par son id a quitté une équipe identifiée par son id.
+Il permet d'indiquer qu'un joueur identifié par son id a été ajouté à une équipe identifiée par son id.
 
 **Déclencheur**
 
-- Une commande ou une action métier de retrait d'un joueur d'une équipe est validée.
-- Le retrait est accepté uniquement si les invariants métier de l'équipe sont respectés.
+- Une commande ou une action métier d'ajout d'un joueur dans une équipe est validée.
+- L'ajout est accepté uniquement si les invariants métier de l'équipe sont respectés.
 
 **Payload JSON**
 
@@ -24,7 +24,7 @@ Il permet d'indiquer qu'un joueur identifié par son id a quitté une équipe id
 - playerId doit être un UUID valide
 - playerId doit correspondre à un joueur existant si cette règle est retenue
 - teamId doit correspondre à une équipe existante si cette règle est retenue
-- le joueur doit appartenir à l'équipe avant son retrait si cette règle est retenue
+- le joueur ne doit pas déjà appartenir à l'équipe si cette règle est retenue
 
 **Format JSON attendu**
 
@@ -35,20 +35,17 @@ Il permet d'indiquer qu'un joueur identifié par son id a quitté une équipe id
 }
 ```
 
-- **Schéma** : `tests/schemas/PlayerLeftTeam.schema.json`
-- **Fixture valide** : `tests/fixtures/PlayerLeftTeam.valid.json`
-- **Fixture invalide** : `tests/fixtures/PlayerLeftTeam.invalid.json`
+- **Schéma** : `tests/schemas/PlayerJoinedTeam.schema.json`
+- **Fixture valide** : `tests/fixtures/PlayerJoinedTeam.valid.json`
+- **Fixture invalide** : `tests/fixtures/PlayerJoinedTeam.invalid.json`
 
 **Producteur**
 
 - Aggregate / service métier de gestion d'équipe
 
-**Consommateurs possibles**
+**Consommateurs**
 
-- journalisation métier
-- projection de lecture
-- audit
-- synchronisation avec un autre système
+- 05-manage-player
 
 **Tests minimaux attendus**
 
@@ -59,6 +56,6 @@ Il permet d'indiquer qu'un joueur identifié par son id a quitté une équipe id
 
 **Remarques**
 
-Cet évènement ne représente que le fait métier "un joueur a quitté une équipe".
+Cet évènement ne représente que le fait métier "un joueur a rejoint une équipe".
 Il ne contient volontairement que les données utiles à ce fait.
 

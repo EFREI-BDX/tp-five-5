@@ -36,12 +36,9 @@ Il permet d'indiquer qu'une équipe identifiée par son id n'existe plus dans le
 
 - Aggregate / service métier de gestion d'équipe
 
-**Consommateurs possibles**
+**Consommateurs**
 
-- journalisation métier
-- projection de lecture
-- audit
-- synchronisation avec un autre système
+- 02-manage-match
 
 **Tests minimaux attendus**
 

@@ -41,12 +41,10 @@ Il permet d'indiquer qu'une équipe identifiée par son id a été renommée ave
 
 - Aggregate / service métier de gestion d'équipe
 
-**Consommateurs possibles**
+**Consommateurs**
 
-- journalisation métier
-- projection de lecture
-- audit
-- synchronisation avec un autre système
+- 02-manage-match
+- 05-manage-player
 
 **Tests minimaux attendus**
 
