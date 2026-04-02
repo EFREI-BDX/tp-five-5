@@ -534,4 +534,5 @@ GRANT EXECUTE ON PROCEDURE fiveteam.teamGetAll TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.teamGetById TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerGetAll TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerGetById TO 'jad_efrei_five_2526'@'%';
+
 FLUSH PRIVILEGES;
