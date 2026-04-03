@@ -1,13 +1,18 @@
 package fr.efreifive.manageplayer.service;
 
+import fr.efreifive.manageplayer.dto.CreatePlayerRequest;
+import fr.efreifive.manageplayer.dto.CreatePlayerResponse;
+import fr.efreifive.manageplayer.dto.DeletePlayerResponse;
 import fr.efreifive.manageplayer.dto.PlayerDto;
-import fr.efreifive.manageplayer.dto.PlayerRequest;
+import fr.efreifive.manageplayer.dto.PlayerStatisticsDto;
+import fr.efreifive.manageplayer.dto.UpdatePlayerRequest;
+import fr.efreifive.manageplayer.dto.UpdatePlayerResponse;
+import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsRequest;
+import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsResponse;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,22 +24,12 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class PlayerService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^(\\+33|0)[1-9]([0-9]{8}|[0-9\\s.\\-]{8,})$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9\\s\\-().]{7,20}$");
     private static final DateTimeFormatter BIRTH_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final String ACTIVE_STATUS = "actif";
+    private static final String DELETED_STATUS = "supprimé";
 
     private final ConcurrentHashMap<UUID, PlayerDto> players = new ConcurrentHashMap<>();
-    private final TeamService teamService;
-
-    public PlayerService(TeamService teamService) {
-        this.teamService = teamService;
-    }
-
-    public List<PlayerDto> findAll() {
-        return players.values().stream()
-            .sorted(Comparator.comparing(PlayerDto::lastName)
-                .thenComparing(PlayerDto::firstName))
-            .toList();
-    }
 
     public PlayerDto findById(UUID id) {
         PlayerDto player = players.get(id);
@@ -44,46 +39,109 @@ public class PlayerService {
         return player;
     }
 
-    public PlayerDto create(PlayerRequest request) {
+    public CreatePlayerResponse create(CreatePlayerRequest request) {
+        String now = now();
         PlayerDto player = new PlayerDto(
             UUID.randomUUID(),
             validateName(request.firstName(), "First name"),
             validateName(request.lastName(), "Last name"),
             validateEmail(request.email()),
             validatePhone(request.phone()),
-            validateGender(request.gender()),
             validateBirthDate(request.birthDate()),
+            validateGender(request.gender()),
             validateHeight(request.height()),
-            validateTeamIds(request.teamIds())
+            ACTIVE_STATUS,
+            zeroStatistics(),
+            List.of(),
+            now,
+            now
         );
         players.put(player.id(), player);
-        return player;
+        return new CreatePlayerResponse(player.id(), player.status(), player.createdAt());
     }
 
-    public PlayerDto update(UUID id, PlayerRequest request) {
-        findById(id);
+    public UpdatePlayerResponse update(UUID id, UpdatePlayerRequest request) {
+        PlayerDto existingPlayer = requireActivePlayer(id);
+        String updatedAt = now();
+
         PlayerDto player = new PlayerDto(
             id,
-            validateName(request.firstName(), "First name"),
-            validateName(request.lastName(), "Last name"),
-            validateEmail(request.email()),
-            validatePhone(request.phone()),
-            validateGender(request.gender()),
-            validateBirthDate(request.birthDate()),
-            validateHeight(request.height()),
-            validateTeamIds(request.teamIds())
+            request.firstName() != null ? validateName(request.firstName(), "First name") : existingPlayer.firstName(),
+            request.lastName() != null ? validateName(request.lastName(), "Last name") : existingPlayer.lastName(),
+            request.email() != null ? validateEmail(request.email()) : existingPlayer.email(),
+            request.phone() != null ? validatePhone(request.phone()) : existingPlayer.phone(),
+            request.birthDate() != null ? validateBirthDate(request.birthDate()) : existingPlayer.birthDate(),
+            request.gender() != null ? validateGender(request.gender()) : existingPlayer.gender(),
+            request.height() != null ? validateHeight(request.height()) : existingPlayer.height(),
+            existingPlayer.status(),
+            existingPlayer.statistics(),
+            existingPlayer.teamIds(),
+            existingPlayer.createdAt(),
+            updatedAt
         );
         players.put(id, player);
+        return new UpdatePlayerResponse(player.id(), player.updatedAt());
+    }
+
+    public DeletePlayerResponse delete(UUID id) {
+        PlayerDto existingPlayer = findById(id);
+        if (DELETED_STATUS.equals(existingPlayer.status())) {
+            return new DeletePlayerResponse(existingPlayer.id(), existingPlayer.status(), existingPlayer.updatedAt());
+        }
+
+        PlayerDto deletedPlayer = new PlayerDto(
+            existingPlayer.id(),
+            existingPlayer.firstName(),
+            existingPlayer.lastName(),
+            existingPlayer.email(),
+            existingPlayer.phone(),
+            existingPlayer.birthDate(),
+            existingPlayer.gender(),
+            existingPlayer.height(),
+            DELETED_STATUS,
+            existingPlayer.statistics(),
+            existingPlayer.teamIds(),
+            existingPlayer.createdAt(),
+            now()
+        );
+        players.put(id, deletedPlayer);
+        return new DeletePlayerResponse(deletedPlayer.id(), deletedPlayer.status(), deletedPlayer.updatedAt());
+    }
+
+    public UpdatePlayerStatisticsResponse updateStatistics(UUID id, UpdatePlayerStatisticsRequest request) {
+        PlayerDto existingPlayer = requireActivePlayer(id);
+        PlayerStatisticsDto statistics = validateStatistics(
+            request.matchesPlayed(),
+            request.goalsScored(),
+            request.assists(),
+            request.wins()
+        );
+
+        PlayerDto updatedPlayer = new PlayerDto(
+            existingPlayer.id(),
+            existingPlayer.firstName(),
+            existingPlayer.lastName(),
+            existingPlayer.email(),
+            existingPlayer.phone(),
+            existingPlayer.birthDate(),
+            existingPlayer.gender(),
+            existingPlayer.height(),
+            existingPlayer.status(),
+            statistics,
+            existingPlayer.teamIds(),
+            existingPlayer.createdAt(),
+            now()
+        );
+        players.put(id, updatedPlayer);
+        return new UpdatePlayerStatisticsResponse(updatedPlayer.id(), updatedPlayer.statistics(), updatedPlayer.updatedAt());
+    }
+
+    private PlayerDto requireActivePlayer(UUID id) {
+        PlayerDto player = findById(id);
+        if (DELETED_STATUS.equals(player.status())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Deleted player cannot be modified");
+        }
         return player;
-    }
-
-    public void delete(UUID id) {
-        findById(id);
-        players.remove(id);
-    }
-
-    public boolean exists(UUID id) {
-        return players.containsKey(id);
     }
 
     private String validateName(String value, String fieldLabel) {
@@ -156,18 +214,24 @@ public class PlayerService {
         return height;
     }
 
-    private List<UUID> validateTeamIds(List<UUID> teamIds) {
-        if (teamIds == null) {
-            return List.of();
+    private PlayerStatisticsDto validateStatistics(Integer matchesPlayed, Integer goalsScored, Integer assists, Integer wins) {
+        if (matchesPlayed == null || goalsScored == null || assists == null || wins == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Statistics fields must not be null");
         }
-        if (teamIds.size() != new HashSet<>(teamIds).size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team ids must be unique");
+        if (matchesPlayed < 0 || goalsScored < 0 || assists < 0 || wins < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Statistics fields must be greater than or equal to 0");
         }
-        for (UUID teamId : teamIds) {
-            if (!teamService.exists(teamId)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Team with id " + teamId + " not found");
-            }
+        if (wins > matchesPlayed) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wins cannot be greater than matches played");
         }
-        return List.copyOf(new ArrayList<>(teamIds));
+        return new PlayerStatisticsDto(matchesPlayed, goalsScored, assists, wins);
+    }
+
+    private PlayerStatisticsDto zeroStatistics() {
+        return new PlayerStatisticsDto(0, 0, 0, 0);
+    }
+
+    private String now() {
+        return Instant.now().toString();
     }
 }

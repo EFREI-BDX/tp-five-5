@@ -9,9 +9,13 @@ public record PlayerDto(
     String lastName,
     String email,
     String phone,
-    String gender,
     String birthDate,
+    String gender,
     double height,
-    List<UUID> teamIds
+    String status,
+    PlayerStatisticsDto statistics,
+    List<String> teamIds,
+    String createdAt,
+    String updatedAt
 ) {
 }
