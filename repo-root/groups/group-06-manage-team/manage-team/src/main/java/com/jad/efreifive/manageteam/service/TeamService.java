@@ -104,8 +104,8 @@ class TeamService implements ITeamService, ITeamServiceForTest {
             }
 
             case TeamCommand.TeamAssignPlayerCommand teamAssignPlayerCommand -> {
-                this.playerService.assignTeam(new Id(teamAssignPlayerCommand.id()),
-                                              new Id(teamAssignPlayerCommand.playerId()));
+                this.playerService.assignTeam(new Id(teamAssignPlayerCommand.playerId()),
+                                              new Id(teamAssignPlayerCommand.id()));
                 yield TeamCommandResult.successWithPayLoad(this.findById(teamAssignPlayerCommand.id()));
             }
 
@@ -125,6 +125,11 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         TeamService.log.info("Team created successfully: id={}", id.value());
         this.teamEventOutboundService.notifyTeamCreated(this.findById(id));
         return id;
+    }
+
+    @Transactional(readOnly = true)
+    TeamDto findById(Id id) {
+        return this.findById(id.value());
     }
 
     @Transactional
@@ -159,11 +164,6 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         this.checkSuccessOrThrow(this.teamRepository.restore(id), "Team restore");
         TeamService.log.info("Team restored successfully: id={}", id);
         this.teamEventOutboundService.notifyTeamRestore(this.findById(id));
-    }
-
-    @Transactional(readOnly = true)
-    TeamDto findById(Id id) {
-        return this.findById(id.value());
     }
 
     @Transactional

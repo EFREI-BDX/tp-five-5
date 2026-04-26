@@ -16,9 +16,10 @@ CREATE TABLE fiveteam.team
 
 CREATE TABLE fiveteam.player
 (
-    id          binary(16)   not null primary key,
-    displayName varchar(255) not null,
-    idTeam      binary(16)   null,
+    id        binary(16)   not null primary key,
+    firstName varchar(255) not null,
+    lastName  varchar(255) not null,
+    idTeam    binary(16)   null,
     foreign key (idTeam) references fiveteam.team (id)
 );
 

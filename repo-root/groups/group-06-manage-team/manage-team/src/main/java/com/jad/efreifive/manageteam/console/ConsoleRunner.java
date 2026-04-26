@@ -6,10 +6,7 @@ import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.ITeamServiceForTest;
 import com.jad.efreifive.manageteam.service.PlayerService;
-import com.jad.efreifive.manageteam.valueobject.Id;
-import com.jad.efreifive.manageteam.valueobject.Label;
-import com.jad.efreifive.manageteam.valueobject.Period;
-import com.jad.efreifive.manageteam.valueobject.Tag;
+import com.jad.efreifive.manageteam.valueobject.*;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -238,20 +235,20 @@ public class ConsoleRunner {
     }
 
     private void playerCreate(final List<String> args) {
-        this.requireArgs(args, 3, "player-create <id> <displayName>");
-        this.playerService.create(UUID.fromString(args.get(1)), args.get(2));
+        this.requireArgs(args, 4, "player-create <id><firstName> <lastName>");
+        this.playerService.create(Id.of(args.get(1)), new Name(args.get(2), args.get(3)));
         System.out.println("OK");
     }
 
     private void playerUpdate(final List<String> args) {
-        this.requireArgs(args, 3, "player-update <id> <displayName>");
-        this.playerService.update(UUID.fromString(args.get(1)), args.get(2));
+        this.requireArgs(args, 4, "player-update <id> <firstName> <lastName>");
+        this.playerService.update(Id.of(args.get(1)), new Name(args.get(2), args.get(3)));
         System.out.println("OK");
     }
 
     private void playerDelete(final List<String> args) {
         this.requireArgs(args, 2, "player-delete <id>");
-        this.playerService.delete(UUID.fromString(args.get(1)));
+        this.playerService.delete(Id.of(args.get(1)));
         System.out.println("OK");
     }
 

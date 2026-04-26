@@ -7,7 +7,7 @@ DROP PROCEDURE IF EXISTS fiveteam.teamDateCheck;
 DROP PROCEDURE IF EXISTS fiveteam.teamLeaderCheck;
 DROP PROCEDURE IF EXISTS fiveteam.teamPlayersCountCheck;
 
-DROP PROCEDURE IF EXISTS fiveteam.playerDisplayNameCheck;
+DROP PROCEDURE IF EXISTS fiveteam.playerNameCheck;
 
 DROP FUNCTION IF EXISTS fiveteam.TeamStateToJavaLabel;
 
@@ -112,14 +112,20 @@ BEGIN
     END IF;
 END //
 
-CREATE PROCEDURE fiveteam.playerDisplayNameCheck(IN _displayName VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+CREATE PROCEDURE fiveteam.playerNameCheck(IN _firstName VARCHAR(255), IN _lastName VARCHAR(255),
+                                          OUT errorMessage_ VARCHAR(500))
 proc:
 BEGIN
     SET errorMessage_ = '';
-    IF _displayName IS NULL OR _displayName = '' THEN
-        SET errorMessage_ = 'PDEMP:Display name must not be empty';
+    IF _firstName IS NULL OR _firstName = '' THEN
+        SET errorMessage_ = 'PDEMP:First name must not be empty';
         LEAVE proc;
     END IF;
+    IF _lastName IS NULL OR _lastName = '' THEN
+        SET errorMessage_ = 'PDEMP:Last name must not be empty';
+        LEAVE proc;
+    END IF;
+
 END //
 
 CREATE FUNCTION fiveteam.TeamStateToJavaLabel(_state CHAR(1))
@@ -163,7 +169,7 @@ BEGIN
     END IF;
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE label = _label) > 0 THEN
-        SET errorMessage_ =  CONCAT('TALXT:A team with label ', _label, ' already exists');
+        SET errorMessage_ = CONCAT('TALXT:A team with label ', _label, ' already exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -393,9 +399,10 @@ BEGIN
     WHILE i < nbPlayers
         DO
             SET @id = fiveteam.UUIDToBinary(JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].id'))));
-            SET @displayName = JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].displayName')));
-            INSERT INTO fiveteam.player (id, displayName, idTeam)
-            VALUES (@id, @displayName, NULL);
+            SET @firstName = JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].firstName')));
+            SET @lastName = JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].lastName')));
+            INSERT INTO fiveteam.player (id, firstName, lastName, idTeam)
+            VALUES (@id, @firstName, @lastName, NULL);
             SET i = i + 1;
         END WHILE;
     COMMIT;
@@ -427,16 +434,19 @@ BEGIN
     WHILE i < nbPlayers
         DO
             SET @id = fiveteam.UUIDToBinary(JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].id'))));
-            SET @displayName = JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].displayName')));
+            SET @firstName = JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].firstName')));
+            SET @lastName = JSON_UNQUOTE(JSON_EXTRACT(_playersJSON, CONCAT('$[', i, '].lastName')));
             UPDATE fiveteam.player
-            SET displayName = @displayName
+            SET firstName = @firstName,
+                lastName  = @lastName
             WHERE id = @id;
             SET i = i + 1;
         END WHILE;
     COMMIT;
 END //
 
-CREATE PROCEDURE fiveteam.playerCreate(IN _id VARCHAR(36), IN _displayName VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+CREATE PROCEDURE fiveteam.playerCreate(IN _id VARCHAR(36), IN _firstName VARCHAR(255), IN _lastName VARCHAR(255),
+                                       OUT errorMessage_ VARCHAR(500))
 proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -454,18 +464,19 @@ BEGIN
         LEAVE proc;
     END IF;
 
-    CALL fiveteam.playerDisplayNameCheck(_displayName, errorMessage_);
+    CALL fiveteam.playerNameCheck(_firstName, _lastName, errorMessage_);
     IF errorMessage_ != '' THEN
         ROLLBACK;
         LEAVE proc;
     END IF;
 
-    INSERT INTO fiveteam.player (id, displayName, idTeam)
-    VALUES (@id, _displayName, NULL);
+    INSERT INTO fiveteam.player (id, firstName, lastName, idTeam)
+    VALUES (@id, _firstName, _lastName, NULL);
     COMMIT;
 END //
 
-CREATE PROCEDURE fiveteam.playerUpdate(IN _id VARCHAR(36), IN _displayName VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+CREATE PROCEDURE fiveteam.playerUpdate(IN _id VARCHAR(36), IN _firstName VARCHAR(255), IN _lastName VARCHAR(255),
+                                       OUT errorMessage_ VARCHAR(500))
 proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -483,14 +494,15 @@ BEGIN
         LEAVE proc;
     END IF;
 
-    CALL fiveteam.playerDisplayNameCheck(_displayName, errorMessage_);
+    CALL fiveteam.playerNameCheck(_firstName, _lastName, errorMessage_);
     IF errorMessage_ != '' THEN
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     UPDATE fiveteam.player
-    SET displayName = _displayName
+    SET _firstName = _firstName,
+        _lastName  = _lastName
     WHERE id = @id;
     COMMIT;
 END //
@@ -635,16 +647,18 @@ END //
 CREATE PROCEDURE fiveteam.playerGetAll()
 BEGIN
     SELECT fiveteam.BinaryToUUID(player.id)     AS id,
-           player.displayName                   AS displayName,
+           player.firstName                     AS firstName,
+           player.lastName                      AS lastName,
            fiveteam.BinaryToUUID(player.idTeam) AS idTeam
     FROM fiveteam.player
-    ORDER BY player.displayName;
+    ORDER BY player.firstName, player.lastName;
 END //
 
 CREATE PROCEDURE fiveteam.playerGetById(IN _id VARCHAR(36))
 BEGIN
     SELECT fiveteam.BinaryToUUID(player.id)     AS id,
-           player.displayName                   AS displayName,
+           player.firstName                     AS firstName,
+           player.lastName                      AS lastName,
            fiveteam.BinaryToUUID(player.idTeam) AS idTeam
     FROM fiveteam.player
     WHERE player.id = fiveteam.UUIDToBinary(_id)
@@ -654,11 +668,12 @@ END //
 CREATE PROCEDURE fiveteam.playerGetByTeamId(IN _idTeam VARCHAR(36))
 BEGIN
     SELECT fiveteam.BinaryToUUID(player.id)     AS id,
-           player.displayName                   AS displayName,
+           player.firstName                     AS firstName,
+           player.lastName                      AS lastName,
            fiveteam.BinaryToUUID(player.idTeam) AS idTeam
     FROM fiveteam.player
     WHERE player.idTeam = fiveteam.UUIDToBinary(_idTeam)
-    ORDER BY player.displayName;
+    ORDER BY player.firstName, player.lastName;
 END //
 
 DELIMITER ;

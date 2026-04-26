@@ -5,6 +5,7 @@ import com.jad.efreifive.manageteam.mapper.PlayerMapper;
 import com.jad.efreifive.manageteam.repository.PlayerRepository;
 import com.jad.efreifive.manageteam.repository.result.PersistenceOperationResult;
 import com.jad.efreifive.manageteam.valueobject.Id;
+import com.jad.efreifive.manageteam.valueobject.Name;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,9 +57,9 @@ public class PlayerService {
     }
 
     @Transactional
-    public void create(UUID id, String displayName) {
+    public void create(final Id id, final Name displayName) {
         PlayerService.log.info("Creating player: id={}, displayName={}", id, displayName);
-        this.assertSuccess(this.playerRepository.create(id.toString(), displayName), "Player create failed");
+        this.assertSuccess(this.playerRepository.create(id, displayName), "Player create failed");
         PlayerService.log.info("Player created successfully: id={}", id);
     }
 
@@ -71,23 +72,23 @@ public class PlayerService {
     }
 
     @Transactional
-    public void update(UUID id, String displayName) {
+    public void update(final Id id, final Name displayName) {
         PlayerService.log.info("Updating player: id={}, displayName={}", id, displayName);
-        this.assertSuccess(this.playerRepository.update(id.toString(), displayName), "Player update failed");
+        this.assertSuccess(this.playerRepository.update(id, displayName), "Player update failed");
         PlayerService.log.info("Player updated successfully: id={}", id);
     }
 
     @Transactional
-    public void delete(UUID id) {
+    public void delete(final Id id) {
         PlayerService.log.info("Deleting player: id={}", id);
-        this.assertSuccess(this.playerRepository.delete(id.toString()), "Player delete failed");
+        this.assertSuccess(this.playerRepository.delete(id), "Player delete failed");
         PlayerService.log.info("Player deleted successfully: id={}", id);
     }
 
     @Transactional
     public void assignTeam(final Id id, final Id teamId) {
         PlayerService.log.info("Assigning player to team: playerId={}, teamId={}", id, teamId);
-        this.assertSuccess(this.playerRepository.assignTeam(id.toString(), teamId.toString()),
+        this.assertSuccess(this.playerRepository.assignTeam(id, teamId),
                            "Player assign team failed");
         PlayerService.log.info("Player assigned to team successfully: playerId={}, teamId={}", id, teamId);
     }
@@ -95,8 +96,7 @@ public class PlayerService {
     @Transactional
     public void unassignTeam(final Id id) {
         PlayerService.log.info("Unassigning player from team: playerId={}", id);
-        this.assertSuccess(this.playerRepository.unassignTeam(id.toString()), "Player unassign team failed");
+        this.assertSuccess(this.playerRepository.unassignTeam(id), "Player unassign team failed");
         PlayerService.log.info("Player unassigned from team successfully: playerId={}", id);
     }
 }
-
