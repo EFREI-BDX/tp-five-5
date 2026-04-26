@@ -35,10 +35,10 @@ public class TeamService {
     }
 
     @Transactional
-    public void changeName(UUID id, String newLabel) {
-        TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
-        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
-        TeamService.log.info("Team renamed successfully: id={}", id);
+    public void changeTag(UUID id, String newTag) {
+        TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
+        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
+        TeamService.log.info("Team tag changed successfully: id={}", id);
     }
 
     private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {
@@ -47,13 +47,6 @@ public class TeamService {
             TeamService.log.error("{} failed: {}", operationName, message);
             throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
         }
-    }
-
-    @Transactional
-    public void changeTag(UUID id, String newTag) {
-        TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
-        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
-        TeamService.log.info("Team tag changed successfully: id={}", id);
     }
 
     @Transactional
@@ -71,6 +64,14 @@ public class TeamService {
                 yield TeamCommandResult.successWithPayLoad(this.findById(id));
             }
 
+            case TeamCommand.TeamUpdateLabelCommand updateLabelCommand -> {
+                TeamService.log.debug("Handling TeamUpdateLabelCommand: id={}, newLabel={}",
+                                      TeamCommand.getId(updateLabelCommand),
+                                      TeamCommand.getLabel(updateLabelCommand));
+                this.changeName(updateLabelCommand.id(), updateLabelCommand.newLabel());
+                yield TeamCommandResult.successWithPayLoad(this.findById(updateLabelCommand.id()));
+            }
+
             case TeamCommand.TeamDissolveCommand dissolveCommand -> {
                 TeamService.log.debug("Handling TeamDissolveCommand: id={}",
                                       TeamCommand.getId(dissolveCommand));
@@ -79,7 +80,7 @@ public class TeamService {
                         : TeamCommandResult.successNoPayLoad();
             }
 
-            case TeamCommand.TreamRestoreCommand restoreCommand -> {
+            case TeamCommand.TeamRestoreCommand restoreCommand -> {
                 TeamService.log.debug("Handling TeamUnDissolveCommand: id={}",
                                       TeamCommand.getId(restoreCommand));
                 this.restore(restoreCommand.id());
@@ -113,6 +114,13 @@ public class TeamService {
                     TeamService.log.warn("Team not found with id={}", id);
                     return new TeamNotFoundException("Team not found: " + id);
                 });
+    }
+
+    @Transactional
+    public void changeName(UUID id, String newLabel) {
+        TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
+        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
+        TeamService.log.info("Team renamed successfully: id={}", id);
     }
 
     @Transactional

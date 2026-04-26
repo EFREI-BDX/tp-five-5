@@ -47,5 +47,23 @@ public class TeamController {
                     .body(null);
         };
     }
+
+    @PutMapping("/{id}/label")
+    public ResponseEntity<TeamDto> changeLabel(@PathVariable UUID id, @RequestBody String newLabel) {
+        TeamCommandResult teamCommandResult = this.teamService.executeCommand(
+                new TeamCommand.TeamUpdateLabelCommand(id, newLabel));
+        return switch (teamCommandResult) {
+            case TeamCommandResult.SuccessWithPayLoad success -> ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(TeamCommandResult.getPayload(teamCommandResult));
+            case TeamCommandResult.SuccessNoPayLoad success -> ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(null);
+            case TeamCommandResult.Failure failure -> ResponseEntity
+                    .status(DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(failure.domainErrorCode()))
+                    .body(null);
+        };
+    }
+
 }
 
