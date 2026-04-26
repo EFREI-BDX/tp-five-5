@@ -40,7 +40,6 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericError(TeamServiceException exception) {
-        System.out.println("###################################Handling generic error: " + exception.getMessage());
         GlobalExceptionHandler.log.error("Team service error: {}", exception.getMessage());
         final HttpStatus httpStatus = DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(
                 exception.getDomainErrorCode());

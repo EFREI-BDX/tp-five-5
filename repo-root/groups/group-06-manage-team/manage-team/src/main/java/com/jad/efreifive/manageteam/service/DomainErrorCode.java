@@ -2,7 +2,9 @@ package com.jad.efreifive.manageteam.service;
 
 public enum DomainErrorCode {
     UNDEFINED("UNDEF", "Undefined error"),
-    TEAM_ALREADY_EXISTS("TAEXT", "A team with this id already exists"),
+    TEAM_ID_ALREADY_EXISTS("TAIXT", "A team with this id already exists"),
+    TEAM_LABEL_ALREADY_EXISTS("TALXT", "A team with this label already exists"),
+    TEAM_TAG_ALREADY_EXISTS("TATXT", "A team with this tag already exists"),
     TEAM_NOT_FOUND("TNFND", "No team with this id exists"),
     TEAM_ALREADY_DISSOLVED("TADIS", "Team is already dissolved"),
     TEAM_NOT_DISSOLVED("TNDIS", "Team is not dissolved"),

@@ -4,7 +4,9 @@ import com.jad.efreifive.manageteam.service.DomainErrorCode;
 import org.springframework.http.HttpStatus;
 
 enum DomainErrorCodeHttpStatusMapper {
-    TEAM_ALREADY_EXISTS(HttpStatus.CONFLICT),
+    TEAM_ID_ALREADY_EXISTS(HttpStatus.CONFLICT),
+    TEAM_LABEL_ALREADY_EXISTS(HttpStatus.CONFLICT),
+    TEAM_TAG_ALREADY_EXISTS(HttpStatus.CONFLICT),
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND),
     TEAM_ALREADY_DISSOLVED(HttpStatus.CONFLICT),
     TEAM_NOT_DISSOLVED(HttpStatus.CONFLICT),

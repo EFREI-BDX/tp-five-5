@@ -150,7 +150,7 @@ BEGIN
     SET errorMessage_ = '';
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) > 0 THEN
-        SET errorMessage_ = 'TAEXT:A team with id ' + _id + ' already exists';
+        SET errorMessage_ = CONCAT('TAIEX:A team with id ', _id, ' already exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -161,8 +161,20 @@ BEGIN
         LEAVE proc;
     END IF;
 
+    IF (SELECT COUNT(*) FROM fiveteam.team WHERE label = _label) > 0 THEN
+        SET errorMessage_ = CONCAT('TALXT:A team with label ', _label, ' already exists');
+        ROLLBACK;
+        LEAVE proc;
+    END IF;
+
     CALL fiveteam.teamTagCheck(_tag, errorMessage_);
     IF errorMessage_ != '' THEN
+        ROLLBACK;
+        LEAVE proc;
+    END IF;
+
+    IF (SELECT COUNT(*) FROM fiveteam.team WHERE tag = _tag) > 0 THEN
+        SET errorMessage_ = CONCAT('TATXT:A team with tag ', _tag, ' already exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -192,13 +204,13 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'TNFND:No team with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('TNFND:No team with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     IF (SELECT dissolutionDate FROM fiveteam.team WHERE id = @id) IS NOT NULL THEN
-        SET errorMessage_ = 'TADIS:Team with id ' + _id + ' is already dissolved';
+        SET errorMessage_ = CONCAT('TADIS:Team with id ', _id, ' is already dissolved');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -231,13 +243,13 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'TNFND:No team with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('TNFND:No team with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     IF (SELECT dissolutionDate FROM fiveteam.team WHERE id = @id) IS NULL THEN
-        SET errorMessage_ = 'TNDIS:Team with id ' + _id + ' is not dissolved';
+        SET errorMessage_ = CONCAT('TNDIS:Team with id ', _id, ' is not dissolved');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -263,13 +275,19 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'TNFND:No team with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('TNFND:No team with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     CALL fiveteam.teamLabelCheck(_newLabel, errorMessage_);
     IF errorMessage_ != '' THEN
+        ROLLBACK;
+        LEAVE proc;
+    END IF;
+
+    IF (SELECT COUNT(*) FROM fiveteam.team WHERE label = _newLabel AND _id != @id) > 0 THEN
+        SET errorMessage_ = CONCAT('TALXT:A team with label ', _newLabel, ' already exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -294,13 +312,19 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'TNFND:No team with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('TNFND:No team with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     CALL fiveteam.teamTagCheck(_newTag, errorMessage_);
     IF errorMessage_ != '' THEN
+        ROLLBACK;
+        LEAVE proc;
+    END IF;
+
+    IF (SELECT COUNT(*) FROM fiveteam.team WHERE label = _newTag AND _id != @id) > 0 THEN
+        SET errorMessage_ = CONCAT('TATXT:A team with tag ', _newTag, ' already exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -393,7 +417,7 @@ BEGIN
     SET errorMessage_ = '';
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) > 0 THEN
-        SET errorMessage_ = 'PAEXT:A player with id ' + _id + ' already exists';
+        SET errorMessage_ = CONCAT('PAEXT:A player with id ', _id, ' already exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -422,7 +446,7 @@ BEGIN
     SET errorMessage_ = '';
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'PNFND:No player with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('PNFND:No player with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -452,7 +476,7 @@ BEGIN
     SET errorMessage_ = '';
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'PNFND:No player with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('PNFND:No player with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -477,25 +501,25 @@ BEGIN
     SET @idTeam = fiveteam.UUIDToBinary(_idTeam);
 
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'PNFND:No player with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('PNFND:No player with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @idTeam) = 0 THEN
-        SET errorMessage_ = 'TNFND:No team with id ' + _idTeam + ' exists';
+        SET errorMessage_ = CONCAT('TNFND:No team with id ', _idTeam, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE idTeamLeader = @id) > 0 THEN
-        SET errorMessage_ = 'PITLD:Player with id ' + _id + ' is a team leader and cannot be assigned to a team';
+        SET errorMessage_ = CONCAT('PITLD:Player with id ', _id, ' is a team leader and cannot be assigned to a team');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE idTeam = @idTeam) >= 8 THEN
-        SET errorMessage_ = 'TFULL:Team with id ' + _idTeam + ' already has 8 players';
+        SET errorMessage_ = CONCAT('TFULL:Team with id ', _idTeam, ' already has 8 players');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -525,13 +549,13 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
 
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
-        SET errorMessage_ = 'PNFND:No player with id ' + _id + ' exists';
+        SET errorMessage_ = CONCAT('PNFND:No player with id ', _id, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE idTeamLeader = @id) > 0 THEN
-        SET errorMessage_ = 'PITLD:Player with id ' + _id + ' is a team leader and cannot be assigned to a team';
+        SET errorMessage_ = CONCAT('PITLD:Player with id ', _id, ' is a team leader and cannot be assigned to a team');
         ROLLBACK;
         LEAVE proc;
     END IF;

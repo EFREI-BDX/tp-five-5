@@ -28,19 +28,22 @@ public sealed interface TeamCommandResult
         };
     }
 
-    static DomainErrorCode getErrorCode(final TeamCommandResult teamCommandResult, final String message) {
+    static DomainErrorCode getErrorCode(final TeamCommandResult teamCommandResult) {
         return switch (teamCommandResult) {
-            case SuccessWithPayLoad success -> throw new IllegalStateException(message);
-            case SuccessNoPayLoad success -> throw new IllegalStateException(message);
+            case SuccessWithPayLoad success -> throw new IllegalStateException(
+                    "Cannot get error code from a successful result");
+            case SuccessNoPayLoad success -> throw new IllegalStateException(
+                    "Cannot get error code from a successful result");
             case Failure failure -> failure.domainErrorCode();
         };
     }
 
-    static TeamDto getPayload(final TeamCommandResult teamCommandResult, final String message) {
+    static TeamDto getPayload(final TeamCommandResult teamCommandResult) {
         return switch (teamCommandResult) {
             case SuccessWithPayLoad success -> success.payload();
-            case SuccessNoPayLoad success -> throw new IllegalStateException(message);
-            case Failure failure -> throw new IllegalStateException(message);
+            case SuccessNoPayLoad success -> throw new IllegalStateException(
+                    "Cannot get payload from a success result without payload");
+            case Failure failure -> throw new IllegalStateException("Cannot get payload from a failure result");
         };
     }
 
