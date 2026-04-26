@@ -6,6 +6,9 @@ import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.PlayerService;
 import com.jad.efreifive.manageteam.service.TeamService;
+import com.jad.efreifive.manageteam.valueobject.Label;
+import com.jad.efreifive.manageteam.valueobject.Period;
+import com.jad.efreifive.manageteam.valueobject.Tag;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -191,7 +194,9 @@ public class ConsoleRunner {
 
     private void teamCreate(final List<String> args) {
         this.requireArgs(args, 4, "team-create <label> <tag> <creationDate(yyyy-MM-dd)>");
-        this.teamService.create(args.get(1), args.get(2), LocalDate.parse(args.get(3)));
+        this.teamService.create(new Label(args.get(1)),
+                                new Tag(args.get(2)),
+                                new Period(LocalDate.parse(args.get(3)), null));
         System.out.println("OK");
     }
 

@@ -6,6 +6,10 @@ import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.mapper.TeamMapper;
 import com.jad.efreifive.manageteam.repository.TeamRepository;
 import com.jad.efreifive.manageteam.repository.result.PersistenceOperationResult;
+import com.jad.efreifive.manageteam.valueobject.Id;
+import com.jad.efreifive.manageteam.valueobject.Label;
+import com.jad.efreifive.manageteam.valueobject.Period;
+import com.jad.efreifive.manageteam.valueobject.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,9 +62,9 @@ public class TeamService {
                                       TeamCommand.getLabel(createCommand),
                                       TeamCommand.getTag(createCommand),
                                       TeamCommand.getCreationDate(createCommand));
-                final UUID id = this.create(TeamCommand.getLabel(command),
-                                            TeamCommand.getTag(command),
-                                            TeamCommand.getCreationDate(command));
+                final Id id = this.create(new Label(TeamCommand.getLabel(command)),
+                                          new Tag(TeamCommand.getTag(command)),
+                                          new Period(TeamCommand.getCreationDate(command), null));
                 yield TeamCommandResult.successWithPayLoad(this.findById(id));
             }
 
@@ -92,13 +96,24 @@ public class TeamService {
     }
 
     @Transactional
-    public UUID create(final String label, final String tag, final LocalDate creationDate) {
+    public Id create(final Label label, final Tag tag, final Period period) {
         TeamService.log.info("Creating team: label={}, tag={}", label, tag);
-        final UUID id = UUID.randomUUID();
-        final PersistenceOperationResult result = this.teamRepository.create(id.toString(), label, tag, creationDate);
+        final Id id = Id.newId();
+        final PersistenceOperationResult result = this.teamRepository.create(id, label, tag, period);
         this.checkSuccessOrThrow(result, "Team create");
-        TeamService.log.info("Team created successfully: id={}", id);
+        TeamService.log.info("Team created successfully: id={}", id.value());
         return id;
+    }
+
+    private TeamDto findById(final Id id) {
+        return this.findById(id.value());
+    }
+
+    @Transactional
+    public void changeName(UUID id, String newLabel) {
+        TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
+        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
+        TeamService.log.info("Team renamed successfully: id={}", id);
     }
 
     @Transactional(readOnly = true)
@@ -114,13 +129,6 @@ public class TeamService {
                     TeamService.log.warn("Team not found with id={}", id);
                     return new TeamNotFoundException("Team not found: " + id);
                 });
-    }
-
-    @Transactional
-    public void changeName(UUID id, String newLabel) {
-        TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
-        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
-        TeamService.log.info("Team renamed successfully: id={}", id);
     }
 
     @Transactional

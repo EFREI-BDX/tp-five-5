@@ -33,12 +33,11 @@ public class TeamController {
 
     @PostMapping(consumes = "application/json")
     public ResponseEntity<TeamDto> create(@RequestBody TeamDto teamDto) {
-        TeamCommandResult teamCommandResult = this.teamService.executeCommand(
-                new TeamCommand.TeamCreateCommand(teamDto));
-        return switch (teamCommandResult) {
+        TeamCommandResult result = this.teamService.executeCommand(new TeamCommand.TeamCreateCommand(teamDto));
+        return switch (result) {
             case TeamCommandResult.SuccessWithPayLoad success -> ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(TeamCommandResult.getPayload(teamCommandResult));
+                    .body(TeamCommandResult.getPayload(result));
             case TeamCommandResult.SuccessNoPayLoad success -> ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(null);
@@ -50,12 +49,12 @@ public class TeamController {
 
     @PutMapping("/{id}/label")
     public ResponseEntity<TeamDto> changeLabel(@PathVariable UUID id, @RequestBody String newLabel) {
-        TeamCommandResult teamCommandResult = this.teamService.executeCommand(
+        TeamCommandResult result = this.teamService.executeCommand(
                 new TeamCommand.TeamUpdateLabelCommand(id, newLabel));
-        return switch (teamCommandResult) {
+        return switch (result) {
             case TeamCommandResult.SuccessWithPayLoad success -> ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(TeamCommandResult.getPayload(teamCommandResult));
+                    .body(TeamCommandResult.getPayload(result));
             case TeamCommandResult.SuccessNoPayLoad success -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(null);

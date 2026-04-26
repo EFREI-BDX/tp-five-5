@@ -2,6 +2,10 @@ package com.jad.efreifive.manageteam.repository;
 
 import com.jad.efreifive.manageteam.entity.TeamEntity;
 import com.jad.efreifive.manageteam.repository.result.PersistenceOperationResult;
+import com.jad.efreifive.manageteam.valueobject.Id;
+import com.jad.efreifive.manageteam.valueobject.Label;
+import com.jad.efreifive.manageteam.valueobject.Period;
+import com.jad.efreifive.manageteam.valueobject.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
@@ -10,8 +14,13 @@ import java.time.LocalDate;
 
 public interface TeamRepository extends JpaRepository<TeamEntity, String> {
 
-    default PersistenceOperationResult create(String id, String label, String tag, LocalDate creationDate) {
-        return PersistenceOperationResult.fromMessage(this.teamCreateProc(id, label, tag, creationDate));
+    default PersistenceOperationResult create(Id id, Label label, Tag tag, Period period) {
+        final String idString = id.value().toString();
+        final String labelValue = label.value();
+        final String tagValue = tag.value();
+        final LocalDate creationDate = period.creationDate();
+        return PersistenceOperationResult.fromMessage(
+                this.teamCreateProc(idString, labelValue, tagValue, creationDate));
     }
 
     @Procedure(procedureName = "fiveteam.teamCreate", outputParameterName = "errorMessage_")
