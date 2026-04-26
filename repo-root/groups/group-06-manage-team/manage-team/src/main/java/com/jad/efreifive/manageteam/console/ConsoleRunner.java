@@ -154,7 +154,7 @@ public class ConsoleRunner {
                            
                              team-list
                              team-get <teamId>
-                             team-create <id> <label> <tag> <creationDate(yyyy-MM-dd)>
+                             team-create <label> <tag> <creationDate(yyyy-MM-dd)>
                              team-dissolve <id> <dissolutionDate(yyyy-MM-dd)>
                              team-restore <id>
                              team-rename <id> <newLabel>
@@ -170,7 +170,7 @@ public class ConsoleRunner {
                              player-unassign <playerId>
                            
                            Tip: use quotes for values with spaces.
-                             team-create 11111111-2222-3333-4444-555555555555 "Equipe Test" TST 2026-04-02
+                             team-create "Equipe Test" TST 2026-04-02
                              player-create 22222222-3333-4444-5555-666666666666 "Player Test\"""");
     }
 
@@ -190,21 +190,14 @@ public class ConsoleRunner {
     }
 
     private void teamCreate(final List<String> args) {
-        this.requireArgs(args, 5, "team-create <id> <label> <tag> <creationDate(yyyy-MM-dd)>");
-        this.teamService.create(
-                args.get(2),
-                args.get(3),
-                LocalDate.parse(args.get(4))
-                               );
+        this.requireArgs(args, 4, "team-create <label> <tag> <creationDate(yyyy-MM-dd)>");
+        this.teamService.create(args.get(1), args.get(2), LocalDate.parse(args.get(3)));
         System.out.println("OK");
     }
 
     private void teamDissolve(final List<String> args) {
         this.requireArgs(args, 3, "team-dissolve <id> <dissolutionDate(yyyy-MM-dd)>");
-        this.teamService.dissolve(
-                UUID.fromString(args.get(1)),
-                LocalDate.parse(args.get(2))
-                                 );
+        this.teamService.dissolve(UUID.fromString(args.get(1)), LocalDate.parse(args.get(2)));
         System.out.println("OK");
     }
 

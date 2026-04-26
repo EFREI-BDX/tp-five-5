@@ -2,7 +2,6 @@ package com.jad.efreifive.manageteam.service;
 
 import com.jad.efreifive.manageteam.command.CommandResult;
 import com.jad.efreifive.manageteam.command.team.TeamCommand;
-import com.jad.efreifive.manageteam.command.team.TeamCreateCommand;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.mapper.TeamMapper;
 import com.jad.efreifive.manageteam.repository.TeamRepository;
@@ -36,33 +35,18 @@ public class TeamService {
     }
 
     @Transactional
-    public void dissolve(UUID id, LocalDate dissolutionDate) {
-        TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
-        this.assertSuccess(this.teamRepository.dissolve(id.toString(), dissolutionDate), "Team dissolve failed");
-        TeamService.log.info("Team dissolved successfully: id={}", id);
-    }
-
-    private void assertSuccess(PersistenceOperationResult result, String defaultMessage) {
-        if (!result.success()) {
-            String msg = result.message() == null || result.message().isBlank()
-                    ? defaultMessage : result.message();
-            TeamService.log.error("Operation failed: {}", msg);
-            throw new ServiceOperationException(msg);
-        }
-    }
-
-    @Transactional
-    public void restore(UUID id) {
-        TeamService.log.info("Restoring team: id={}", id);
-        this.assertSuccess(this.teamRepository.restore(id.toString()), "Team restore failed");
-        TeamService.log.info("Team restored successfully: id={}", id);
-    }
-
-    @Transactional
     public void changeName(UUID id, String newLabel) {
         TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
         this.assertSuccess(this.teamRepository.changeName(id.toString(), newLabel), "Team rename failed");
         TeamService.log.info("Team renamed successfully: id={}", id);
+    }
+
+    private void assertSuccess(PersistenceOperationResult result, String defaultMessage) {
+        if (!result.success()) {
+            String msg = result.message() == null || result.message().isBlank() ? defaultMessage : result.message();
+            TeamService.log.error("Operation failed: {}", msg);
+            throw new ServiceOperationException(msg);
+        }
     }
 
     @Transactional
@@ -72,18 +56,39 @@ public class TeamService {
         TeamService.log.info("Team tag changed successfully: id={}", id);
     }
 
+    @Transactional
     public CommandResult<TeamDto> executeCommand(final TeamCommand command) {
+        TeamService.log.debug("Executing command: {}", command.getClass().getSimpleName());
         return switch (command) {
-            case TeamCreateCommand createCommand -> {
-                final UUID id = this.handle(createCommand);
+            case TeamCommand.TeamCreateCommand createCommand -> {
+                TeamService.log.debug("Handling TeamCreateCommand: label={}, tag={}, creationDate={}",
+                                      TeamCommand.getLabel(createCommand),
+                                      TeamCommand.getTag(createCommand),
+                                      TeamCommand.getCreationDate(createCommand));
+                final UUID id = this.handleCreateCommand(createCommand);
                 yield CommandResult.withPayLoad(this.findById(id));
+            }
+
+            case TeamCommand.TeamDissolveCommand dissolveCommand -> {
+                TeamService.log.debug("Handling TeamDissolveCommand: id={}",
+                                      TeamCommand.getId(dissolveCommand));
+                yield (this.handleDissolveCommand(dissolveCommand))
+                        ? CommandResult.withPayLoad(this.findById(dissolveCommand.id()))
+                        : CommandResult.noPayLoad();
+            }
+
+            case TeamCommand.TreamRestoreCommand restoreCommand -> {
+                TeamService.log.debug("Handling TeamUnDissolveCommand: id={}",
+                                      TeamCommand.getId(restoreCommand));
+                this.restore(restoreCommand.id());
+                yield CommandResult.withPayLoad(this.findById(restoreCommand.id()));
             }
             default -> throw new UnsupportedOperationException(
                     "Not yet implemented command type: " + command.getClass().getSimpleName());
         };
     }
 
-    private UUID handle(final TeamCreateCommand command) {
+    private UUID handleCreateCommand(final TeamCommand.TeamCreateCommand command) {
         return this.create(TeamCommand.getLabel(command),
                            TeamCommand.getTag(command),
                            TeamCommand.getCreationDate(command));
@@ -104,6 +109,17 @@ public class TeamService {
                 });
     }
 
+    private boolean handleDissolveCommand(final TeamCommand.TeamDissolveCommand dissolveCommand) {
+        return this.dissolve(dissolveCommand.id(), TeamCommand.getDissolutionDate(dissolveCommand));
+    }
+
+    @Transactional
+    public void restore(UUID id) {
+        TeamService.log.info("Restoring team: id={}", id);
+        this.assertSuccess(this.teamRepository.restore(id.toString()), "Team restore failed");
+        TeamService.log.info("Team restored successfully: id={}", id);
+    }
+
     @Transactional
     public UUID create(final String label, final String tag, final LocalDate creationDate) {
         TeamService.log.info("Creating team: label={}, tag={}", label, tag);
@@ -112,6 +128,15 @@ public class TeamService {
         this.assertSuccess(result, "Team create failed");
         TeamService.log.info("Team created successfully: id={}", id);
         return id;
+    }
+
+    @Transactional
+    public boolean dissolve(UUID id, LocalDate dissolutionDate) {
+        TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
+        final PersistenceOperationResult result = this.teamRepository.dissolve(id.toString(), dissolutionDate);
+        this.assertSuccess(result, "Team dissolve failed");
+        TeamService.log.info("Team dissolved successfully: id={}", id);
+        return PersistenceOperationResult.getResult(result);
     }
 }
 

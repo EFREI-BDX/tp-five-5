@@ -23,5 +23,13 @@ public record TeamDto(
     public static LocalDate getCreationDate(final TeamDto teamDto) {
         return teamDto.creationDate;
     }
+
+    public static UUID getId(final TeamDto teamDto) {
+        return teamDto.id;
+    }
+
+    public static LocalDate getDissolutionDate(final TeamDto teamDto) {
+        return teamDto.dissolutionDate;
+    }
 }
 
