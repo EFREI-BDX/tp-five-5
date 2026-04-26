@@ -1,7 +1,7 @@
 package com.jad.efreifive.manageteam.service;
 
-import com.jad.efreifive.manageteam.command.CommandResult;
-import com.jad.efreifive.manageteam.command.team.TeamCommand;
+import com.jad.efreifive.manageteam.controller.command.TeamCommand;
+import com.jad.efreifive.manageteam.controller.command.TeamCommandResult;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.mapper.TeamMapper;
 import com.jad.efreifive.manageteam.repository.TeamRepository;
@@ -57,7 +57,7 @@ public class TeamService {
     }
 
     @Transactional
-    public CommandResult<TeamDto> executeCommand(final TeamCommand command) {
+    public TeamCommandResult executeCommand(final TeamCommand command) {
         TeamService.log.debug("Executing command: {}", command.getClass().getSimpleName());
         return switch (command) {
             case TeamCommand.TeamCreateCommand createCommand -> {
@@ -66,22 +66,22 @@ public class TeamService {
                                       TeamCommand.getTag(createCommand),
                                       TeamCommand.getCreationDate(createCommand));
                 final UUID id = this.handleCreateCommand(createCommand);
-                yield CommandResult.withPayLoad(this.findById(id));
+                yield TeamCommandResult.successWithPayLoad(this.findById(id));
             }
 
             case TeamCommand.TeamDissolveCommand dissolveCommand -> {
                 TeamService.log.debug("Handling TeamDissolveCommand: id={}",
                                       TeamCommand.getId(dissolveCommand));
                 yield (this.handleDissolveCommand(dissolveCommand))
-                        ? CommandResult.withPayLoad(this.findById(dissolveCommand.id()))
-                        : CommandResult.noPayLoad();
+                        ? TeamCommandResult.successWithPayLoad(this.findById(dissolveCommand.id()))
+                        : TeamCommandResult.successNoPayLoad();
             }
 
             case TeamCommand.TreamRestoreCommand restoreCommand -> {
                 TeamService.log.debug("Handling TeamUnDissolveCommand: id={}",
                                       TeamCommand.getId(restoreCommand));
                 this.restore(restoreCommand.id());
-                yield CommandResult.withPayLoad(this.findById(restoreCommand.id()));
+                yield TeamCommandResult.successWithPayLoad(this.findById(restoreCommand.id()));
             }
             default -> throw new UnsupportedOperationException(
                     "Not yet implemented command type: " + command.getClass().getSimpleName());

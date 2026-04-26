@@ -1,7 +1,7 @@
 package com.jad.efreifive.manageteam.controller;
 
-import com.jad.efreifive.manageteam.command.CommandResult;
-import com.jad.efreifive.manageteam.command.team.TeamCommand;
+import com.jad.efreifive.manageteam.controller.command.TeamCommand;
+import com.jad.efreifive.manageteam.controller.command.TeamCommandResult;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.TeamService;
 import org.springframework.http.HttpStatus;
@@ -33,11 +33,16 @@ public class TeamController {
 
     @PostMapping(consumes = "application/json")
     public ResponseEntity<TeamDto> create(@RequestBody TeamDto teamDto) {
-        CommandResult<TeamDto> commandResult = this.teamService.executeCommand(
+        TeamCommandResult teamCommandResult = this.teamService.executeCommand(
                 new TeamCommand.TeamCreateCommand(teamDto));
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(commandResult.getPayload("Create must return a payload."));
+        return switch (teamCommandResult) {
+            case TeamCommandResult.SuccessWithPayLoad success -> ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(TeamCommandResult.getPayload(teamCommandResult, "Create must return a payload."));
+            case TeamCommandResult.Failure failure -> ResponseEntity
+                    .status(DomainErrorCodeHttpStatusMapper.fromCode(failure.errorCode()))
+                    .body(null);
+        };
     }
 }
 

@@ -1,4 +1,4 @@
-package com.jad.efreifive.manageteam.command.team;
+package com.jad.efreifive.manageteam.controller.command;
 
 import com.jad.efreifive.manageteam.dto.TeamDto;
 
