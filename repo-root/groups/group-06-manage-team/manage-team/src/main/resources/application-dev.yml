@@ -18,9 +18,9 @@ team:
         - http://localhost:8081/test-post
       restore:
         - http://localhost:8081/test-post
-      assign-leader:
+      assign_leader:
         - http://localhost:8081/test-post
-      assign-member:
+      assign_member:
         - http://localhost:8081/test-post
-      remove-member:
+      remove_member:
         - http://localhost:8081/test-post

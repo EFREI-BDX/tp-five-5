@@ -4,7 +4,9 @@ import java.util.UUID;
 
 public record PlayerDto(
         UUID id,
-        String displayName,
+        String firstName,
+        String lastName,
         UUID idTeam
-) {}
+) {
+}
 

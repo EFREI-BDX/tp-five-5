@@ -38,15 +38,6 @@ public sealed interface TeamCommand
         };
     }
 
-    static UUID getPlayerId(TeamCommand command) {
-        return switch (command) {
-            case TeamUpdateTeamLeaderCommand updateTeamLeaderCommand -> updateTeamLeaderCommand.playerId();
-            case TeamAssignPlayerCommand assignPlayerCommand -> assignPlayerCommand.playerId();
-            case TeamRemovePlayerCommand removePlayerCommand -> removePlayerCommand.playerId();
-            default -> throw new IllegalStateException("No player ID for this command");
-        };
-    }
-
     static LocalDate getDissolutionDate(TeamCommand command) {
         return switch (command) {
             case TeamDissolveCommand dissolveCommand -> dissolveCommand.dissolutionDate();
@@ -110,10 +101,10 @@ public sealed interface TeamCommand
         }
     }
 
-    record TeamRemovePlayerCommand(UUID playerId) implements TeamCommand {
+    record TeamRemovePlayerCommand(UUID id, UUID playerId) implements TeamCommand {
         @Override
         public String toLogString() {
-            return String.format("TeamRemovePlayerCommand{playerId=%s}", this.playerId());
+            return String.format("TeamRemovePlayerCommand{teamId=%s, playerId=%s}", this.id(), this.playerId());
         }
     }
 }

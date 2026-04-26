@@ -1,10 +1,12 @@
 package com.jad.efreifive.manageteam.controller.command;
 
+import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.DomainErrorCode;
 
 public sealed interface TeamCommandResult
-        permits TeamCommandResult.SuccessWithPayLoad,
+        permits TeamCommandResult.SuccessWithTeamDtoPayLoad,
+                TeamCommandResult.SuccessWithPlayerDtoPayLoad,
                 TeamCommandResult.SuccessNoPayLoad,
                 TeamCommandResult.Failure {
 
@@ -13,7 +15,12 @@ public sealed interface TeamCommandResult
     }
 
     static TeamCommandResult successWithPayLoad(final TeamDto payLoad) {
-        return new SuccessWithPayLoad(payLoad);
+        return new SuccessWithTeamDtoPayLoad(payLoad);
+    }
+
+
+    static TeamCommandResult successWithPayLoad(final PlayerDto payLoad) {
+        return new SuccessWithPlayerDtoPayLoad(payLoad);
     }
 
     static TeamCommandResult successNoPayLoad() {
@@ -22,7 +29,8 @@ public sealed interface TeamCommandResult
 
     static String getMessage(final TeamCommandResult teamCommandResult) {
         return switch (teamCommandResult) {
-            case SuccessWithPayLoad success -> "Success";
+            case SuccessWithTeamDtoPayLoad success -> "Success";
+            case SuccessWithPlayerDtoPayLoad success -> "Success";
             case SuccessNoPayLoad success -> "Success";
             case Failure failure -> failure.message();
         };
@@ -30,24 +38,30 @@ public sealed interface TeamCommandResult
 
     static DomainErrorCode getErrorCode(final TeamCommandResult teamCommandResult) {
         return switch (teamCommandResult) {
-            case SuccessWithPayLoad success -> throw new IllegalStateException(
-                    "Cannot get error code from a successful result");
-            case SuccessNoPayLoad success -> throw new IllegalStateException(
-                    "Cannot get error code from a successful result");
             case Failure failure -> failure.domainErrorCode();
+            default -> throw new IllegalStateException(
+                    "Cannot get error code from a successful result");
         };
     }
 
-    static TeamDto getPayload(final TeamCommandResult teamCommandResult) {
+    static TeamDto getTeamDtoPayload(final TeamCommandResult teamCommandResult) {
         return switch (teamCommandResult) {
-            case SuccessWithPayLoad success -> success.payload();
-            case SuccessNoPayLoad success -> throw new IllegalStateException(
-                    "Cannot get payload from a success result without payload");
-            case Failure failure -> throw new IllegalStateException("Cannot get payload from a failure result");
+            case SuccessWithTeamDtoPayLoad success -> success.payload();
+            default -> throw new IllegalStateException("Cannot get payload from a result without TeamDto payload");
         };
     }
 
-    record SuccessWithPayLoad(TeamDto payload) implements TeamCommandResult {
+    static PlayerDto getPlayerDtoPayload(final TeamCommandResult teamCommandResult) {
+        return switch (teamCommandResult) {
+            case SuccessWithPlayerDtoPayLoad success -> success.payload();
+            default -> throw new IllegalStateException("Cannot get payload from a result without PlayerDto payload");
+        };
+    }
+
+    record SuccessWithTeamDtoPayLoad(TeamDto payload) implements TeamCommandResult {
+    }
+
+    record SuccessWithPlayerDtoPayLoad(PlayerDto payload) implements TeamCommandResult {
     }
 
     record SuccessNoPayLoad() implements TeamCommandResult {

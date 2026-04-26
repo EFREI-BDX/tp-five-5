@@ -104,14 +104,17 @@ class TeamService implements ITeamService, ITeamServiceForTest {
             }
 
             case TeamCommand.TeamAssignPlayerCommand teamAssignPlayerCommand -> {
-                this.playerService.assignTeam(new Id(teamAssignPlayerCommand.playerId()),
-                                              new Id(teamAssignPlayerCommand.id()));
-                yield TeamCommandResult.successWithPayLoad(this.findById(teamAssignPlayerCommand.id()));
+                this.assignTeam(new Id(teamAssignPlayerCommand.id()),
+                                new Id(teamAssignPlayerCommand.playerId()));
+                yield TeamCommandResult.successWithPayLoad(
+                        this.playerService.findById(teamAssignPlayerCommand.playerId()));
             }
 
             case TeamCommand.TeamRemovePlayerCommand teamRemovePlayerCommand -> {
-                this.playerService.unassignTeam(new Id(teamRemovePlayerCommand.playerId()));
-                yield TeamCommandResult.successNoPayLoad();
+                this.removePlayer(new Id(teamRemovePlayerCommand.id()),
+                                  new Id(teamRemovePlayerCommand.playerId()));
+                yield TeamCommandResult.successWithPayLoad(
+                        this.playerService.findById(teamRemovePlayerCommand.playerId()));
             }
         };
     }
@@ -172,6 +175,16 @@ class TeamService implements ITeamService, ITeamServiceForTest {
                                  "Team change team leader");
         TeamService.log.info("Team leader changed successfully: teamId={}", id);
         this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
+    }
+
+    private void assignTeam(final Id id, final Id idPlayer) {
+        this.playerService.assignTeam(idPlayer, id);
+        this.teamEventOutboundService.notifyAssignPlayer(this.playerService.findById(idPlayer));
+    }
+
+    private void removePlayer(final Id id, final Id idPlayer) {
+        this.playerService.unassignTeam(idPlayer);
+        this.teamEventOutboundService.notifyUnassignPlayer(this.playerService.findById(idPlayer));
     }
 
     private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {

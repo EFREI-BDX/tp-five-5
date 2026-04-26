@@ -354,6 +354,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
     SET @id = fiveteam.UUIDToBinary(_id);
+    SET @idLeader = fiveteam.UUIDToBinary(_IdLeader);
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('TNFND:No team with id ', _id, ' exists');
@@ -361,14 +362,14 @@ BEGIN
         LEAVE proc;
     END IF;
 
-    IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = _IdLeader AND idTeam = @id) = 0 THEN
+    IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @idLeader AND idTeam = @id) = 0 THEN
         SET errorMessage_ = CONCAT('PNFND:No player with id ', _IdLeader, ' exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
 
     UPDATE fiveteam.team
-    SET idTeamLeader = _IdLeader
+    SET idTeamLeader = @idLeader
     WHERE id = @id;
     COMMIT;
 END //
@@ -458,6 +459,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
     SET @id = fiveteam.UUIDToBinary(_id);
+
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) > 0 THEN
         SET errorMessage_ = CONCAT('PAEXT:A player with id ', _id, ' already exists');
         ROLLBACK;
@@ -678,6 +680,8 @@ END //
 
 DELIMITER ;
 
+
+GRANT EXECUTE ON FUNCTION fiveteam.BinaryToUUID TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.teamCreate TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.teamDissolve TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.teamRestore TO 'jad_efrei_five_2526'@'%';

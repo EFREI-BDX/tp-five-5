@@ -34,20 +34,6 @@ public class PlayerService {
     }
 
     @Transactional(readOnly = true)
-    public PlayerDto findById(UUID id) {
-        PlayerService.log.debug("Looking up player with id={}", id);
-        return this.playerRepository.findById(id.toString())
-                .map(entity -> {
-                    PlayerService.log.debug("Player found: {}", entity);
-                    return this.playerMapper.entityToDto(entity);
-                })
-                .orElseThrow(() -> {
-                    PlayerService.log.warn("Player not found with id={}", id);
-                    return new PlayerNotFoundException("Player not found: " + id);
-                });
-    }
-
-    @Transactional(readOnly = true)
     public List<PlayerDto> findByTeamId(UUID teamId) {
         PlayerService.log.debug("Listing players by teamId={}", teamId);
         List<PlayerDto> players = this.playerRepository.findByIdTeam(teamId.toString()).stream().map(
@@ -98,5 +84,23 @@ public class PlayerService {
         PlayerService.log.info("Unassigning player from team: playerId={}", id);
         this.assertSuccess(this.playerRepository.unassignTeam(id), "Player unassign team failed");
         PlayerService.log.info("Player unassigned from team successfully: playerId={}", id);
+    }
+
+    public PlayerDto findById(final Id id) {
+        return this.findById(id.value());
+    }
+
+    @Transactional(readOnly = true)
+    public PlayerDto findById(UUID id) {
+        PlayerService.log.debug("Looking up player with id={}", id);
+        return this.playerRepository.findById(id.toString())
+                .map(entity -> {
+                    PlayerService.log.debug("Player found: {}", entity);
+                    return this.playerMapper.entityToDto(entity);
+                })
+                .orElseThrow(() -> {
+                    PlayerService.log.warn("Player not found with id={}", id);
+                    return new PlayerNotFoundException("Player not found: " + id);
+                });
     }
 }

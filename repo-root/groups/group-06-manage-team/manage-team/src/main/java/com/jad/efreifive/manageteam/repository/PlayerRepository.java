@@ -20,7 +20,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, String> {
 
     @Procedure(procedureName = "fiveteam.playerCreate", outputParameterName = "errorMessage_")
     String playerCreateProc(@Param("_id") String id,
-                            @Param("_firstName") String displayName,
+                            @Param("_firstName") String firstName,
                             @Param("_lastName") String lastName);
 
     default PersistenceOperationResult update(final Id id, final Name displayName) {
@@ -30,7 +30,7 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, String> {
 
     @Procedure(procedureName = "fiveteam.playerUpdate", outputParameterName = "errorMessage_")
     String playerUpdateProc(@Param("_id") String id,
-                            @Param("_firstName") String displayName,
+                            @Param("_firstName") String firstName,
                             @Param("_lastName") String lastName);
 
     default PersistenceOperationResult delete(final Id id) {

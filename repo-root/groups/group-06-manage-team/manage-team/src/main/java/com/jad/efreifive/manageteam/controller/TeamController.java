@@ -2,6 +2,7 @@ package com.jad.efreifive.manageteam.controller;
 
 import com.jad.efreifive.manageteam.controller.command.TeamCommand;
 import com.jad.efreifive.manageteam.controller.command.TeamCommandResult;
+import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.ITeamService;
 import org.springframework.http.HttpStatus;
@@ -37,15 +38,16 @@ public class TeamController {
     public ResponseEntity<TeamDto> create(@RequestBody TeamDto teamDto) {
         TeamCommandResult result = this.teamService.executeCommand(new TeamCommand.TeamCreateCommand(teamDto));
         return switch (result) {
-            case TeamCommandResult.SuccessWithPayLoad _ -> ResponseEntity
+            case TeamCommandResult.SuccessWithTeamDtoPayLoad _ -> ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body(TeamCommandResult.getPayload(result));
+                    .body(TeamCommandResult.getTeamDtoPayload(result));
             case TeamCommandResult.SuccessNoPayLoad _ -> ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(null);
             case TeamCommandResult.Failure failure -> ResponseEntity
                     .status(DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(failure.domainErrorCode()))
                     .body(null);
+            default -> throw new IllegalStateException("Unexpected result type: " + result.getClass());
         };
     }
 
@@ -59,15 +61,16 @@ public class TeamController {
     @NonNull
     private ResponseEntity<TeamDto> toTeamDtoResponseEntity(final TeamCommandResult result) {
         return switch (result) {
-            case TeamCommandResult.SuccessWithPayLoad _ -> ResponseEntity
+            case TeamCommandResult.SuccessWithTeamDtoPayLoad _ -> ResponseEntity
                     .status(HttpStatus.OK)
-                    .body(TeamCommandResult.getPayload(result));
+                    .body(TeamCommandResult.getTeamDtoPayload(result));
             case TeamCommandResult.SuccessNoPayLoad _ -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(null);
             case TeamCommandResult.Failure failure -> ResponseEntity
                     .status(DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(failure.domainErrorCode()))
                     .body(null);
+            default -> throw new IllegalStateException("Unexpected result type: " + result.getClass());
         };
     }
 
@@ -100,17 +103,33 @@ public class TeamController {
     }
 
     @PutMapping("/{teamId}/assign-player")
-    public ResponseEntity<TeamDto> assignPlayer(@PathVariable UUID teamId, @RequestBody UUID playerId) {
+    public ResponseEntity<PlayerDto> assignPlayer(@PathVariable UUID teamId, @RequestBody UUID playerId) {
         TeamCommandResult result = this.teamService.executeCommand(
                 new TeamCommand.TeamAssignPlayerCommand(teamId, playerId));
-        return this.toTeamDtoResponseEntity(result);
+        return this.toPlayerDtoResponseEntity(result);
     }
 
-    @PutMapping("/{playerId}/remove-player")
-    public ResponseEntity<TeamDto> removePlayer(@PathVariable UUID playerId) {
+    @NonNull
+    private ResponseEntity<PlayerDto> toPlayerDtoResponseEntity(final TeamCommandResult result) {
+        return switch (result) {
+            case TeamCommandResult.SuccessWithPlayerDtoPayLoad _ -> ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(TeamCommandResult.getPlayerDtoPayload(result));
+            case TeamCommandResult.SuccessNoPayLoad _ -> ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(null);
+            case TeamCommandResult.Failure failure -> ResponseEntity
+                    .status(DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(failure.domainErrorCode()))
+                    .body(null);
+            default -> throw new IllegalStateException("Unexpected result type: " + result.getClass());
+        };
+    }
+
+    @PutMapping("/{teamId}/remove-player")
+    public ResponseEntity<PlayerDto> removePlayer(@PathVariable UUID teamId, @RequestBody UUID playerId) {
         TeamCommandResult result = this.teamService.executeCommand(
-                new TeamCommand.TeamRemovePlayerCommand(playerId));
-        return this.toTeamDtoResponseEntity(result);
+                new TeamCommand.TeamRemovePlayerCommand(teamId, playerId));
+        return this.toPlayerDtoResponseEntity(result);
     }
 }
 
