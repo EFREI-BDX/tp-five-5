@@ -6,3 +6,22 @@ spring:
 
 logging:
   config: classpath:log4j2-dev.xml
+
+team:
+  outbound:
+    notify-urls:
+      create:
+        - http://appli1/api/integration/teams
+        - http://appli2/api/integration/teams
+      update:
+        - http://appli1/api/integration/teams/update
+      dissolve:
+        - http://appli2/api/integration/teams/delete
+      restore:
+        - http://appli2/api/integration/teams/delete
+      assign-leader:
+        - http://appli1/api/integration/teams/assign-leader
+      assign-member:
+        - http://appli2/api/integration/teams/assign-member
+      remove-member:
+        - http://appli1/api/integration/teams/remove-member

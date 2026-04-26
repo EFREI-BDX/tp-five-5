@@ -24,10 +24,14 @@ class TeamService implements ITeamService, ITeamServiceForTest {
 
     private final TeamRepository teamRepository;
     private final TeamMapper teamMapper;
+    private final TeamEventOutboundService teamEventOutboundService;
 
-    public TeamService(TeamRepository teamRepository, TeamMapper teamMapper) {
+    public TeamService(final TeamRepository teamRepository,
+                       final TeamMapper teamMapper,
+                       final TeamEventOutboundService teamEventOutboundService) {
         this.teamRepository = teamRepository;
         this.teamMapper = teamMapper;
+        this.teamEventOutboundService = teamEventOutboundService;
     }
 
     @Transactional(readOnly = true)
@@ -37,22 +41,6 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         List<TeamDto> teams = this.teamRepository.findAll().stream().map(this.teamMapper::entityToDto).toList();
         TeamService.log.debug("Loaded {} teams", teams.size());
         return teams;
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public TeamDto findById(UUID id) {
-        TeamService.log.debug("Looking up team with id={}", id);
-
-        return this.teamRepository.findById(id.toString())
-                .map(entity -> {
-                    TeamService.log.debug("Team found: {}", entity);
-                    return this.teamMapper.entityToDto(entity);
-                })
-                .orElseThrow(() -> {
-                    TeamService.log.warn("Team not found with id={}", id);
-                    return new TeamServiceException(DomainErrorCode.TEAM_NOT_FOUND, "Team not found: " + id);
-                });
     }
 
     @Transactional
@@ -101,12 +89,51 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         final PersistenceOperationResult result = this.teamRepository.create(id, label, tag, period);
         this.checkSuccessOrThrow(result, "Team create");
         TeamService.log.info("Team created successfully: id={}", id.value());
+        this.teamEventOutboundService.notifyTeamCreated(this.findById(id));
         return id;
     }
 
     @Transactional(readOnly = true)
     TeamDto findById(Id id) {
         return this.findById(id.value());
+    }
+
+    @Transactional
+    @Override
+    public void changeName(UUID id, String newLabel) {
+        TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
+        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
+        TeamService.log.info("Team renamed successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
+    }
+
+    @Transactional
+    @Override
+    public void changeTag(UUID id, String newTag) {
+        TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
+        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
+        TeamService.log.info("Team tag changed successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
+    }
+
+    @Transactional
+    @Override
+    public boolean dissolve(UUID id, LocalDate dissolutionDate) {
+        TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
+        final PersistenceOperationResult result = this.teamRepository.dissolve(id.toString(), dissolutionDate);
+        this.checkSuccessOrThrow(result, "Team dissolve");
+        TeamService.log.info("Team dissolved successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamDissolve(this.findById(id));
+        return PersistenceOperationResult.getResult(result);
+    }
+
+    @Transactional
+    @Override
+    public void restore(UUID id) {
+        TeamService.log.info("Restoring team: id={}", id);
+        this.checkSuccessOrThrow(this.teamRepository.restore(id.toString()), "Team restore");
+        TeamService.log.info("Team restored successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamRestore(this.findById(id));
     }
 
     private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {
@@ -117,38 +144,20 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     @Override
-    public void changeName(UUID id, String newLabel) {
-        TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
-        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
-        TeamService.log.info("Team renamed successfully: id={}", id);
-    }
+    public TeamDto findById(UUID id) {
+        TeamService.log.debug("Looking up team with id={}", id);
 
-    @Transactional
-    @Override
-    public void changeTag(UUID id, String newTag) {
-        TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
-        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
-        TeamService.log.info("Team tag changed successfully: id={}", id);
-    }
-
-    @Transactional
-    @Override
-    public boolean dissolve(UUID id, LocalDate dissolutionDate) {
-        TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
-        final PersistenceOperationResult result = this.teamRepository.dissolve(id.toString(), dissolutionDate);
-        this.checkSuccessOrThrow(result, "Team dissolve");
-        TeamService.log.info("Team dissolved successfully: id={}", id);
-        return PersistenceOperationResult.getResult(result);
-    }
-
-    @Transactional
-    @Override
-    public void restore(UUID id) {
-        TeamService.log.info("Restoring team: id={}", id);
-        this.checkSuccessOrThrow(this.teamRepository.restore(id.toString()), "Team restore");
-        TeamService.log.info("Team restored successfully: id={}", id);
+        return this.teamRepository.findById(id.toString())
+                .map(entity -> {
+                    TeamService.log.debug("Team found: {}", entity);
+                    return this.teamMapper.entityToDto(entity);
+                })
+                .orElseThrow(() -> {
+                    TeamService.log.warn("Team not found with id={}", id);
+                    return new TeamServiceException(DomainErrorCode.TEAM_NOT_FOUND, "Team not found: " + id);
+                });
     }
 }
 

@@ -10,7 +10,9 @@ public sealed interface TeamCommand
                 TeamCommand.TeamUpdateLabelCommand,
                 TeamCommand.TeamDissolveCommand,
                 TeamCommand.TeamRestoreCommand,
-                TeamCommand.TeamUpdateTagCommand {
+                TeamCommand.TeamUpdateTagCommand,
+                TeamCommand.TeamAssignPlayerCommand,
+                TeamCommand.TeamRemovePlayerCommand {
 
     static String getLabel(TeamCommand command) {
         return switch (command) {
@@ -37,11 +39,21 @@ public sealed interface TeamCommand
 
     static UUID getId(TeamCommand command) {
         return switch (command) {
-            case TeamCreateCommand createCommand -> throw new IllegalStateException("No ID for this command");
             case TeamUpdateLabelCommand updateLabelCommand -> updateLabelCommand.id();
             case TeamUpdateTagCommand updateTagCommand -> updateTagCommand.id();
             case TeamDissolveCommand dissolveCommand -> dissolveCommand.id();
             case TeamRestoreCommand restoreCommand -> restoreCommand.id();
+            case TeamAssignPlayerCommand assignPlayerCommand -> assignPlayerCommand.teamId();
+            case TeamRemovePlayerCommand removePlayerCommand -> removePlayerCommand.teamId();
+            default -> throw new IllegalStateException("No ID for this command");
+        };
+    }
+
+    static UUID getPlayerId(TeamCommand command) {
+        return switch (command) {
+            case TeamAssignPlayerCommand assignPlayerCommand -> assignPlayerCommand.playerId();
+            case TeamRemovePlayerCommand removePlayerCommand -> removePlayerCommand.playerId();
+            default -> throw new IllegalStateException("No player ID for this command");
         };
     }
 
@@ -91,6 +103,20 @@ public sealed interface TeamCommand
         @Override
         public String toLogString() {
             return String.format("TeamUpdateTagCommand{id=%s, newTag=%s}", this.id(), this.newTag());
+        }
+    }
+
+    record TeamAssignPlayerCommand(UUID teamId, UUID playerId) implements TeamCommand {
+        @Override
+        public String toLogString() {
+            return String.format("TeamAssignPlayerCommand{teamId=%s, playerId=%s}", this.teamId(), this.playerId());
+        }
+    }
+
+    record TeamRemovePlayerCommand(UUID teamId, UUID playerId) implements TeamCommand {
+        @Override
+        public String toLogString() {
+            return String.format("TeamRemovePlayerCommand{teamId=%s, playerId=%s}", this.teamId(), this.playerId());
         }
     }
 }
