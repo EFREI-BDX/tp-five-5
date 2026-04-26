@@ -1,7 +1,6 @@
 package com.jad.efreifive.manageteam.controller;
 
 import com.jad.efreifive.manageteam.service.ServiceOperationException;
-import com.jad.efreifive.manageteam.service.TeamNotFoundException;
 import com.jad.efreifive.manageteam.service.TeamServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,11 +15,11 @@ import java.util.Map;
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
-    @ExceptionHandler(TeamNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleNotFound(TeamNotFoundException exception) {
-        GlobalExceptionHandler.log.warn("Resource not found: {}", exception.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(this.errorBody(exception.getMessage(), HttpStatus.NOT_FOUND.value()));
+    @ExceptionHandler(ServiceOperationException.class)
+    public ResponseEntity<Map<String, Object>> handleServiceError(ServiceOperationException exception) {
+        GlobalExceptionHandler.log.error("Service operation error: {}", exception.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(this.errorBody(exception.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY.value()));
     }
 
     private Map<String, Object> errorBody(String message, int status) {
@@ -31,14 +30,7 @@ class GlobalExceptionHandler {
                      );
     }
 
-    @ExceptionHandler(ServiceOperationException.class)
-    public ResponseEntity<Map<String, Object>> handleServiceError(ServiceOperationException exception) {
-        GlobalExceptionHandler.log.error("Service operation error: {}", exception.getMessage());
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(this.errorBody(exception.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY.value()));
-    }
-
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(TeamServiceException.class)
     public ResponseEntity<Map<String, Object>> handleGenericError(TeamServiceException exception) {
         GlobalExceptionHandler.log.error("Team service error: {}", exception.getMessage());
         final HttpStatus httpStatus = DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(

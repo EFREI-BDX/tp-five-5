@@ -73,6 +73,11 @@ public class TeamService implements ITeamService {
                 yield TeamCommandResult.successWithPayLoad(this.findById(updateLabelCommand.id()));
             }
 
+            case TeamCommand.TeamUpdateTagCommand updateTagCommand -> {
+                this.changeTag(updateTagCommand.id(), updateTagCommand.newTag());
+                yield TeamCommandResult.successWithPayLoad(this.findById(updateTagCommand.id()));
+            }
+
             case TeamCommand.TeamDissolveCommand dissolveCommand -> {
                 yield (this.dissolve(dissolveCommand.id(), TeamCommand.getDissolutionDate(dissolveCommand)))
                         ? TeamCommandResult.successWithPayLoad(this.findById(dissolveCommand.id()))
@@ -111,6 +116,13 @@ public class TeamService implements ITeamService {
     }
 
     @Transactional
+    public void changeTag(UUID id, String newTag) {
+        TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
+        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
+        TeamService.log.info("Team tag changed successfully: id={}", id);
+    }
+
+    @Transactional
     public boolean dissolve(UUID id, LocalDate dissolutionDate) {
         TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
         final PersistenceOperationResult result = this.teamRepository.dissolve(id.toString(), dissolutionDate);
@@ -132,13 +144,6 @@ public class TeamService implements ITeamService {
             TeamService.log.error("{} failed: {}", operationName, message);
             throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
         }
-    }
-
-    @Transactional
-    public void changeTag(UUID id, String newTag) {
-        TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
-        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
-        TeamService.log.info("Team tag changed successfully: id={}", id);
     }
 }
 

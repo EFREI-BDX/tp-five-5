@@ -323,7 +323,7 @@ BEGIN
         LEAVE proc;
     END IF;
 
-    IF (SELECT COUNT(*) FROM fiveteam.team WHERE label = _newTag AND _id != @id) > 0 THEN
+    IF (SELECT COUNT(*) FROM fiveteam.team WHERE tag = _newTag AND _id != @id) > 0 THEN
         SET errorMessage_ = CONCAT('TATXT:A team with tag ', _newTag, ' already exists');
         ROLLBACK;
         LEAVE proc;
