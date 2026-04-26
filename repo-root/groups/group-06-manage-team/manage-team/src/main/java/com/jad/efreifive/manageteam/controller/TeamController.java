@@ -40,7 +40,7 @@ public class TeamController {
                     .status(HttpStatus.CREATED)
                     .body(TeamCommandResult.getPayload(teamCommandResult, "Create must return a payload."));
             case TeamCommandResult.Failure failure -> ResponseEntity
-                    .status(DomainErrorCodeHttpStatusMapper.fromCode(failure.errorCode()))
+                    .status(DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(failure.domainErrorCode()))
                     .body(null);
         };
     }
