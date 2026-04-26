@@ -3,7 +3,7 @@ package com.jad.efreifive.manageteam.controller;
 import com.jad.efreifive.manageteam.service.DomainErrorCode;
 import org.springframework.http.HttpStatus;
 
-public enum DomainErrorCodeHttpStatusMapper {
+enum DomainErrorCodeHttpStatusMapper {
     TEAM_ALREADY_EXISTS(HttpStatus.CONFLICT),
     TEAM_NOT_FOUND(HttpStatus.NOT_FOUND),
     TEAM_ALREADY_DISSOLVED(HttpStatus.CONFLICT),

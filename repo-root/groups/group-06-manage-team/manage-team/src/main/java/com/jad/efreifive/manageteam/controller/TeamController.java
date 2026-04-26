@@ -28,6 +28,7 @@ public class TeamController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TeamDto> findById(@PathVariable UUID id) {
+        System.out.println("###################################Looking up team with id=" + id);
         return ResponseEntity.ok(this.teamService.findById(id));
     }
 
@@ -39,6 +40,9 @@ public class TeamController {
             case TeamCommandResult.SuccessWithPayLoad success -> ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(TeamCommandResult.getPayload(teamCommandResult, "Create must return a payload."));
+            case TeamCommandResult.SuccessNoPayLoad success -> ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(null);
             case TeamCommandResult.Failure failure -> ResponseEntity
                     .status(DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(failure.domainErrorCode()))
                     .body(null);

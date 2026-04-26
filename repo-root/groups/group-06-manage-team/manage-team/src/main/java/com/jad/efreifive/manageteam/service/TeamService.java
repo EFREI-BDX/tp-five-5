@@ -37,22 +37,22 @@ public class TeamService {
     @Transactional
     public void changeName(UUID id, String newLabel) {
         TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
-        this.assertSuccess(this.teamRepository.changeName(id.toString(), newLabel), "Team rename failed");
+        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
         TeamService.log.info("Team renamed successfully: id={}", id);
     }
 
-    private void assertSuccess(PersistenceOperationResult result, String defaultMessage) {
+    private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {
         if (!result.success()) {
-            String msg = result.message() == null || result.message().isBlank() ? defaultMessage : result.message();
-            TeamService.log.error("Operation failed: {}", msg);
-            throw new ServiceOperationException(msg);
+            String message = result.message();
+            TeamService.log.error("{} failed: {}", operationName, message);
+            throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
         }
     }
 
     @Transactional
     public void changeTag(UUID id, String newTag) {
         TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
-        this.assertSuccess(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag failed");
+        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
         TeamService.log.info("Team tag changed successfully: id={}", id);
     }
 
@@ -65,14 +65,16 @@ public class TeamService {
                                       TeamCommand.getLabel(createCommand),
                                       TeamCommand.getTag(createCommand),
                                       TeamCommand.getCreationDate(createCommand));
-                final UUID id = this.handleCreateCommand(createCommand);
+                final UUID id = this.create(TeamCommand.getLabel(command),
+                                            TeamCommand.getTag(command),
+                                            TeamCommand.getCreationDate(command));
                 yield TeamCommandResult.successWithPayLoad(this.findById(id));
             }
 
             case TeamCommand.TeamDissolveCommand dissolveCommand -> {
                 TeamService.log.debug("Handling TeamDissolveCommand: id={}",
                                       TeamCommand.getId(dissolveCommand));
-                yield (this.handleDissolveCommand(dissolveCommand))
+                yield (this.dissolve(dissolveCommand.id(), TeamCommand.getDissolutionDate(dissolveCommand)))
                         ? TeamCommandResult.successWithPayLoad(this.findById(dissolveCommand.id()))
                         : TeamCommandResult.successNoPayLoad();
             }
@@ -88,10 +90,14 @@ public class TeamService {
         };
     }
 
-    private UUID handleCreateCommand(final TeamCommand.TeamCreateCommand command) {
-        return this.create(TeamCommand.getLabel(command),
-                           TeamCommand.getTag(command),
-                           TeamCommand.getCreationDate(command));
+    @Transactional
+    public UUID create(final String label, final String tag, final LocalDate creationDate) {
+        TeamService.log.info("Creating team: label={}, tag={}", label, tag);
+        final UUID id = UUID.randomUUID();
+        final PersistenceOperationResult result = this.teamRepository.create(id.toString(), label, tag, creationDate);
+        this.checkSuccessOrThrow(result, "Team create");
+        TeamService.log.info("Team created successfully: id={}", id);
+        return id;
     }
 
     @Transactional(readOnly = true)
@@ -105,38 +111,25 @@ public class TeamService {
                 })
                 .orElseThrow(() -> {
                     TeamService.log.warn("Team not found with id={}", id);
-                    return new ResourceNotFoundException("Team not found: " + id);
+                    return new TeamNotFoundException("Team not found: " + id);
                 });
-    }
-
-    private boolean handleDissolveCommand(final TeamCommand.TeamDissolveCommand dissolveCommand) {
-        return this.dissolve(dissolveCommand.id(), TeamCommand.getDissolutionDate(dissolveCommand));
-    }
-
-    @Transactional
-    public void restore(UUID id) {
-        TeamService.log.info("Restoring team: id={}", id);
-        this.assertSuccess(this.teamRepository.restore(id.toString()), "Team restore failed");
-        TeamService.log.info("Team restored successfully: id={}", id);
-    }
-
-    @Transactional
-    public UUID create(final String label, final String tag, final LocalDate creationDate) {
-        TeamService.log.info("Creating team: label={}, tag={}", label, tag);
-        final UUID id = UUID.randomUUID();
-        final PersistenceOperationResult result = this.teamRepository.create(id.toString(), label, tag, creationDate);
-        this.assertSuccess(result, "Team create failed");
-        TeamService.log.info("Team created successfully: id={}", id);
-        return id;
     }
 
     @Transactional
     public boolean dissolve(UUID id, LocalDate dissolutionDate) {
         TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
         final PersistenceOperationResult result = this.teamRepository.dissolve(id.toString(), dissolutionDate);
-        this.assertSuccess(result, "Team dissolve failed");
+        this.checkSuccessOrThrow(result, "Team dissolve");
         TeamService.log.info("Team dissolved successfully: id={}", id);
         return PersistenceOperationResult.getResult(result);
     }
+
+    @Transactional
+    public void restore(UUID id) {
+        TeamService.log.info("Restoring team: id={}", id);
+        this.checkSuccessOrThrow(this.teamRepository.restore(id.toString()), "Team restore");
+        TeamService.log.info("Team restored successfully: id={}", id);
+    }
+
 }
 

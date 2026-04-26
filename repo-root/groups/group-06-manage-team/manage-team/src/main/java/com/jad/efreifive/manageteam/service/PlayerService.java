@@ -41,7 +41,7 @@ public class PlayerService {
                 })
                 .orElseThrow(() -> {
                     PlayerService.log.warn("Player not found with id={}", id);
-                    return new ResourceNotFoundException("Player not found: " + id);
+                    return new PlayerNotFoundException("Player not found: " + id);
                 });
     }
 
