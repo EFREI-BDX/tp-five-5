@@ -20,7 +20,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-public class TeamService implements ITeamService {
+class TeamService implements ITeamService, ITeamServiceForTest {
 
     private final TeamRepository teamRepository;
     private final TeamMapper teamMapper;
@@ -94,6 +94,7 @@ public class TeamService implements ITeamService {
     }
 
     @Transactional
+    @Override
     public Id create(final Label label, final Tag tag, final Period period) {
         TeamService.log.info("Creating team: label={}, tag={}", label, tag);
         final Id id = Id.newId();
@@ -108,7 +109,16 @@ public class TeamService implements ITeamService {
         return this.findById(id.value());
     }
 
+    private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {
+        if (!result.success()) {
+            String message = result.message();
+            TeamService.log.error("{} failed: {}", operationName, message);
+            throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
+        }
+    }
+
     @Transactional
+    @Override
     public void changeName(UUID id, String newLabel) {
         TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
         this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
@@ -116,6 +126,7 @@ public class TeamService implements ITeamService {
     }
 
     @Transactional
+    @Override
     public void changeTag(UUID id, String newTag) {
         TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
         this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
@@ -123,6 +134,7 @@ public class TeamService implements ITeamService {
     }
 
     @Transactional
+    @Override
     public boolean dissolve(UUID id, LocalDate dissolutionDate) {
         TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
         final PersistenceOperationResult result = this.teamRepository.dissolve(id.toString(), dissolutionDate);
@@ -132,18 +144,11 @@ public class TeamService implements ITeamService {
     }
 
     @Transactional
+    @Override
     public void restore(UUID id) {
         TeamService.log.info("Restoring team: id={}", id);
         this.checkSuccessOrThrow(this.teamRepository.restore(id.toString()), "Team restore");
         TeamService.log.info("Team restored successfully: id={}", id);
-    }
-
-    private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {
-        if (!result.success()) {
-            String message = result.message();
-            TeamService.log.error("{} failed: {}", operationName, message);
-            throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
-        }
     }
 }
 

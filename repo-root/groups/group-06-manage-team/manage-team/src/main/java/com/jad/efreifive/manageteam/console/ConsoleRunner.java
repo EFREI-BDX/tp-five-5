@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.dto.TeamDto;
+import com.jad.efreifive.manageteam.service.ITeamServiceForTest;
 import com.jad.efreifive.manageteam.service.PlayerService;
-import com.jad.efreifive.manageteam.service.TeamService;
 import com.jad.efreifive.manageteam.valueobject.Label;
 import com.jad.efreifive.manageteam.valueobject.Period;
 import com.jad.efreifive.manageteam.valueobject.Tag;
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Log4j2
 public class ConsoleRunner {
 
-    private final TeamService teamService;
+    private final ITeamServiceForTest teamService;
     private final PlayerService playerService;
     private final ObjectMapper objectMapper;
 
@@ -39,7 +39,7 @@ public class ConsoleRunner {
     private ExecutorService executorService;
     private Scanner scanner;
 
-    public ConsoleRunner(final TeamService teamService, final PlayerService playerService,
+    public ConsoleRunner(final ITeamServiceForTest teamService, final PlayerService playerService,
                          final ObjectMapper objectMapper) {
         this.teamService = teamService;
         this.playerService = playerService;
