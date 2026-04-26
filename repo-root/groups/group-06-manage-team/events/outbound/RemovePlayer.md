@@ -1,0 +1,11 @@
+# RemovePlayer (outbound)
+
+```json
+{
+  "id": "<uuid>",
+  "firstName": "<string>",
+  "lastName": "<string>",
+  "idTeam": null
+}
+```
+
