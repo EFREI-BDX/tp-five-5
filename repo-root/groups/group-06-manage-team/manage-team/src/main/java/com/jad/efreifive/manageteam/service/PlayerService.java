@@ -103,4 +103,12 @@ public class PlayerService {
                     return new PlayerNotFoundException("Player not found: " + id);
                 });
     }
+
+    public void massiveCreate(final PlayerDto[] playerDtos) {
+        this.playerRepository.massiveCreate(playerDtos);
+    }
+
+    public void massiveUpdate(final PlayerDto[] playerDtos) {
+        this.playerRepository.massiveUpdate(playerDtos);
+    }
 }

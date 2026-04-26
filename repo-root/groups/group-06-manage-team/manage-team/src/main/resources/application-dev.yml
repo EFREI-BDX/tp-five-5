@@ -24,3 +24,6 @@ team:
         - http://localhost:8081/test-post
       remove_member:
         - http://localhost:8081/test-post
+
+admin:
+  players-source-url: "http://localhost:8081/api/players"

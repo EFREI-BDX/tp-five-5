@@ -1,7 +1,9 @@
 package com.jad.efreifive.manageteam.service;
 
+import com.jad.efreifive.manageteam.config.AdminProperties;
 import com.jad.efreifive.manageteam.controller.command.TeamCommand;
 import com.jad.efreifive.manageteam.controller.command.TeamCommandResult;
+import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.mapper.TeamMapper;
 import com.jad.efreifive.manageteam.repository.TeamRepository;
@@ -13,26 +15,35 @@ import com.jad.efreifive.manageteam.valueobject.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
-class TeamService implements ITeamService, ITeamServiceForTest {
+class TeamService implements ITeamService, ITeamServiceForTest, ITeamAdminService {
 
     private final TeamRepository teamRepository;
     private final TeamMapper teamMapper;
     private final TeamEventOutboundService teamEventOutboundService;
     private final PlayerService playerService;
+    private final AdminProperties adminProperties;
+    private final WebClient webClient;
 
     public TeamService(final TeamRepository teamRepository,
                        final TeamMapper teamMapper,
-                       final TeamEventOutboundService teamEventOutboundService, final PlayerService playerService) {
+                       final TeamEventOutboundService teamEventOutboundService,
+                       final PlayerService playerService,
+                       final AdminProperties adminProperties,
+                       final WebClient.Builder webClientBuilder) {
         this.teamRepository = teamRepository;
         this.teamMapper = teamMapper;
         this.teamEventOutboundService = teamEventOutboundService;
         this.playerService = playerService;
+        this.adminProperties = adminProperties;
+        this.webClient = webClientBuilder.build();
     }
 
     @Transactional(readOnly = true)
@@ -130,11 +141,6 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         return id;
     }
 
-    @Transactional(readOnly = true)
-    TeamDto findById(Id id) {
-        return this.findById(id.value());
-    }
-
     @Transactional
     @Override
     public void changeName(final Id id, final Label newLabel) {
@@ -169,6 +175,11 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         this.teamEventOutboundService.notifyTeamRestore(this.findById(id));
     }
 
+    @Transactional(readOnly = true)
+    TeamDto findById(Id id) {
+        return this.findById(id.value());
+    }
+
     @Transactional
     void updateTeamLeader(final Id id, final Id idTeamLeader) {
         this.checkSuccessOrThrow(this.teamRepository.changeTeamLeader(id, idTeamLeader),
@@ -194,5 +205,25 @@ class TeamService implements ITeamService, ITeamServiceForTest {
             throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
         }
     }
-}
 
+    @Override
+    public void massiveCreatePlayers() {
+        PlayerDto[] playerDtos = this.fetchPlayersFromSource();
+        this.playerService.massiveCreate(playerDtos);
+    }
+
+    private PlayerDto[] fetchPlayersFromSource() {
+        String url = this.adminProperties.getPlayersSourceUrl();
+        Mono<PlayerDto[]> response = this.webClient.get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(PlayerDto[].class);
+        return response.block();
+    }
+
+    @Override
+    public void massiveUpdatePlayers() {
+        PlayerDto[] playerDtos = this.fetchPlayersFromSource();
+        this.playerService.massiveUpdate(playerDtos);
+    }
+}

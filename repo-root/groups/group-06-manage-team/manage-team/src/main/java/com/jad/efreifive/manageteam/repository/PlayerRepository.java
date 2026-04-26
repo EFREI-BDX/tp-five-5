@@ -1,5 +1,6 @@
 package com.jad.efreifive.manageteam.repository;
 
+import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.entity.PlayerEntity;
 import com.jad.efreifive.manageteam.repository.result.PersistenceOperationResult;
 import com.jad.efreifive.manageteam.valueobject.Id;
@@ -55,4 +56,18 @@ public interface PlayerRepository extends JpaRepository<PlayerEntity, String> {
 
     @Procedure(procedureName = "fiveteam.playerUnassignTeam", outputParameterName = "errorMessage_")
     String playerUnassignTeamProc(@Param("_id") String id);
+
+    default PersistenceOperationResult massiveCreate(final PlayerDto[] playerDtos) {
+        return PersistenceOperationResult.fromMessage(this.massiveCreatePlayersProc(playerDtos));
+    }
+
+    @Procedure(procedureName = "fiveteam.playerMassiveCreate", outputParameterName = "errorMessage_")
+    String massiveCreatePlayersProc(@Param("_playersJSON") PlayerDto[] playerDtos);
+
+    default PersistenceOperationResult massiveUpdate(final PlayerDto[] playerDtos) {
+        return PersistenceOperationResult.fromMessage(this.massiveUpdatePlayersProc(playerDtos));
+    }
+
+    @Procedure(procedureName = "fiveteam.playerMassiveUpdate", outputParameterName = "errorMessage_")
+    String massiveUpdatePlayersProc(@Param("_playersJSON") PlayerDto[] playerDtos);
 }
