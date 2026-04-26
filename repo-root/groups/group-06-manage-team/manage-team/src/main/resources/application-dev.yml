@@ -9,19 +9,18 @@ logging:
 
 team:
   outbound:
-    notify-urls:
+    notify_urls:
       create:
-        - http://appli1/api/integration/teams
-        - http://appli2/api/integration/teams
+        - http://localhost:8081/test-post
       update:
-        - http://appli1/api/integration/teams/update
+        - http://localhost:8081/test-post
       dissolve:
-        - http://appli2/api/integration/teams/delete
+        - http://localhost:8081/test-post
       restore:
-        - http://appli2/api/integration/teams/delete
+        - http://localhost:8081/test-post
       assign-leader:
-        - http://appli1/api/integration/teams/assign-leader
+        - http://localhost:8081/test-post
       assign-member:
-        - http://appli2/api/integration/teams/assign-member
+        - http://localhost:8081/test-post
       remove-member:
-        - http://appli1/api/integration/teams/remove-member
+        - http://localhost:8081/test-post

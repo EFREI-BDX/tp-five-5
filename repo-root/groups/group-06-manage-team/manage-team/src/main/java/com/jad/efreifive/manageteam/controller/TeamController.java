@@ -50,7 +50,7 @@ public class TeamController {
     }
 
     @PutMapping("/{id}/label")
-    public ResponseEntity<TeamDto> changeLabel(@PathVariable UUID id, @RequestBody String newLabel) {
+    public ResponseEntity<TeamDto> changeLabel(@PathVariable("id") UUID id, @RequestBody String newLabel) {
         TeamCommandResult result = this.teamService.executeCommand(
                 new TeamCommand.TeamUpdateLabelCommand(id, newLabel));
         return this.toTeamDtoResponseEntity(result);
