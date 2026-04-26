@@ -6,8 +6,10 @@ import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.ITeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,10 +37,10 @@ public class TeamController {
     public ResponseEntity<TeamDto> create(@RequestBody TeamDto teamDto) {
         TeamCommandResult result = this.teamService.executeCommand(new TeamCommand.TeamCreateCommand(teamDto));
         return switch (result) {
-            case TeamCommandResult.SuccessWithPayLoad success -> ResponseEntity
+            case TeamCommandResult.SuccessWithPayLoad _ -> ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(TeamCommandResult.getPayload(result));
-            case TeamCommandResult.SuccessNoPayLoad success -> ResponseEntity
+            case TeamCommandResult.SuccessNoPayLoad _ -> ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(null);
             case TeamCommandResult.Failure failure -> ResponseEntity
@@ -51,11 +53,16 @@ public class TeamController {
     public ResponseEntity<TeamDto> changeLabel(@PathVariable UUID id, @RequestBody String newLabel) {
         TeamCommandResult result = this.teamService.executeCommand(
                 new TeamCommand.TeamUpdateLabelCommand(id, newLabel));
+        return this.toTeamDtoResponseEntity(result);
+    }
+
+    @NonNull
+    private ResponseEntity<TeamDto> toTeamDtoResponseEntity(final TeamCommandResult result) {
         return switch (result) {
-            case TeamCommandResult.SuccessWithPayLoad success -> ResponseEntity
+            case TeamCommandResult.SuccessWithPayLoad _ -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(TeamCommandResult.getPayload(result));
-            case TeamCommandResult.SuccessNoPayLoad success -> ResponseEntity
+            case TeamCommandResult.SuccessNoPayLoad _ -> ResponseEntity
                     .status(HttpStatus.OK)
                     .body(null);
             case TeamCommandResult.Failure failure -> ResponseEntity
@@ -64,5 +71,25 @@ public class TeamController {
         };
     }
 
+    @PutMapping("/{id}/tag")
+    public ResponseEntity<TeamDto> changeTag(@PathVariable UUID id, @RequestBody String newTag) {
+        TeamCommandResult result = this.teamService.executeCommand(
+                new TeamCommand.TeamUpdateTagCommand(id, newTag));
+        return this.toTeamDtoResponseEntity(result);
+    }
+
+    @PutMapping("/{id}/dissolve")
+    public ResponseEntity<TeamDto> dissolve(@PathVariable UUID id, @RequestBody LocalDate dissolutionDate) {
+        TeamCommandResult result = this.teamService.executeCommand(
+                new TeamCommand.TeamDissolveCommand(id, dissolutionDate));
+        return this.toTeamDtoResponseEntity(result);
+    }
+
+    @PutMapping("/{id}/restore")
+    public ResponseEntity<TeamDto> restore(@PathVariable UUID id) {
+        TeamCommandResult result = this.teamService.executeCommand(
+                new TeamCommand.TeamRestoreCommand(id));
+        return this.toTeamDtoResponseEntity(result);
+    }
 }
 
