@@ -1,12 +1,12 @@
 package com.jad.efreifive.manageteam.controller;
 
+import com.jad.efreifive.manageteam.command.CommandResult;
+import com.jad.efreifive.manageteam.command.team.TeamCreateCommand;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.TeamService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,8 +27,16 @@ public class TeamController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TeamDto> findById(@PathVariable("id") UUID id) {
+    public ResponseEntity<TeamDto> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(this.teamService.findById(id));
+    }
+
+    @PostMapping(consumes = "application/json")
+    public ResponseEntity<TeamDto> create(@RequestBody TeamDto teamDto) {
+        CommandResult<TeamDto> commandResult = this.teamService.executeCommand(new TeamCreateCommand(teamDto));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(commandResult.getPayload("Create must return a payload."));
     }
 }
 

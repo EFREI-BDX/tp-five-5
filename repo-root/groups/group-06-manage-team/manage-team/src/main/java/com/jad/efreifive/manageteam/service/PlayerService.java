@@ -3,13 +3,15 @@ package com.jad.efreifive.manageteam.service;
 import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.mapper.PlayerMapper;
 import com.jad.efreifive.manageteam.repository.PlayerRepository;
-import com.jad.efreifive.manageteam.repository.result.OperationResult;
+import com.jad.efreifive.manageteam.repository.result.PersistenceOperationResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class PlayerService {
 
@@ -23,50 +25,77 @@ public class PlayerService {
 
     @Transactional(readOnly = true)
     public List<PlayerDto> findAll() {
-        return this.playerRepository.findAll().stream().map(this.playerMapper::entityToDto).toList();
+        PlayerService.log.debug("Listing all players");
+        List<PlayerDto> players = this.playerRepository.findAll().stream().map(this.playerMapper::entityToDto).toList();
+        PlayerService.log.debug("Loaded {} players", players.size());
+        return players;
     }
 
     @Transactional(readOnly = true)
     public PlayerDto findById(UUID id) {
+        PlayerService.log.debug("Looking up player with id={}", id);
         return this.playerRepository.findById(id.toString())
-                .map(this.playerMapper::entityToDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Player not found: " + id));
+                .map(entity -> {
+                    PlayerService.log.debug("Player found: {}", entity);
+                    return this.playerMapper.entityToDto(entity);
+                })
+                .orElseThrow(() -> {
+                    PlayerService.log.warn("Player not found with id={}", id);
+                    return new ResourceNotFoundException("Player not found: " + id);
+                });
     }
 
     @Transactional(readOnly = true)
     public List<PlayerDto> findByTeamId(UUID teamId) {
-        return this.playerRepository.findByIdTeam(teamId.toString()).stream().map(this.playerMapper::entityToDto).toList();
+        PlayerService.log.debug("Listing players by teamId={}", teamId);
+        List<PlayerDto> players = this.playerRepository.findByIdTeam(teamId.toString()).stream().map(
+                this.playerMapper::entityToDto).toList();
+        PlayerService.log.debug("Loaded {} players for teamId={}", players.size(), teamId);
+        return players;
     }
 
     @Transactional
     public void create(UUID id, String displayName) {
+        PlayerService.log.info("Creating player: id={}, displayName={}", id, displayName);
         this.assertSuccess(this.playerRepository.create(id.toString(), displayName), "Player create failed");
+        PlayerService.log.info("Player created successfully: id={}", id);
+    }
+
+    private void assertSuccess(PersistenceOperationResult result, String defaultMessage) {
+        if (!result.success()) {
+            String message = result.message() == null || result.message().isBlank() ? defaultMessage : result.message();
+            PlayerService.log.error("Operation failed: {}", message);
+            throw new ServiceOperationException(message);
+        }
     }
 
     @Transactional
     public void update(UUID id, String displayName) {
+        PlayerService.log.info("Updating player: id={}, displayName={}", id, displayName);
         this.assertSuccess(this.playerRepository.update(id.toString(), displayName), "Player update failed");
+        PlayerService.log.info("Player updated successfully: id={}", id);
     }
 
     @Transactional
     public void delete(UUID id) {
+        PlayerService.log.info("Deleting player: id={}", id);
         this.assertSuccess(this.playerRepository.delete(id.toString()), "Player delete failed");
+        PlayerService.log.info("Player deleted successfully: id={}", id);
     }
 
     @Transactional
     public void assignTeam(UUID id, UUID teamId) {
-        this.assertSuccess(this.playerRepository.assignTeam(id.toString(), teamId.toString()), "Player assign team failed");
+        PlayerService.log.info("Assigning player to team: playerId={}, teamId={}", id, teamId);
+        this.assertSuccess(this.playerRepository.assignTeam(id.toString(), teamId.toString()),
+                           "Player assign team failed");
+        PlayerService.log.info("Player assigned to team successfully: playerId={}, teamId={}", id, teamId);
     }
 
     @Transactional
     public void unassignTeam(UUID id) {
+        PlayerService.log.info("Unassigning player from team: playerId={}", id);
         this.assertSuccess(this.playerRepository.unassignTeam(id.toString()), "Player unassign team failed");
-    }
-
-    private void assertSuccess(OperationResult result, String defaultMessage) {
-        if (!result.success()) {
-            throw new ServiceOperationException(result.message() == null || result.message().isBlank() ? defaultMessage : result.message());
-        }
+        PlayerService.log.info("Player unassigned from team successfully: playerId={}", id);
     }
 }
 

@@ -50,78 +50,76 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.teamLabelCheck(IN _label VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     SET errorMessage_ = '';
 
     IF _label IS NULL OR _label = '' THEN
         SET errorMessage_ = 'Label must not be empty';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        LEAVE proc;
     END IF;
 END //
 
 CREATE PROCEDURE fiveteam.teamTagCheck(IN _tag VARCHAR(3), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     SET errorMessage_ = '';
 
     IF _tag IS NULL OR _tag = '' THEN
         SET errorMessage_ = 'Tag must not be empty';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        LEAVE proc;
     END IF;
 END //
 
 CREATE PROCEDURE fiveteam.teamDateCheck(IN _creationDate DATE, IN _dissolutionDate DATE, OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     SET errorMessage_ = '';
     IF _creationDate IS NULL THEN
         SET errorMessage_ = 'Creation date must not be empty';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        LEAVE proc;
     END IF;
     IF _dissolutionDate IS NOT NULL AND _dissolutionDate < _creationDate THEN
         SET errorMessage_ = 'Dissolution date must be greater than or equal to creation date';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        LEAVE proc;
     END IF;
 END //
 
 CREATE PROCEDURE fiveteam.teamLeaderCheck(IN _idTeamLeader BINARY(16), IN _idTeam BINARY(16),
                                           OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     SET errorMessage_ = '';
     IF _idTeamLeader IS NOT NULL THEN
         IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = _idTeamLeader) = 0 THEN
             SET errorMessage_ = 'Team leader must be a valid player id';
-            SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = errorMessage_;
+            LEAVE proc;
         END IF;
         IF (SELECT idTeam FROM fiveteam.player WHERE id = _idTeamLeader) != _idTeam THEN
             SET errorMessage_ = 'Team leader must be a member of the team';
-            SIGNAL SQLSTATE '45000'
-                SET MESSAGE_TEXT = errorMessage_;
+            LEAVE proc;
         END IF;
     END IF;
 END //
 
 CREATE PROCEDURE fiveteam.teamPlayersCountCheck(IN _id VARCHAR(36), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     SET errorMessage_ = '';
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE idTeam = @id) > 8 THEN
         SET errorMessage_ = 'A team cannot have more than 8 players';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        LEAVE proc;
     END IF;
 END //
 
 CREATE PROCEDURE fiveteam.playerDisplayNameCheck(IN _displayName VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     SET errorMessage_ = '';
     IF _displayName IS NULL OR _displayName = '' THEN
         SET errorMessage_ = 'Display name must not be empty';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        LEAVE proc;
     END IF;
 END //
 
@@ -142,6 +140,7 @@ CREATE PROCEDURE fiveteam.teamCreate(IN _id VARCHAR(36),
                                      IN _tag VARCHAR(3),
                                      IN _creationDate DATE,
                                      OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -154,8 +153,8 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) > 0 THEN
         SET errorMessage_ = CONCAT('A team with id ', _id, ' already exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     CALL fiveteam.teamLabelCheck(_label, errorMessage_);
     CALL fiveteam.teamTagCheck(_tag, errorMessage_);
@@ -166,6 +165,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.teamDissolve(IN _id VARCHAR(36), IN _dissolutionDate DATE, OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -178,13 +178,13 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No team with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     IF (SELECT dissolutionDate FROM fiveteam.team WHERE id = @id) IS NOT NULL THEN
         SET errorMessage_ = CONCAT('Team with id ', _id, ' is already dissolved');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     SELECT creationDate INTO @creationDate FROM fiveteam.team WHERE id = @id;
     CALL fiveteam.teamDateCheck(@creationDate, _dissolutionDate, errorMessage_);
@@ -197,6 +197,7 @@ END //
 
 
 CREATE PROCEDURE fiveteam.teamRestore(IN _id VARCHAR(36), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -209,13 +210,13 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No team with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     IF (SELECT dissolutionDate FROM fiveteam.team WHERE id = @id) IS NULL THEN
         SET errorMessage_ = CONCAT('Team with id ', _id, ' is not dissolved');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     UPDATE fiveteam.team
     SET dissolutionDate = NULL,
@@ -225,6 +226,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.teamChangeName(IN _id VARCHAR(36), IN _newLabel VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -237,8 +239,8 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No team with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     CALL fiveteam.teamLabelCheck(_newLabel, errorMessage_);
     UPDATE fiveteam.team
@@ -248,6 +250,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.teamChangeTag(IN _id VARCHAR(36), IN _newTag VARCHAR(3), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -260,8 +263,8 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No team with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     CALL fiveteam.teamTagCheck(_newTag, errorMessage_);
     UPDATE fiveteam.team
@@ -271,6 +274,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.playersMassiveCreate(IN _playersJSON LONGTEXT, OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE i INT DEFAULT 0;
     DECLARE nbPlayers INT;
@@ -285,8 +289,8 @@ BEGIN
     SET nbPlayers = JSON_LENGTH(_playersJSON);
     IF nbPlayers = 0 THEN
         SET errorMessage_ = 'playersJSON must contain at least one player';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
 
     START TRANSACTION;
@@ -304,6 +308,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.playersMassiveUpdate(IN _playersJSON LONGTEXT, OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE i INT DEFAULT 0;
     DECLARE nbPlayers INT;
@@ -318,8 +323,8 @@ BEGIN
     SET nbPlayers = JSON_LENGTH(_playersJSON);
     IF nbPlayers = 0 THEN
         SET errorMessage_ = 'playersJSON must contain at least one player';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
 
     START TRANSACTION;
@@ -338,6 +343,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.playerCreate(IN _id VARCHAR(36), IN _displayName VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -350,8 +356,8 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) > 0 THEN
         SET errorMessage_ = CONCAT('A player with id ', _id, ' already exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     CALL fiveteam.playerDisplayNameCheck(_displayName, errorMessage_);
     INSERT INTO fiveteam.player (id, displayName, idTeam)
@@ -360,6 +366,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.playerUpdate(IN _id VARCHAR(36), IN _displayName VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -372,8 +379,8 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     CALL fiveteam.playerDisplayNameCheck(_displayName, errorMessage_);
     UPDATE fiveteam.player
@@ -383,6 +390,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.playerDelete(IN _id VARCHAR(36), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -395,8 +403,8 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     DELETE
     FROM fiveteam.player
@@ -405,6 +413,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.playerAssignTeam(IN _id VARCHAR(36), IN _idTeam VARCHAR(36), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -418,23 +427,23 @@ BEGIN
     SET @idTeam = fiveteam.UUIDToBinary(_idTeam);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @idTeam) = 0 THEN
         SET errorMessage_ = CONCAT('No team with id ', _idTeam, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE idTeamLeader = @id) > 0 THEN
         SET errorMessage_ = CONCAT('Player with id ', _id, ' is a team leader and cannot be assigned to a team');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE idTeam = @idTeam) >= 8 THEN
         SET errorMessage_ = CONCAT('Team with id ', _idTeam, ' already has 8 players');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     UPDATE fiveteam.player
     SET idTeam = @idTeam
@@ -448,6 +457,7 @@ BEGIN
 END //
 
 CREATE PROCEDURE fiveteam.playerUnassignTeam(IN _id VARCHAR(36), OUT errorMessage_ VARCHAR(500))
+proc:
 BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
         BEGIN
@@ -460,13 +470,13 @@ BEGIN
     SET @id = fiveteam.UUIDToBinary(_id);
     IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = @id) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _id, ' exists');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE idTeamLeader = @id) > 0 THEN
         SET errorMessage_ = CONCAT('Player with id ', _id, ' is a team leader and cannot be assigned to a team');
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
+        ROLLBACK;
+        LEAVE proc;
     END IF;
     SET @idTeam = (SELECT idTeam FROM fiveteam.player WHERE id = @id);
     UPDATE fiveteam.player

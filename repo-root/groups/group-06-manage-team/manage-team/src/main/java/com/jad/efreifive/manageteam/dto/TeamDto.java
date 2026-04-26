@@ -11,5 +11,17 @@ public record TeamDto(
         LocalDate dissolutionDate,
         UUID idTeamLeader,
         String state
-) {}
+) {
+    public static String getLabel(final TeamDto teamDto) {
+        return teamDto.label;
+    }
+
+    public static String getTag(final TeamDto teamDto) {
+        return teamDto.tag;
+    }
+
+    public static LocalDate getCreationDate(final TeamDto teamDto) {
+        return teamDto.creationDate;
+    }
+}
 

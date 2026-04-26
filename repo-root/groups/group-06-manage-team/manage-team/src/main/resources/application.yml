@@ -1,6 +1,8 @@
 spring:
   application:
     name: manage-team
+  profiles:
+    default: dev
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiveteam
@@ -20,6 +22,4 @@ app:
   console:
     enabled: true
 
-logging:
-  config: classpath:log4j2-spring.xml
 

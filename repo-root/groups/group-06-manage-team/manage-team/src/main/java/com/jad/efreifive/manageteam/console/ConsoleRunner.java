@@ -192,7 +192,6 @@ public class ConsoleRunner {
     private void teamCreate(final List<String> args) {
         this.requireArgs(args, 5, "team-create <id> <label> <tag> <creationDate(yyyy-MM-dd)>");
         this.teamService.create(
-                UUID.fromString(args.get(1)),
                 args.get(2),
                 args.get(3),
                 LocalDate.parse(args.get(4))

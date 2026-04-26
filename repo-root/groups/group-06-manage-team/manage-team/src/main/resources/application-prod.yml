@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: ${MANAGE_TEAM_DB_URL}
+    username: ${MANAGE_TEAM_DB_USERNAME}
+    password: ${MANAGE_TEAM_DB_PASSWORD}
+
+server:
+  port: 8080
+
+app:
+  console:
+    enabled: false
+
+logging:
+  config: classpath:log4j2-prod.xml
+
