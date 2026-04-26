@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,13 +24,15 @@ class TeamService implements ITeamService, ITeamServiceForTest {
     private final TeamRepository teamRepository;
     private final TeamMapper teamMapper;
     private final TeamEventOutboundService teamEventOutboundService;
+    private final PlayerService playerService;
 
     public TeamService(final TeamRepository teamRepository,
                        final TeamMapper teamMapper,
-                       final TeamEventOutboundService teamEventOutboundService) {
+                       final TeamEventOutboundService teamEventOutboundService, final PlayerService playerService) {
         this.teamRepository = teamRepository;
         this.teamMapper = teamMapper;
         this.teamEventOutboundService = teamEventOutboundService;
+        this.playerService = playerService;
     }
 
     @Transactional(readOnly = true)
@@ -41,107 +42,6 @@ class TeamService implements ITeamService, ITeamServiceForTest {
         List<TeamDto> teams = this.teamRepository.findAll().stream().map(this.teamMapper::entityToDto).toList();
         TeamService.log.debug("Loaded {} teams", teams.size());
         return teams;
-    }
-
-    @Transactional
-    @Override
-    public TeamCommandResult executeCommand(final TeamCommand command) {
-        TeamService.log.debug("Executing command: {}", command.toLogString());
-        return switch (command) {
-
-            case TeamCommand.TeamCreateCommand createCommand -> {
-                final Id id = this.create(new Label(TeamCommand.getLabel(createCommand)),
-                                          new Tag(TeamCommand.getTag(createCommand)),
-                                          new Period(TeamCommand.getCreationDate(createCommand), null));
-                yield TeamCommandResult.successWithPayLoad(this.findById(id));
-            }
-
-            case TeamCommand.TeamUpdateLabelCommand updateLabelCommand -> {
-                this.changeName(updateLabelCommand.id(), updateLabelCommand.newLabel());
-                yield TeamCommandResult.successWithPayLoad(this.findById(updateLabelCommand.id()));
-            }
-
-            case TeamCommand.TeamUpdateTagCommand updateTagCommand -> {
-                this.changeTag(updateTagCommand.id(), updateTagCommand.newTag());
-                yield TeamCommandResult.successWithPayLoad(this.findById(updateTagCommand.id()));
-            }
-
-            case TeamCommand.TeamDissolveCommand dissolveCommand -> {
-                yield (this.dissolve(dissolveCommand.id(), TeamCommand.getDissolutionDate(dissolveCommand)))
-                        ? TeamCommandResult.successWithPayLoad(this.findById(dissolveCommand.id()))
-                        : TeamCommandResult.successNoPayLoad();
-            }
-
-            case TeamCommand.TeamRestoreCommand restoreCommand -> {
-                this.restore(restoreCommand.id());
-                yield TeamCommandResult.successWithPayLoad(this.findById(restoreCommand.id()));
-            }
-            default -> throw new UnsupportedOperationException(
-                    "Not yet implemented command type: " + command.getClass().getSimpleName());
-        };
-    }
-
-    @Transactional
-    @Override
-    public Id create(final Label label, final Tag tag, final Period period) {
-        TeamService.log.info("Creating team: label={}, tag={}", label, tag);
-        final Id id = Id.newId();
-        final PersistenceOperationResult result = this.teamRepository.create(id, label, tag, period);
-        this.checkSuccessOrThrow(result, "Team create");
-        TeamService.log.info("Team created successfully: id={}", id.value());
-        this.teamEventOutboundService.notifyTeamCreated(this.findById(id));
-        return id;
-    }
-
-    @Transactional(readOnly = true)
-    TeamDto findById(Id id) {
-        return this.findById(id.value());
-    }
-
-    @Transactional
-    @Override
-    public void changeName(UUID id, String newLabel) {
-        TeamService.log.info("Renaming team: id={}, newLabel={}", id, newLabel);
-        this.checkSuccessOrThrow(this.teamRepository.changeName(id.toString(), newLabel), "Team rename");
-        TeamService.log.info("Team renamed successfully: id={}", id);
-        this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
-    }
-
-    @Transactional
-    @Override
-    public void changeTag(UUID id, String newTag) {
-        TeamService.log.info("Changing team tag: id={}, newTag={}", id, newTag);
-        this.checkSuccessOrThrow(this.teamRepository.changeTag(id.toString(), newTag), "Team change tag");
-        TeamService.log.info("Team tag changed successfully: id={}", id);
-        this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
-    }
-
-    @Transactional
-    @Override
-    public boolean dissolve(UUID id, LocalDate dissolutionDate) {
-        TeamService.log.info("Dissolving team: id={}, dissolutionDate={}", id, dissolutionDate);
-        final PersistenceOperationResult result = this.teamRepository.dissolve(id.toString(), dissolutionDate);
-        this.checkSuccessOrThrow(result, "Team dissolve");
-        TeamService.log.info("Team dissolved successfully: id={}", id);
-        this.teamEventOutboundService.notifyTeamDissolve(this.findById(id));
-        return PersistenceOperationResult.getResult(result);
-    }
-
-    @Transactional
-    @Override
-    public void restore(UUID id) {
-        TeamService.log.info("Restoring team: id={}", id);
-        this.checkSuccessOrThrow(this.teamRepository.restore(id.toString()), "Team restore");
-        TeamService.log.info("Team restored successfully: id={}", id);
-        this.teamEventOutboundService.notifyTeamRestore(this.findById(id));
-    }
-
-    private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {
-        if (!result.success()) {
-            String message = result.message();
-            TeamService.log.error("{} failed: {}", operationName, message);
-            throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
-        }
     }
 
     @Transactional(readOnly = true)
@@ -158,6 +58,128 @@ class TeamService implements ITeamService, ITeamServiceForTest {
                     TeamService.log.warn("Team not found with id={}", id);
                     return new TeamServiceException(DomainErrorCode.TEAM_NOT_FOUND, "Team not found: " + id);
                 });
+    }
+
+    @Transactional
+    @Override
+    public TeamCommandResult executeCommand(final TeamCommand command) {
+        TeamService.log.debug("Executing command: {}", command.toLogString());
+        return switch (command) {
+
+            case TeamCommand.TeamCreateCommand createCommand -> {
+                final Id id = this.create(new Label(TeamCommand.getLabel(createCommand)),
+                                          new Tag(TeamCommand.getTag(createCommand)),
+                                          new Period(TeamCommand.getCreationDate(createCommand), null));
+                yield TeamCommandResult.successWithPayLoad(this.findById(id));
+            }
+
+            case TeamCommand.TeamUpdateLabelCommand updateLabelCommand -> {
+                this.changeName(new Id(updateLabelCommand.id()), new Label(updateLabelCommand.newLabel()));
+                yield TeamCommandResult.successWithPayLoad(this.findById(updateLabelCommand.id()));
+            }
+
+            case TeamCommand.TeamUpdateTagCommand updateTagCommand -> {
+                this.changeTag(new Id(updateTagCommand.id()), new Tag(updateTagCommand.newTag()));
+                yield TeamCommandResult.successWithPayLoad(this.findById(updateTagCommand.id()));
+            }
+
+            case TeamCommand.TeamDissolveCommand dissolveCommand -> {
+                if (this.dissolve(new Id(dissolveCommand.id()),
+                                  new Period(TeamCommand.getDissolutionDate(dissolveCommand),
+                                             TeamCommand.getDissolutionDate(dissolveCommand)))) {
+                    yield TeamCommandResult.successWithPayLoad(this.findById(dissolveCommand.id()));
+                }
+                yield TeamCommandResult.successNoPayLoad();
+            }
+
+            case TeamCommand.TeamRestoreCommand restoreCommand -> {
+                this.restore(new Id(restoreCommand.id()));
+                yield TeamCommandResult.successWithPayLoad(this.findById(restoreCommand.id()));
+            }
+
+            case TeamCommand.TeamUpdateTeamLeaderCommand teamUpdateTeamLeaderCommand -> {
+                this.updateTeamLeader(new Id(teamUpdateTeamLeaderCommand.id()),
+                                      new Id(teamUpdateTeamLeaderCommand.playerId()));
+                yield TeamCommandResult.successWithPayLoad(this.findById(teamUpdateTeamLeaderCommand.id()));
+            }
+
+            case TeamCommand.TeamAssignPlayerCommand teamAssignPlayerCommand -> {
+                this.playerService.assignTeam(new Id(teamAssignPlayerCommand.id()),
+                                              new Id(teamAssignPlayerCommand.playerId()));
+                yield TeamCommandResult.successWithPayLoad(this.findById(teamAssignPlayerCommand.id()));
+            }
+
+            case TeamCommand.TeamRemovePlayerCommand teamRemovePlayerCommand -> {
+                this.playerService.unassignTeam(new Id(teamRemovePlayerCommand.playerId()));
+                yield TeamCommandResult.successNoPayLoad();
+            }
+        };
+    }
+
+    @Transactional
+    @Override
+    public Id create(final Label label, final Tag tag, final Period period) {
+        final Id id = Id.newId();
+        final PersistenceOperationResult result = this.teamRepository.create(id, label, tag, period);
+        this.checkSuccessOrThrow(result, "Team create");
+        TeamService.log.info("Team created successfully: id={}", id.value());
+        this.teamEventOutboundService.notifyTeamCreated(this.findById(id));
+        return id;
+    }
+
+    @Transactional
+    @Override
+    public void changeName(final Id id, final Label newLabel) {
+        this.checkSuccessOrThrow(this.teamRepository.changeName(id, newLabel), "Team rename");
+        TeamService.log.info("Team renamed successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
+    }
+
+    @Transactional
+    @Override
+    public void changeTag(final Id id, final Tag newTag) {
+        this.checkSuccessOrThrow(this.teamRepository.changeTag(id, newTag), "Team change tag");
+        TeamService.log.info("Team tag changed successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
+    }
+
+    @Transactional
+    @Override
+    public boolean dissolve(final Id id, Period period) {
+        final PersistenceOperationResult result = this.teamRepository.dissolve(id, period);
+        this.checkSuccessOrThrow(result, "Team dissolve");
+        TeamService.log.info("Team dissolved successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamDissolve(this.findById(id));
+        return PersistenceOperationResult.getResult(result);
+    }
+
+    @Transactional
+    @Override
+    public void restore(final Id id) {
+        this.checkSuccessOrThrow(this.teamRepository.restore(id), "Team restore");
+        TeamService.log.info("Team restored successfully: id={}", id);
+        this.teamEventOutboundService.notifyTeamRestore(this.findById(id));
+    }
+
+    @Transactional(readOnly = true)
+    TeamDto findById(Id id) {
+        return this.findById(id.value());
+    }
+
+    @Transactional
+    void updateTeamLeader(final Id id, final Id idTeamLeader) {
+        this.checkSuccessOrThrow(this.teamRepository.changeTeamLeader(id, idTeamLeader),
+                                 "Team change team leader");
+        TeamService.log.info("Team leader changed successfully: teamId={}", id);
+        this.teamEventOutboundService.notifyTeamUpdated(this.findById(id));
+    }
+
+    private void checkSuccessOrThrow(PersistenceOperationResult result, String operationName) {
+        if (!result.success()) {
+            String message = result.message();
+            TeamService.log.error("{} failed: {}", operationName, message);
+            throw new TeamServiceException(result.errorCode(), operationName + " failed: " + message);
+        }
     }
 }
 

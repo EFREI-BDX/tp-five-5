@@ -4,6 +4,7 @@ import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.mapper.PlayerMapper;
 import com.jad.efreifive.manageteam.repository.PlayerRepository;
 import com.jad.efreifive.manageteam.repository.result.PersistenceOperationResult;
+import com.jad.efreifive.manageteam.valueobject.Id;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +85,7 @@ public class PlayerService {
     }
 
     @Transactional
-    public void assignTeam(UUID id, UUID teamId) {
+    public void assignTeam(final Id id, final Id teamId) {
         PlayerService.log.info("Assigning player to team: playerId={}, teamId={}", id, teamId);
         this.assertSuccess(this.playerRepository.assignTeam(id.toString(), teamId.toString()),
                            "Player assign team failed");
@@ -92,7 +93,7 @@ public class PlayerService {
     }
 
     @Transactional
-    public void unassignTeam(UUID id) {
+    public void unassignTeam(final Id id) {
         PlayerService.log.info("Unassigning player from team: playerId={}", id);
         this.assertSuccess(this.playerRepository.unassignTeam(id.toString()), "Player unassign team failed");
         PlayerService.log.info("Player unassigned from team successfully: playerId={}", id);

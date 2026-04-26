@@ -16,6 +16,7 @@ DROP PROCEDURE IF EXISTS fiveteam.teamDissolve;
 DROP PROCEDURE IF EXISTS fiveteam.teamRestore;
 DROP PROCEDURE IF EXISTS fiveteam.teamChangeName;
 DROP PROCEDURE IF EXISTS fiveteam.teamChangeTag;
+DROP PROCEDURE IF EXISTS fiveteam.teamChangeLeader;
 
 DROP PROCEDURE IF EXISTS fiveteam.playersMassiveCreate;
 DROP PROCEDURE IF EXISTS fiveteam.playersMassiveUpdate;
@@ -162,7 +163,7 @@ BEGIN
     END IF;
 
     IF (SELECT COUNT(*) FROM fiveteam.team WHERE label = _label) > 0 THEN
-        SET errorMessage_ = CONCAT('TALXT:A team with label ', _label, ' already exists');
+        SET errorMessage_ =  CONCAT('TALXT:A team with label ', _label, ' already exists');
         ROLLBACK;
         LEAVE proc;
     END IF;
@@ -331,6 +332,37 @@ BEGIN
 
     UPDATE fiveteam.team
     SET tag = _newTag
+    WHERE id = @id;
+    COMMIT;
+END //
+
+CREATE PROCEDURE fiveteam.teamChangeLeader(IN _id VARCHAR(36), IN _IdLeader VARCHAR(36), OUT errorMessage_ VARCHAR(500))
+proc:
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+
+    START TRANSACTION;
+    SET errorMessage_ = '';
+    SET @id = fiveteam.UUIDToBinary(_id);
+
+    IF (SELECT COUNT(*) FROM fiveteam.team WHERE id = @id) = 0 THEN
+        SET errorMessage_ = CONCAT('TNFND:No team with id ', _id, ' exists');
+        ROLLBACK;
+        LEAVE proc;
+    END IF;
+
+    IF (SELECT COUNT(*) FROM fiveteam.player WHERE id = _IdLeader AND idTeam = @id) = 0 THEN
+        SET errorMessage_ = CONCAT('PNFND:No player with id ', _IdLeader, ' exists');
+        ROLLBACK;
+        LEAVE proc;
+    END IF;
+
+    UPDATE fiveteam.team
+    SET idTeamLeader = _IdLeader
     WHERE id = @id;
     COMMIT;
 END //
@@ -636,6 +668,7 @@ GRANT EXECUTE ON PROCEDURE fiveteam.teamDissolve TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.teamRestore TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.teamChangeName TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.teamChangeTag TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveteam.teamChangeLeader TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playersMassiveCreate TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playersMassiveUpdate TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveteam.playerCreate TO 'jad_efrei_five_2526'@'%';

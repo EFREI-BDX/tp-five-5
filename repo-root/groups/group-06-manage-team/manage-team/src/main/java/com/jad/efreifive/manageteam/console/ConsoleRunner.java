@@ -6,6 +6,7 @@ import com.jad.efreifive.manageteam.dto.PlayerDto;
 import com.jad.efreifive.manageteam.dto.TeamDto;
 import com.jad.efreifive.manageteam.service.ITeamServiceForTest;
 import com.jad.efreifive.manageteam.service.PlayerService;
+import com.jad.efreifive.manageteam.valueobject.Id;
 import com.jad.efreifive.manageteam.valueobject.Label;
 import com.jad.efreifive.manageteam.valueobject.Period;
 import com.jad.efreifive.manageteam.valueobject.Tag;
@@ -202,25 +203,26 @@ public class ConsoleRunner {
 
     private void teamDissolve(final List<String> args) {
         this.requireArgs(args, 3, "team-dissolve <id> <dissolutionDate(yyyy-MM-dd)>");
-        this.teamService.dissolve(UUID.fromString(args.get(1)), LocalDate.parse(args.get(2)));
+        this.teamService.dissolve(Id.of(args.get(1)),
+                                  new Period(LocalDate.parse(args.get(2)), LocalDate.parse(args.get(2))));
         System.out.println("OK");
     }
 
     private void teamRestore(final List<String> args) {
         this.requireArgs(args, 2, "team-restore <id>");
-        this.teamService.restore(UUID.fromString(args.get(1)));
+        this.teamService.restore(Id.of((args.get(1))));
         System.out.println("OK");
     }
 
     private void teamRename(final List<String> args) {
         this.requireArgs(args, 3, "team-rename <id> <newLabel>");
-        this.teamService.changeName(UUID.fromString(args.get(1)), args.get(2));
+        this.teamService.changeName(Id.of(args.get(1)), new Label(args.get(2)));
         System.out.println("OK");
     }
 
     private void teamRetag(final List<String> args) {
         this.requireArgs(args, 3, "team-retag <id> <newTag>");
-        this.teamService.changeTag(UUID.fromString(args.get(1)), args.get(2));
+        this.teamService.changeTag(Id.of(args.get(1)), new Tag(args.get(2)));
         System.out.println("OK");
     }
 
@@ -255,13 +257,13 @@ public class ConsoleRunner {
 
     private void playerAssign(final List<String> args) {
         this.requireArgs(args, 3, "player-assign <playerId> <teamId>");
-        this.playerService.assignTeam(UUID.fromString(args.get(1)), UUID.fromString(args.get(2)));
+        this.playerService.assignTeam(Id.of(args.get(1)), Id.of(args.get(2)));
         System.out.println("OK");
     }
 
     private void playerUnassign(final List<String> args) {
         this.requireArgs(args, 2, "player-unassign <playerId>");
-        this.playerService.unassignTeam(UUID.fromString(args.get(1)));
+        this.playerService.unassignTeam(Id.of(args.get(1)));
         System.out.println("OK");
     }
 

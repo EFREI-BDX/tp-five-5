@@ -29,34 +29,44 @@ public interface TeamRepository extends JpaRepository<TeamEntity, String> {
                           @Param("_tag") String tag,
                           @Param("_creationDate") LocalDate creationDate);
 
-    default PersistenceOperationResult dissolve(String id, LocalDate dissolutionDate) {
-        return PersistenceOperationResult.fromMessage(this.teamDissolveProc(id, dissolutionDate));
+    default PersistenceOperationResult dissolve(final Id id, final Period period) {
+        return PersistenceOperationResult.fromMessage(
+                this.teamDissolveProc(id.value().toString(), period.dissolutionDate()));
     }
 
     @Procedure(procedureName = "fiveteam.teamDissolve", outputParameterName = "errorMessage_")
     String teamDissolveProc(@Param("_id") String id,
                             @Param("_dissolutionDate") LocalDate dissolutionDate);
 
-    default PersistenceOperationResult restore(String id) {
-        return PersistenceOperationResult.fromMessage(this.teamRestoreProc(id));
+    default PersistenceOperationResult restore(final Id id) {
+        return PersistenceOperationResult.fromMessage(this.teamRestoreProc(id.value().toString()));
     }
 
     @Procedure(procedureName = "fiveteam.teamRestore", outputParameterName = "errorMessage_")
     String teamRestoreProc(@Param("_id") String id);
 
-    default PersistenceOperationResult changeName(String id, String newLabel) {
-        return PersistenceOperationResult.fromMessage(this.teamChangeNameProc(id, newLabel));
+    default PersistenceOperationResult changeName(final Id id, final Label newLabel) {
+        return PersistenceOperationResult.fromMessage(this.teamChangeNameProc(id.value().toString(), newLabel.value()));
     }
 
     @Procedure(procedureName = "fiveteam.teamChangeName", outputParameterName = "errorMessage_")
     String teamChangeNameProc(@Param("_id") String id,
                               @Param("_newLabel") String newLabel);
 
-    default PersistenceOperationResult changeTag(String id, String newTag) {
-        return PersistenceOperationResult.fromMessage(this.teamChangeTagProc(id, newTag));
+    default PersistenceOperationResult changeTag(final Id id, final Tag newTag) {
+        return PersistenceOperationResult.fromMessage(this.teamChangeTagProc(id.value().toString(), newTag.value()));
     }
 
     @Procedure(procedureName = "fiveteam.teamChangeTag", outputParameterName = "errorMessage_")
     String teamChangeTagProc(@Param("_id") String id,
                              @Param("_newTag") String newTag);
+
+    default PersistenceOperationResult changeTeamLeader(final Id id, Id newTeamLeaderId) {
+        return PersistenceOperationResult.fromMessage(this.changeTeamLeaderProc(id.value().toString(),
+                                                                                newTeamLeaderId.value().toString()));
+    }
+
+    @Procedure(procedureName = "fiveteam.teamChangeLeader", outputParameterName = "errorMessage_")
+    String changeTeamLeaderProc(@Param("_id") String id,
+                                @Param("_idLeader") String newTeamLeaderId);
 }

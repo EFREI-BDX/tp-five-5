@@ -91,5 +91,26 @@ public class TeamController {
                 new TeamCommand.TeamRestoreCommand(id));
         return this.toTeamDtoResponseEntity(result);
     }
+
+    @PutMapping("/{id}/team-leader")
+    public ResponseEntity<TeamDto> changeTeamLeader(@PathVariable UUID id, @RequestBody UUID newTeamLeaderId) {
+        TeamCommandResult result = this.teamService.executeCommand(
+                new TeamCommand.TeamUpdateTeamLeaderCommand(id, newTeamLeaderId));
+        return this.toTeamDtoResponseEntity(result);
+    }
+
+    @PutMapping("/{teamId}/assign-player")
+    public ResponseEntity<TeamDto> assignPlayer(@PathVariable UUID teamId, @RequestBody UUID playerId) {
+        TeamCommandResult result = this.teamService.executeCommand(
+                new TeamCommand.TeamAssignPlayerCommand(teamId, playerId));
+        return this.toTeamDtoResponseEntity(result);
+    }
+
+    @PutMapping("/{playerId}/remove-player")
+    public ResponseEntity<TeamDto> removePlayer(@PathVariable UUID playerId) {
+        TeamCommandResult result = this.teamService.executeCommand(
+                new TeamCommand.TeamRemovePlayerCommand(playerId));
+        return this.toTeamDtoResponseEntity(result);
+    }
 }
 

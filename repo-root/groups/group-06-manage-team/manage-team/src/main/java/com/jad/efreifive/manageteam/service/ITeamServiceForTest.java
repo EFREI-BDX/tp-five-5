@@ -6,22 +6,19 @@ import com.jad.efreifive.manageteam.valueobject.Period;
 import com.jad.efreifive.manageteam.valueobject.Tag;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.UUID;
-
 public interface ITeamServiceForTest extends ITeamService {
     @Transactional
-    Id create(Label label, Tag tag, Period period);
+    Id create(final Label label, final Tag tag, final Period period);
 
     @Transactional
-    void changeName(UUID id, String newLabel);
+    void changeName(final Id id, final Label newLabel);
 
     @Transactional
-    void changeTag(UUID id, String newTag);
+    void changeTag(final Id id, final Tag newTag);
 
     @Transactional
-    boolean dissolve(UUID id, LocalDate dissolutionDate);
+    boolean dissolve(final Id id, final Period dissolutionDate);
 
     @Transactional
-    void restore(UUID id);
+    void restore(final Id id);
 }
