@@ -3,7 +3,7 @@ package com.jad.efreifive.manageteam.controller;
 import com.jad.efreifive.manageteam.controller.command.TeamCommand;
 import com.jad.efreifive.manageteam.controller.command.TeamCommandResult;
 import com.jad.efreifive.manageteam.dto.TeamDto;
-import com.jad.efreifive.manageteam.service.TeamService;
+import com.jad.efreifive.manageteam.service.ITeamService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +15,9 @@ import java.util.UUID;
 @RequestMapping("/api/teams")
 public class TeamController {
 
-    private final TeamService teamService;
+    private final ITeamService teamService;
 
-    public TeamController(TeamService teamService) {
+    public TeamController(ITeamService teamService) {
         this.teamService = teamService;
     }
 

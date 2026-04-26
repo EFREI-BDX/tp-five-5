@@ -1,7 +1,6 @@
 package com.jad.efreifive.manageteam.controller.command;
 
 import com.jad.efreifive.manageteam.dto.TeamDto;
-import com.jad.efreifive.manageteam.valueobject.Label;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -53,18 +52,45 @@ public sealed interface TeamCommand
         };
     }
 
+    String toLogString();
+
     record TeamCreateCommand(TeamDto teamDto) implements TeamCommand {
+        @Override
+        public String toLogString() {
+            return String.format("TeamCreateCommand{label=%s, tag=%s, creationDate=%s}",
+                                 TeamDto.getLabel(this.teamDto()),
+                                 TeamDto.getTag(this.teamDto()),
+                                 TeamDto.getCreationDate(this.teamDto()));
+        }
     }
 
     record TeamDissolveCommand(UUID id, LocalDate dissolutionDate) implements TeamCommand {
+        @Override
+        public String toLogString() {
+            return String.format("TeamDissolveCommand{id=%s, dissolutionDate=%s}",
+                                 this.id(),
+                                 this.dissolutionDate());
+        }
     }
 
     record TeamRestoreCommand(UUID id) implements TeamCommand {
+        @Override
+        public String toLogString() {
+            return String.format("TeamRestoreCommand{id=%s}", this.id());
+        }
     }
 
     record TeamUpdateLabelCommand(UUID id, String newLabel) implements TeamCommand {
+        @Override
+        public String toLogString() {
+            return String.format("TeamUpdateLabelCommand{id=%s, newLabel=%s}", this.id(), this.newLabel());
+        }
     }
 
     record TeamUpdateTagCommand(UUID id, String newTag) implements TeamCommand {
+        @Override
+        public String toLogString() {
+            return String.format("TeamUpdateTagCommand{id=%s, newTag=%s}", this.id(), this.newTag());
+        }
     }
 }
