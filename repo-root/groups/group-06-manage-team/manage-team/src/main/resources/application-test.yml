@@ -10,3 +10,6 @@ app:
   console:
     enabled: false
 
+logging:
+  config: classpath:log4j2-test.xml
+

@@ -46,4 +46,8 @@ public record Id(@NotNull UUID value) {
         }
     }
 
+    public String asString() {
+        return this.value.toString();
+    }
+
 }

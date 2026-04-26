@@ -3,3 +3,27 @@ spring:
     url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiveteam
     username: jad_efrei_five_2526
     password: ${MANAGE_TEAM_DB_PASSWORD}
+
+logging:
+  config: classpath:log4j2-dev.xml
+
+team:
+  outbound:
+    notify_urls:
+      create:
+        - http://localhost:8081/test-post
+      update:
+        - http://localhost:8081/test-post
+      dissolve:
+        - http://localhost:8081/test-post
+      restore:
+        - http://localhost:8081/test-post
+      assign_leader:
+        - http://localhost:8081/test-post
+      assign_member:
+        - http://localhost:8081/test-post
+      remove_member:
+        - http://localhost:8081/test-post
+
+admin:
+  players-source-url: "http://localhost:8081/api/players"
