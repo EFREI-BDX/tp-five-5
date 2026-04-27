@@ -4,11 +4,17 @@
 
 Représentation d'un type d'événement pouvant être enregistré pendant un match de five. Un Event décrit la nature de l'action observée, ainsi que le nombre de joueurs impliqués dans cette action. Il sert de référentiel pour valider les MatchEvent.
 
-**Attributs**
+**Attributs persistés en base / JSON**
 
-- **idEvent** - identifiant unique du type d'événement
-- **name** - nom ou libellé de l'événement
-- **nbPlayer** - nombre de joueurs impliqués dans l'événement
+- **IdEvent** - identifiant unique du type d'événement
+- **Name** - nom ou libellé de l'événement
+- **NbPlayer** - nombre de joueurs impliqués dans l'événement
+
+**Attributs domaine**
+
+- **idEvent** - identifiant unique du type d'événement, représenté par un `EventId`
+- **name** - nom ou libellé de l'événement, représenté par un `EventName`
+- **nbPlayer** - nombre de joueurs impliqués, représenté par un `PlayerCount`
 
 **Invariants**
 
@@ -17,6 +23,12 @@ Représentation d'un type d'événement pouvant être enregistré pendant un mat
 - **nbPlayer** doit être un entier positif ou nul
 - **nbPlayer** doit correspondre au nombre de joueurs réellement nécessaires pour enregistrer cet événement
 - **nbPlayer** vaut généralement 0, 1 ou 2 selon la nature de l'événement
+
+**Value Objects utilisés**
+
+- `EventId`
+- `EventName`
+- `PlayerCount`
 
 **Format JSON attendu**
 

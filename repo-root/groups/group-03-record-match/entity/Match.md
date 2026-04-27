@@ -4,11 +4,16 @@
 
 Représentation d'un match de five dans le contexte Record Match. Un Match oppose deux équipes distinctes et sert de support aux événements enregistrés pendant la rencontre.
 
-**Attributs**
+**Attributs persistés en base / JSON**
 
-- **idMatch** - identifiant unique du match
-- **idTeam1** - identifiant de la première équipe participant au match
-- **idTeam2** - identifiant de la deuxième équipe participant au match
+- **IdMatch** - identifiant unique du match
+- **IdTeam1** - identifiant de la première équipe participant au match
+- **IdTeam2** - identifiant de la deuxième équipe participant au match
+
+**Attributs domaine**
+
+- **idMatch** - identifiant unique du match, représenté par un `MatchId`
+- **teams** - équipes participant au match, représentées par un `MatchTeams`
 
 **Invariants**
 
@@ -16,6 +21,12 @@ Représentation d'un match de five dans le contexte Record Match. Un Match oppos
 - **idTeam1** doit être un UUID valide et non vide
 - **idTeam2** doit être un UUID valide et non vide
 - **idTeam1** et **idTeam2** doivent référencer deux équipes différentes
+
+**Value Objects utilisés**
+
+- `MatchId`
+- `TeamId`
+- `MatchTeams`
 
 **Format JSON attendu**
 

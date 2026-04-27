@@ -4,13 +4,20 @@
 
 Représentation d'un événement survenu pendant un match de five. Un MatchEvent associe un match, un type d'événement et éventuellement un ou deux joueurs selon la nature de l'événement. Il permet de reconstruire le déroulé du match et de produire des statistiques.
 
-**Attributs**
+**Attributs persistés en base / JSON**
 
-- **idMatch** - identifiant du match concerné par l'événement
-- **idEvent** - identifiant du type d'événement enregistré
-- **idPlayer1** - identifiant du joueur principal impliqué dans l'événement
-- **idPlayer2** - identifiant du joueur secondaire impliqué dans l'événement
-- **occuredAt** - date et heure réelle à laquelle l'événement a été enregistré
+- **IdMatch** - identifiant du match concerné par l'événement
+- **IdEvent** - identifiant du type d'événement enregistré
+- **IdPlayer1** - identifiant du joueur principal impliqué dans l'événement
+- **IdPlayer2** - identifiant du joueur secondaire impliqué dans l'événement
+- **OccuredAt** - date et heure réelle à laquelle l'événement a été enregistré
+
+**Attributs domaine**
+
+- **idMatch** - identifiant du match concerné, représenté par un `MatchId`
+- **idEvent** - identifiant du type d'événement enregistré, représenté par un `EventId`
+- **participants** - joueurs impliqués dans l'événement, représentés par un `EventParticipants`
+- **occurredAt** - date et heure réelle d'enregistrement, représentée par un `OccurredAt`
 
 **Invariants**
 
@@ -22,6 +29,15 @@ Représentation d'un événement survenu pendant un match de five. Un MatchEvent
 - **idPlayer1** et **idPlayer2** doivent être différents lorsqu'ils sont tous les deux renseignés
 - Si **Event.nbPlayer = 0**, aucun joueur ne doit être obligatoire
 - Les joueurs renseignés doivent appartenir à l'une des deux équipes du match
+
+**Value Objects utilisés**
+
+- `MatchId`
+- `EventId`
+- `PlayerId`
+- `EventParticipants`
+- `OccurredAt`
+- `MatchTime`
 
 **Format JSON attendu**
 
