@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: manage-field
+
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: true
+    url: jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    user: ${FLYWAY_USER}
+    password: ${FLYWAY_PASSWORD}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+security:
+  api-key: ${API_KEY}

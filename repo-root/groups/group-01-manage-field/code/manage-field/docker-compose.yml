@@ -1,0 +1,22 @@
+services:
+  mariadb:
+    image: mariadb:10.11.11
+    container_name: manage_field_mariadb
+    restart: always
+
+    env_file:
+      - .env
+
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+
+    ports:
+      - "${MARIADB_PORT}:3306"
+
+    volumes:
+      - manage_field_data:/var/lib/mysql
+      - ./docker/mariadb/init:/docker-entrypoint-initdb.d:ro
+
+volumes:
+  manage_field_data:
