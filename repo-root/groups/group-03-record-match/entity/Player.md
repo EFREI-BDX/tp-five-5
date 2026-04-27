@@ -6,18 +6,18 @@ Représentation locale d'un joueur de five dans le contexte Record Match. Un Pla
 
 **Attributs persistés en base / JSON**
 
-- **IdPlayer** - identifiant unique du joueur
-- **IdTeam** - identifiant de l'équipe à laquelle appartient le joueur
+- **playerId** - identifiant unique du joueur
+- **teamId** - identifiant de l'équipe à laquelle appartient le joueur
 
 **Attributs domaine**
 
-- **idPlayer** - identifiant unique du joueur, représenté par un `PlayerId`
-- **idTeam** - identifiant de l'équipe du joueur, représenté par un `TeamId`
+- **playerId** - identifiant unique du joueur, représenté par un `PlayerId`
+- **teamId** - identifiant de l'équipe du joueur, représenté par un `TeamId`
 
 **Invariants**
 
-- **idPlayer** doit être un UUID valide et non vide
-- **idTeam** doit être un UUID valide et non vide
+- **playerId** doit être un UUID valide et non vide
+- **teamId** doit être un UUID valide et non vide
 - Un joueur doit toujours être rattaché à une équipe
 
 **Value Objects utilisés**
@@ -33,8 +33,8 @@ Représentation locale d'un joueur de five dans le contexte Record Match. Un Pla
 
 **Tests minimaux attendus**
 
-- **createValid** - construction avec un idPlayer et un idTeam UUID valides ne lève pas d'exception.
-- **createInvalidIdPlayerThrows** - idPlayer non UUID lève une exception métier.
-- **createInvalidIdTeamThrows** - idTeam non UUID lève une exception métier.
+- **createValid** - construction avec un playerId et un teamId UUID valides ne lève pas d'exception.
+- **createInvalidIdPlayerThrows** - playerId non UUID lève une exception métier.
+- **createInvalidIdTeamThrows** - teamId non UUID lève une exception métier.
 - **jsonRoundtrip** - sérialisation/désérialisation conserve toutes les valeurs.
 - **schemaValidation** - fixture valide passe le schema ; fixture invalide échoue.
