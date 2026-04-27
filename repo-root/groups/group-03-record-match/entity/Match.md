@@ -2,23 +2,20 @@
 
 **Résumé métier**
 
-Un match de five opposant deux équipes. Agrégat racine du bounded context Record Match. Contient la liste de tous les événements enregistrés pendant la partie.
+Représentation d'un match de five dans le contexte Record Match. Un Match oppose deux équipes distinctes et sert de support aux événements enregistrés pendant la rencontre.
 
 **Attributs**
 
-- **id** - identifiant unique du match
-- **startTime** - heure de début du match
-- **teamHomeId** - référence à l'équipe qui reçoit
-- **teamAwayId** - référence à l'équipe visiteuse
-- **events** - liste ordonnée des événements survenus pendant le match
+- **idMatch** - identifiant unique du match
+- **idTeam1** - identifiant de la première équipe participant au match
+- **idTeam2** - identifiant de la deuxième équipe participant au match
 
 **Invariants**
 
-- **id** doit être un UUID valide et non vide
-- **startTime** doit être un datetime ISO-8601 valide
-- **teamHomeId** doit être un UUID valide et différent de **teamAwayId**
-- **teamAwayId** doit être un UUID valide et différent de **teamHomeId**
-- **events** doit être trié par ordre croissant de timestamp
+- **idMatch** doit être un UUID valide et non vide
+- **idTeam1** doit être un UUID valide et non vide
+- **idTeam2** doit être un UUID valide et non vide
+- **idTeam1** et **idTeam2** doivent référencer deux équipes différentes
 
 **Format JSON attendu**
 
@@ -28,8 +25,9 @@ Un match de five opposant deux équipes. Agrégat racine du bounded context Reco
 
 **Tests minimaux attendus**
 
-- **createValid** - construction avec des valeurs valides ne lève pas d'exception.
-- **createInvalidSameTeams** - teamHomeId identique à teamAwayId lève une exception métier.
-- **addEvent** - l'ajout d'un événement valide est ajouté à la liste events.
+- **createValid** - construction avec un idMatch, un idTeam1 et un idTeam2 UUID valides ne lève pas d'exception.
+- **createInvalidIdMatchThrows** - idMatch non UUID lève une exception métier.
+- **createInvalidIdTeamThrows** - idTeam1 ou idTeam2 non UUID lève une exception métier.
+- **createSameTeamsThrows** - idTeam1 égal à idTeam2 lève une exception métier.
 - **jsonRoundtrip** - sérialisation/désérialisation conserve toutes les valeurs.
 - **schemaValidation** - fixture valide passe le schema ; fixture invalide échoue.

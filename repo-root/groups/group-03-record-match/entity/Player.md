@@ -2,17 +2,18 @@
 
 **Résumé métier**
 
-Représentation locale d'un joueur de five dans le contexte Record Match. Un Player n'est pas géré ici (c'est la responsabilité du groupe Manage Player), mais il est référencé dans les événements d'un match comme joueur principal ou joueur secondaire.
+Représentation locale d'un joueur de five dans le contexte Record Match. Un Player n'est pas géré ici dans son intégralité, mais il est référencé dans les événements d'un match comme joueur principal ou joueur secondaire. Il est rattaché à une équipe afin de permettre la validation des événements enregistrés pendant un match.
 
 **Attributs**
 
-- **id** - identifiant unique du joueur (UUID fourni par le groupe Manage Player)
-- **name** - nom et prénom du joueur
+- **idPlayer** - identifiant unique du joueur
+- **idTeam** - identifiant de l'équipe à laquelle appartient le joueur
 
 **Invariants**
 
-- **id** doit être un UUID valide et non vide
-- **name** doit être une chaîne non vide
+- **idPlayer** doit être un UUID valide et non vide
+- **idTeam** doit être un UUID valide et non vide
+- Un joueur doit toujours être rattaché à une équipe
 
 **Format JSON attendu**
 
@@ -22,8 +23,8 @@ Représentation locale d'un joueur de five dans le contexte Record Match. Un Pla
 
 **Tests minimaux attendus**
 
-- **createValid** - construction avec un id UUID valide, un firstName et un lastName non vides ne lève pas d'exception.
-- **createInvalidIdThrows** - id non UUID lève une exception métier.
-- **createInvalidEmptyNameThrows** - name vide lève une exception métier.
+- **createValid** - construction avec un idPlayer et un idTeam UUID valides ne lève pas d'exception.
+- **createInvalidIdPlayerThrows** - idPlayer non UUID lève une exception métier.
+- **createInvalidIdTeamThrows** - idTeam non UUID lève une exception métier.
 - **jsonRoundtrip** - sérialisation/désérialisation conserve toutes les valeurs.
 - **schemaValidation** - fixture valide passe le schema ; fixture invalide échoue.
