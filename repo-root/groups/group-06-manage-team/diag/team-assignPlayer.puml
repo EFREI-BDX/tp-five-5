@@ -1,0 +1,27 @@
+@startuml
+' Diag de séquence pour PUT /api/teams/{teamId}/assign-player
+' Jacobson, PlantUML v2
+actor Client
+boundary TeamController
+control TeamService
+control PlayerService
+entity PlayerRepository
+entity PlayerMapper
+control TeamEventOutboundService
+
+Client -> TeamController : assignPlayer(teamId, playerId)
+TeamController -> TeamService : executeCommand(TeamAssignPlayerCommand)
+TeamService -> PlayerService : assignTeam(playerId, teamId)
+PlayerService -> PlayerRepository : assignTeam(playerId, teamId)
+PlayerRepository --> PlayerService : PersistenceOperationResult
+PlayerService -> PlayerRepository : findById(playerId)
+PlayerRepository --> PlayerService : PlayerEntity
+PlayerService -> PlayerMapper : entityToDto(PlayerEntity)
+PlayerMapper --> PlayerService : PlayerDto
+PlayerService --> TeamService : PlayerDto
+TeamService -> TeamEventOutboundService : notifyAssignPlayer(PlayerDto)
+TeamEventOutboundService ->> ExternalApp : POST /api/integration/teams/assign-member
+TeamService --> TeamController : PlayerDto
+TeamController --> Client : ResponseEntity<PlayerDto>
+@enduml
+

@@ -1,0 +1,27 @@
+@startuml
+' Diag de séquence pour PUT /api/teams/{teamId}/remove-player
+' Jacobson, PlantUML v2
+actor Client
+boundary TeamController
+control TeamService
+control PlayerService
+entity PlayerRepository
+entity PlayerMapper
+control TeamEventOutboundService
+
+Client -> TeamController : removePlayer(teamId, playerId)
+TeamController -> TeamService : executeCommand(TeamRemovePlayerCommand)
+TeamService -> PlayerService : unassignTeam(playerId)
+PlayerService -> PlayerRepository : unassignTeam(playerId)
+PlayerRepository --> PlayerService : PersistenceOperationResult
+PlayerService -> PlayerRepository : findById(playerId)
+PlayerRepository --> PlayerService : PlayerEntity
+PlayerService -> PlayerMapper : entityToDto(PlayerEntity)
+PlayerMapper --> PlayerService : PlayerDto
+PlayerService --> TeamService : PlayerDto
+TeamService -> TeamEventOutboundService : notifyUnassignPlayer(PlayerDto)
+TeamEventOutboundService ->> ExternalApp : POST /api/integration/teams/remove-member
+TeamService --> TeamController : PlayerDto
+TeamController --> Client : ResponseEntity<PlayerDto>
+@enduml
+

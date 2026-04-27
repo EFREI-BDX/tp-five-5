@@ -1,13 +1,19 @@
 spring:
   application:
     name: manage-team
+  profiles:
+    default: dev
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://localhost:3306/manage_team
-    username: manage_team_user
-    password: ${MANAGE_TEAM_LOCAL_DB_PASSWORD:}
+    url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiveteam
+    username: jad_efrei_five_2526
+    password: ${MANAGE_TEAM_DB_PASSWORD}
     hikari:
       initialization-fail-timeout: 0
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 server:
   port: 8080
@@ -16,6 +22,4 @@ app:
   console:
     enabled: true
 
-logging:
-  config: classpath:log4j2-spring.xml
 

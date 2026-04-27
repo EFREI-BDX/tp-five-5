@@ -1,0 +1,125 @@
+@startuml team-class-diagram
+' Diagramme de classes principal du microservice manage-team
+' Stéréotypes, packages par couche, héritage, implémentation, association, agrégation, composition
+
+
+' === Entities ===
+package "entity" {
+  class TeamEntity <<Entity>> {
+    - id: String
+    - label: String
+    - tag: String
+    - creationDate: LocalDate
+    - dissolutionDate: LocalDate
+    - idTeamLeader: String
+    - state: String
+  }
+  class PlayerEntity <<Entity>> {
+    - id: String
+    - firstName: String
+    - lastName: String
+    - idTeam: String
+  }
+}
+
+' === DTOs ===
+package "dto" {
+  class TeamDto <<DTO>> {
+    + id: UUID
+    + label: String
+    + tag: String
+    + creationDate: LocalDate
+    + dissolutionDate: LocalDate
+    + idTeamLeader: UUID
+    + state: String
+  }
+  class PlayerDto <<DTO>> {
+    + id: UUID
+    + firstName: String
+    + lastName: String
+    + idTeam: UUID
+  }
+}
+
+' === Mappers ===
+package "mapper" {
+  interface TeamMapper <<Mapper>>
+  interface PlayerMapper <<Mapper>>
+}
+
+' === Services ===
+package "service" {
+  interface ITeamService <<Service>>
+  interface ITeamAdminService <<Service>>
+  interface IPlayerSyncService <<Service>>
+  interface ITeamServiceForTest <<Service>>
+  class TeamService <<Service>>
+  class PlayerService <<Service>>
+  class PlayerSyncService <<Service>>
+  class TeamEventOutboundService <<Service>>
+}
+
+' === Controllers ===
+package "controller" {
+  class TeamController <<Controller>>
+}
+package "admin" {
+    ' === Commandes ===
+    package "controller.command" {
+      interface TeamCommand <<Command>> {
+        .. Sous-types ..
+        -- TeamCreateCommand
+        -- TeamUpdateLabelCommand
+        -- TeamDissolveCommand
+        -- TeamRestoreCommand
+        -- TeamUpdateTagCommand
+        -- TeamUpdateTeamLeaderCommand
+        -- TeamAssignPlayerCommand
+        -- TeamRemovePlayerCommand
+      }
+
+      interface TeamCommandResult <<CommandResult>> {
+        .. Sous-types ..
+        -- SuccessWithTeamDtoPayLoad
+        -- SuccessWithPlayerDtoPayLoad
+        -- SuccessNoPayLoad
+        -- Failure
+      }
+      ' Relations principales conservées via l'interface scellée (optionnel)
+      TeamCommandResult ..> dto.TeamDto
+      TeamCommandResult ..> dto.PlayerDto
+      TeamCommandResult ..> service.DomainErrorCode
+    }
+  class TeamAdminController <<Controller>>
+}
+
+' === Value Objects ===
+package "valueobject" {
+  class Id <<ValueObject>>
+  class Label <<ValueObject>>
+  class Tag <<ValueObject>>
+  class Period <<ValueObject>>
+  class Name <<ValueObject>>
+  enum TeamState <<ValueObject>>
+}
+
+' === Relations ===
+TeamEntity "1" o-- "*" PlayerEntity : contains
+'' Les DTO n'utilisent pas directement les value objects, ils exposent uniquement des types primitifs Java (UUID, String, etc.)
+TeamService ..|> ITeamService
+TeamService ..|> ITeamAdminService
+TeamService --> TeamEventOutboundService
+TeamService --> PlayerService
+TeamService --> TeamMapper
+TeamService --> TeamEntity
+TeamService --> PlayerEntity
+PlayerService --> PlayerMapper
+PlayerService --> PlayerEntity
+PlayerSyncService --> PlayerService
+TeamController --> ITeamService
+TeamAdminController --> ITeamAdminService
+TeamMapper ..|> org.mapstruct.Mapper
+PlayerMapper ..|> org.mapstruct.Mapper
+
+@enduml
+

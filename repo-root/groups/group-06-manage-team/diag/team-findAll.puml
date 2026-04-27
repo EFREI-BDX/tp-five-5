@@ -1,0 +1,19 @@
+@startuml
+' Diag de séquence pour GET /api/teams
+' Jacobson, PlantUML v2
+actor Client
+boundary TeamController
+control TeamService
+entity TeamRepository
+entity TeamMapper
+
+Client -> TeamController : findAll()
+TeamController -> TeamService : findAll()
+TeamService -> TeamRepository : findAll()
+TeamRepository --> TeamService : List<TeamEntity>
+TeamService -> TeamMapper : entityToDto(List<TeamEntity>)
+TeamMapper --> TeamService : List<TeamDto>
+TeamService --> TeamController : List<TeamDto>
+TeamController --> Client : ResponseEntity<List<TeamDto>>
+@enduml
+

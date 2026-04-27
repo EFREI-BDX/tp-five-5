@@ -1,0 +1,24 @@
+@startuml
+' Diag de séquence pour PUT /api/teams/{id}/label
+' Jacobson, PlantUML v2
+actor Client
+boundary TeamController
+control TeamService
+entity TeamRepository
+entity TeamMapper
+control TeamEventOutboundService
+
+Client -> TeamController : changeLabel(id, newLabel)
+TeamController -> TeamService : executeCommand(TeamUpdateLabelCommand)
+TeamService -> TeamRepository : changeName(...)
+TeamRepository --> TeamService : PersistenceOperationResult
+TeamService -> TeamRepository : findById(id)
+TeamRepository --> TeamService : TeamEntity
+TeamService -> TeamMapper : entityToDto(TeamEntity)
+TeamMapper --> TeamService : TeamDto
+TeamService -> TeamEventOutboundService : notifyTeamUpdated(TeamDto)
+TeamEventOutboundService ->> ExternalApp : POST /api/integration/teams/update
+TeamService --> TeamController : TeamDto
+TeamController --> Client : ResponseEntity<TeamDto>
+@enduml
+
