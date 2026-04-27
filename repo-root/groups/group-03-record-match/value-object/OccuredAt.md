@@ -1,29 +1,24 @@
-# OccurredAt
+# OccuredAt
 
 **Résumé métier**
 
-Date et heure réelle à laquelle l'événement a été enregistré.
+Date d'occurrence de l'événement.
 
-Ce Value Object représente un instant réel dans le temps. Il ne représente pas le temps de jeu dans le match.
-
-Le temps de jeu n'est pas porté par le contexte Record Match. Il pourra être calculé par un autre contexte à partir de l'heure de début du match et de l'heure réelle de l'événement.
-
-Attention : si la base de données contient déjà le champ `OccuredAt`, on peut garder ce nom côté base pour éviter une migration.  
-Dans le domaine, on peut utiliser le nom correctement orthographié `OccurredAt`.
+Ce Value Object représente une date métier stockée en base dans la colonne SQL `occuredAt` (`date`).
 
 **Utilisé par**
 
-- `MatchEvent.OccuredAt`
+- `MatchEvent.occuredAt`
 
 **Valeur portée**
 
-- date/heure
+- date
 
 **Invariants**
 
 - doit être renseigné
 - doit être une date valide
-- doit représenter l'instant réel d'enregistrement de l'événement
+- doit représenter une date valide d'occurrence de l'événement
 
 **Tests minimaux attendus**
 
@@ -31,4 +26,4 @@ Dans le domaine, on peut utiliser le nom correctement orthographié `OccurredAt`
 - **createNullThrows** - valeur nulle lève une exception métier.
 - **createInvalidDateThrows** - date invalide lève une exception métier.
 - **toIsoStringReturnsValue** - conversion en chaîne ISO conserve la valeur.
-- **equalsSameInstant** - deux OccurredAt représentant le même instant sont égaux.
+- **equalsSameDate** - deux OccuredAt représentant la même date sont égaux.

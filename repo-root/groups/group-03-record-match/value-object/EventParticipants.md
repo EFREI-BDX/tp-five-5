@@ -8,9 +8,9 @@ Ce Value Object encapsule la règle selon laquelle le nombre de joueurs renseign
 
 **Utilisé par**
 
-- `MatchEvent.IdPlayer1`
-- `MatchEvent.IdPlayer2`
-- validation avec `Event.NbPlayer`
+- `MatchEvent.player1Id`
+- `MatchEvent.player2Id`
+- validation avec `Event.nbPlayers`
 
 **Valeurs portées**
 
@@ -20,7 +20,7 @@ Ce Value Object encapsule la règle selon laquelle le nombre de joueurs renseign
 **Invariants**
 
 - si `PlayerCount = 0`, aucun joueur n'est obligatoire
-- si `PlayerCount = 1`, `player1` est obligatoire
+- si `PlayerCount = 1`, `player1` est obligatoire et `player2` doit être absent
 - si `PlayerCount = 2`, `player1` et `player2` sont obligatoires
 - si `player1` et `player2` sont renseignés, ils doivent être différents
 

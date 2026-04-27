@@ -6,8 +6,8 @@ Identifiant unique d'un match.
 
 **Utilisé par**
 
-- `Match.IdMatch`
-- `MatchEvent.IdMatch`
+- `Match.matchId`
+- `MatchEvent.matchId`
 
 **Valeur portée**
 

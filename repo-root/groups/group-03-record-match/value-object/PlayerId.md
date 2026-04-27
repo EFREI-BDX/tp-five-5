@@ -8,9 +8,9 @@ Le joueur est référencé dans Record Match afin d'être associé aux événeme
 
 **Utilisé par**
 
-- `Player.IdPlayer`
-- `MatchEvent.IdPlayer1`
-- `MatchEvent.IdPlayer2`
+- `Player.playerId`
+- `MatchEvent.player1Id`
+- `MatchEvent.player2Id`
 
 **Valeur portée**
 

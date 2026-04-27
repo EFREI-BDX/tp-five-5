@@ -8,9 +8,9 @@ Dans le contexte Record Match, l'équipe est référencée mais n'est pas forcé
 
 **Utilisé par**
 
-- `Match.IdTeam1`
-- `Match.IdTeam2`
-- `Player.IdTeam`
+- `Match.team1Id`
+- `Match.team2Id`
+- `Player.teamId`
 
 **Valeur portée**
 

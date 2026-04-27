@@ -8,8 +8,8 @@ Ce Value Object permet de garantir qu'un match oppose bien deux équipes distinc
 
 **Utilisé par**
 
-- `Match.IdTeam1`
-- `Match.IdTeam2`
+- `Match.team1Id`
+- `Match.team2Id`
 
 **Valeurs portées**
 

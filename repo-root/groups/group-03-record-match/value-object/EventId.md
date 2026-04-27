@@ -6,8 +6,9 @@ Identifiant unique d'un type d'événement enregistrable pendant un match.
 
 **Utilisé par**
 
-- `Event.IdEvent`
-- `MatchEvent.IdEvent`
+- `Event.eventId`
+- `MatchEvent.eventId`
+- `MatchEvent.matchEventId` (tant qu'aucun value object `MatchEventId` dédié n'est introduit)
 
 **Valeur portée**
 

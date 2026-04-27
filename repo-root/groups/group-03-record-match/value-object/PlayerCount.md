@@ -8,9 +8,9 @@ Ce Value Object permet de savoir si un événement doit être associé à aucun 
 
 **Utilisé par**
 
-- `Event.NbPlayer`
-- validation de `MatchEvent.IdPlayer1`
-- validation de `MatchEvent.IdPlayer2`
+- `Event.nbPlayers`
+- validation de `MatchEvent.player1Id`
+- validation de `MatchEvent.player2Id`
 
 **Valeur portée**
 
