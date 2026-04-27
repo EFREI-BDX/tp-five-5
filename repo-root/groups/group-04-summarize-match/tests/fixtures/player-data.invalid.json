@@ -1,0 +1,12 @@
+{
+  "palyerId": "not-a-uuid",
+  "goals": -1,
+  "assists": -2,
+  "saves": -3,
+  "result": "Victory",
+  "bestScorer": "yes",
+  "bestAssistsProvider": "no",
+  "MVP": "true",
+  "playTime": -90,
+  "unexpected": "field"
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "player-data.schema.json",
+  "title": "PlayerData",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "palyerId",
+    "goals",
+    "assists",
+    "saves",
+    "result",
+    "bestScorer",
+    "bestAssistsProvider",
+    "MVP",
+    "playTime"
+  ],
+  "properties": {
+    "palyerId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "goals": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "assists": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "saves": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "result": {
+      "type": "string",
+      "enum": ["Win", "Loose", "Draw"]
+    },
+    "bestScorer": {
+      "type": "boolean"
+    },
+    "bestAssistsProvider": {
+      "type": "boolean"
+    },
+    "MVP": {
+      "type": "boolean"
+    },
+    "playTime": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}
