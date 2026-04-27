@@ -25,13 +25,11 @@ package "Field Management Context" {
   [Field DB]
 }
 interface "Field API" as FieldAPI
-interface "Event Bus" as EventBus
 
 [Match Service] --> FieldAPI: use
 
 FieldAPI - [Field Service]
 [Field Service] --> [Field DB]
-[Field Service] --> EventBus: publish
 
 [Record Match Service] ..> [Match Service]: indirect
 [Summarize Match Service] ..> [Match Service]: indirect

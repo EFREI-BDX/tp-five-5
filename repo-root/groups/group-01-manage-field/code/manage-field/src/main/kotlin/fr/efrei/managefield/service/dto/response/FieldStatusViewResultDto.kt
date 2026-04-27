@@ -1,4 +1,4 @@
-package fr.efrei.managefield.service.dto
+package fr.efrei.managefield.service.dto.response
 
 /**
  * Read model returned by the service layer for a field status.

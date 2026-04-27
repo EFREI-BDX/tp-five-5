@@ -4,8 +4,8 @@ import fr.efrei.managefield.mapper.ReferenceDataServiceMapper
 import fr.efrei.managefield.repository.FieldStatusRepository
 import fr.efrei.managefield.repository.ReservationStatusRepository
 import fr.efrei.managefield.service.ReferenceDataService
-import fr.efrei.managefield.service.dto.FieldStatusViewResultDto
-import fr.efrei.managefield.service.dto.ReservationStatusViewResultDto
+import fr.efrei.managefield.service.dto.response.FieldStatusViewResultDto
+import fr.efrei.managefield.service.dto.response.ReservationStatusViewResultDto
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

@@ -1,19 +1,21 @@
 package fr.efrei.managefield.service.implementation
 
-import fr.efrei.managefield.domain.enums.FieldStatusCode
-import fr.efrei.managefield.domain.enums.ReservationStatusCode
 import fr.efrei.managefield.domain.valueobject.DomainId
 import fr.efrei.managefield.domain.valueobject.FieldName
 import fr.efrei.managefield.domain.valueobject.TimeSlot
 import fr.efrei.managefield.entity.FieldEntity
 import fr.efrei.managefield.mapper.FieldServiceMapper
+import fr.efrei.managefield.mapper.ReservationServiceMapper
+import fr.efrei.managefield.repository.ActiveFieldRepository
+import fr.efrei.managefield.repository.BlockingReservationRepository
 import fr.efrei.managefield.repository.FieldRepository
 import fr.efrei.managefield.repository.ReservationRepository
 import fr.efrei.managefield.service.FieldService
-import fr.efrei.managefield.service.dto.ChangeFieldStatusCommandDto
-import fr.efrei.managefield.service.dto.CreateFieldCommandDto
-import fr.efrei.managefield.service.dto.FieldViewResultDto
-import fr.efrei.managefield.service.dto.ListAvailableFieldsCommandDto
+import fr.efrei.managefield.service.dto.request.ChangeFieldStatusCommandDto
+import fr.efrei.managefield.service.dto.request.CreateFieldCommandDto
+import fr.efrei.managefield.service.dto.response.FieldDetailsViewResultDto
+import fr.efrei.managefield.service.dto.response.FieldViewResultDto
+import fr.efrei.managefield.service.dto.request.ListAvailableFieldsCommandDto
 import fr.efrei.managefield.service.exception.ApplicationInternalException
 import fr.efrei.managefield.service.exception.ApplicationNotFoundException
 import fr.efrei.managefield.service.exception.ApplicationValidationException
@@ -33,21 +35,23 @@ import org.springframework.validation.annotation.Validated
 @Validated
 class FieldServiceImpl(
     private val fieldRepository: FieldRepository,
+    private val activeFieldRepository: ActiveFieldRepository,
+    private val blockingReservationRepository: BlockingReservationRepository,
     private val reservationRepository: ReservationRepository,
-    private val fieldServiceMapper: FieldServiceMapper
+    private val fieldServiceMapper: FieldServiceMapper,
+    private val reservationServiceMapper: ReservationServiceMapper
 ) : FieldService {
     @Transactional(readOnly = true)
     override fun listAvailableFields(command: ListAvailableFieldsCommandDto): List<FieldViewResultDto> {
         val slot = parseSlot(command.date, command.startTime, command.endTime)
-        val activeFields = fieldRepository.findAllByStatusIdOrderByNameAsc(FieldStatusCode.ACTIVE.id)
-        val blockingStatusIds = listOf(ReservationStatusCode.PENDING.id, ReservationStatusCode.CONFIRMED.id)
+        val activeFields = activeFieldRepository.findAllByOrderByNameAsc()
 
         if (activeFields.isEmpty()) {
-            return fieldServiceMapper.toFieldViews(activeFields)
+            return fieldServiceMapper.toActiveFieldViews(activeFields)
         }
 
-        val blockedFieldIds = reservationRepository
-            .findAllByDateAndStatusIdIn(slot.date, blockingStatusIds)
+        val blockedFieldIds = blockingReservationRepository
+            .findAllByDate(slot.date)
             .filter { reservation ->
                 val start = reservation.startTime ?: throw ApplicationInternalException("reservation start_time is missing")
                 val end = reservation.endTime ?: throw ApplicationInternalException("reservation end_time is missing")
@@ -56,13 +60,18 @@ class FieldServiceImpl(
             .map { it.fieldId }
             .toSet()
 
-        return fieldServiceMapper.toFieldViews(activeFields.filterNot { it.id in blockedFieldIds })
+        return fieldServiceMapper.toActiveFieldViews(activeFields.filterNot { it.id in blockedFieldIds })
     }
 
     @Transactional(readOnly = true)
-    override fun findById(fieldId: String): FieldViewResultDto {
+    override fun findById(fieldId: String): FieldDetailsViewResultDto {
         val id = parseId(fieldId, "field_id")
-        return fieldServiceMapper.toFieldView(findFieldOrThrow(id.value))
+        val field = findFieldOrThrow(id.value)
+        val reservations = reservationServiceMapper.toReservationViews(
+            reservationRepository.findAllByFieldIdOrderByDateAscStartTimeAsc(id.value)
+        )
+
+        return fieldServiceMapper.toFieldDetails(field, reservations)
     }
 
     @Transactional

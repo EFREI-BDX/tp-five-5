@@ -1,15 +1,17 @@
 package fr.efrei.managefield.service;
 
-import fr.efrei.managefield.entity.FieldEntity;
-import fr.efrei.managefield.entity.ReservationEntity;
+import fr.efrei.managefield.entity.ActiveFieldEntity;
+import fr.efrei.managefield.entity.BlockingReservationEntity;
 import fr.efrei.managefield.mapper.FieldServiceMapperImpl;
 import fr.efrei.managefield.mapper.ReservationServiceMapperImpl;
+import fr.efrei.managefield.repository.ActiveFieldRepository;
+import fr.efrei.managefield.repository.BlockingReservationRepository;
 import fr.efrei.managefield.repository.FieldRepository;
 import fr.efrei.managefield.repository.ReservationRepository;
 import fr.efrei.managefield.repository.procedural.CreateReservationProcedureResult;
-import fr.efrei.managefield.service.dto.CreateReservationCommandDto;
-import fr.efrei.managefield.service.dto.FieldViewResultDto;
-import fr.efrei.managefield.service.dto.ListAvailableFieldsCommandDto;
+import fr.efrei.managefield.service.dto.request.CreateReservationCommandDto;
+import fr.efrei.managefield.service.dto.response.FieldViewResultDto;
+import fr.efrei.managefield.service.dto.request.ListAvailableFieldsCommandDto;
 import fr.efrei.managefield.service.exception.ApplicationConflictException;
 import fr.efrei.managefield.service.exception.ApplicationValidationException;
 import fr.efrei.managefield.service.implementation.FieldServiceImpl;
@@ -41,30 +43,33 @@ class FieldManagementServiceTest {
     private static final String RESERVATION_STATUS_ID = "33333333-3333-4333-8333-333333333333";
 
     private final FieldRepository fieldRepository = Mockito.mock(FieldRepository.class);
+    private final ActiveFieldRepository activeFieldRepository = Mockito.mock(ActiveFieldRepository.class);
+    private final BlockingReservationRepository blockingReservationRepository = Mockito.mock(BlockingReservationRepository.class);
     private final ReservationRepository reservationRepository = Mockito.mock(ReservationRepository.class);
     private final FieldService fieldService = new FieldServiceImpl(
         fieldRepository,
+        activeFieldRepository,
+        blockingReservationRepository,
         reservationRepository,
-        new FieldServiceMapperImpl()
+        new FieldServiceMapperImpl(),
+        new ReservationServiceMapperImpl()
     );
     private final ReservationService reservationService = new ReservationServiceImpl(
+        fieldRepository,
         reservationRepository,
         new ReservationServiceMapperImpl()
     );
 
     @BeforeEach
     void resetMocks() {
-        Mockito.reset(fieldRepository, reservationRepository);
+        Mockito.reset(fieldRepository, activeFieldRepository, blockingReservationRepository, reservationRepository);
     }
 
     @Test
     void listAvailableFieldsRemovesOverlappingActiveReservations() {
-        when(fieldRepository.findAllByStatusIdOrderByNameAsc(FIELD_STATUS_ID))
+        when(activeFieldRepository.findAllByOrderByNameAsc())
             .thenReturn(List.of(field(FIELD_ID, "Field A"), field(OTHER_FIELD_ID, "Field B")));
-        when(reservationRepository.findAllByDateAndStatusIdIn(
-            LocalDate.parse("2026-03-18"),
-            List.of(PENDING_RESERVATION_STATUS_ID, RESERVATION_STATUS_ID)
-        ))
+        when(blockingReservationRepository.findAllByDate(LocalDate.parse("2026-03-18")))
             .thenReturn(List.of(reservation(FIELD_ID, "10:30", "11:30")));
 
         List<FieldViewResultDto> fields = fieldService.listAvailableFields(
@@ -116,21 +121,25 @@ class FieldManagementServiceTest {
         assertThat(exception.getMessage()).isEqualTo("reservation overlaps an active reservation");
     }
 
-    private FieldEntity field(String id, String name) {
-        FieldEntity entity = new FieldEntity();
+    private ActiveFieldEntity field(String id, String name) {
+        ActiveFieldEntity entity = new ActiveFieldEntity();
         entity.setId(id);
         entity.setName(name);
         entity.setStatusId(FIELD_STATUS_ID);
+        entity.setStatusCode("active");
+        entity.setStatusLabel("Active");
         entity.setCreatedAt(LocalDateTime.parse("2026-03-18T10:00:00"));
         entity.setUpdatedAt(LocalDateTime.parse("2026-03-18T10:00:00"));
         return entity;
     }
 
-    private ReservationEntity reservation(String fieldId, String startTime, String endTime) {
-        ReservationEntity entity = new ReservationEntity();
+    private BlockingReservationEntity reservation(String fieldId, String startTime, String endTime) {
+        BlockingReservationEntity entity = new BlockingReservationEntity();
         entity.setId("44444444-4444-4444-8444-444444444444");
         entity.setFieldId(fieldId);
         entity.setStatusId(RESERVATION_STATUS_ID);
+        entity.setStatusCode("confirmed");
+        entity.setStatusLabel("Confirmed");
         entity.setDate(LocalDate.parse("2026-03-18"));
         entity.setStartTime(LocalTime.parse(startTime));
         entity.setEndTime(LocalTime.parse(endTime));

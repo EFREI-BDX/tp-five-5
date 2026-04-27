@@ -14,6 +14,8 @@ data class ReservationResponseDto(
     @JsonProperty("status_id")
     val statusId: String,
 
+    val status: ReservationStatusResponseDto,
+
     val date: String,
 
     @JsonProperty("start_time")

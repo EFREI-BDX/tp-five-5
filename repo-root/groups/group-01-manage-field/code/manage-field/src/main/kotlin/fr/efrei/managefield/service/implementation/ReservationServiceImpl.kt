@@ -4,11 +4,12 @@ import fr.efrei.managefield.domain.valueobject.DomainId
 import fr.efrei.managefield.domain.valueobject.TimeSlot
 import fr.efrei.managefield.entity.ReservationEntity
 import fr.efrei.managefield.mapper.ReservationServiceMapper
+import fr.efrei.managefield.repository.FieldRepository
 import fr.efrei.managefield.repository.ReservationRepository
 import fr.efrei.managefield.service.ReservationService
-import fr.efrei.managefield.service.dto.ChangeReservationStatusCommandDto
-import fr.efrei.managefield.service.dto.CreateReservationCommandDto
-import fr.efrei.managefield.service.dto.ReservationViewResultDto
+import fr.efrei.managefield.service.dto.request.ChangeReservationStatusCommandDto
+import fr.efrei.managefield.service.dto.request.CreateReservationCommandDto
+import fr.efrei.managefield.service.dto.response.ReservationViewResultDto
 import fr.efrei.managefield.service.exception.ApplicationInternalException
 import fr.efrei.managefield.service.exception.ApplicationNotFoundException
 import fr.efrei.managefield.service.exception.ApplicationValidationException
@@ -28,9 +29,22 @@ import java.util.UUID
 @Service
 @Validated
 class ReservationServiceImpl(
+    private val fieldRepository: FieldRepository,
     private val reservationRepository: ReservationRepository,
     private val reservationServiceMapper: ReservationServiceMapper
 ) : ReservationService {
+    @Transactional(readOnly = true)
+    override fun listByFieldId(fieldId: String): List<ReservationViewResultDto> {
+        val id = parseId(fieldId, "field_id")
+        if (!fieldRepository.existsById(id.value)) {
+            throw ApplicationNotFoundException("field not found")
+        }
+
+        return reservationServiceMapper.toReservationViews(
+            reservationRepository.findAllByFieldIdOrderByDateAscStartTimeAsc(id.value)
+        )
+    }
+
     @Transactional
     override fun create(command: CreateReservationCommandDto): ReservationViewResultDto {
         val fieldId = parseId(command.fieldId, "field_id")

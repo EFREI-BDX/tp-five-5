@@ -11,15 +11,15 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 /**
- * Repository exposing reservation reads through a view and writes through
- * stored procedures.
+ * Repository exposing detailed reservation reads through a view and writes
+ * through stored procedures.
  */
 @Repository
 interface ReservationRepository : JpaRepository<ReservationEntity, String> {
     /**
-     * Returns reservations for availability checks.
+     * Lists reservations attached to a field.
      */
-    fun findAllByDateAndStatusIdIn(date: LocalDate, statusIds: Collection<String>): List<ReservationEntity>
+    fun findAllByFieldIdOrderByDateAscStartTimeAsc(fieldId: String): List<ReservationEntity>
 
     /**
      * Calls the `app_create_reservation` stored procedure.

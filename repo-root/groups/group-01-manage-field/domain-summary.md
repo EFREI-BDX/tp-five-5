@@ -7,12 +7,11 @@ groups.
 
 **Ubiquitous language**
 
-- **Field** - reservable field identified by `id`, `name`, `status_id`.
+- **Field** - reservable field identified by `id`, `name`, `status_id`; detailed reads include the field status object.
 - **FieldStatus** - reference status of a field: `active`, `inactive`, `maintenance`.
 - **ReservationStatus** - reference status of a reservation: `pending`, `confirmed`, `cancelled`.
-- **Reservation** - reservation record for one field on a `date` between `start_time` and `end_time`.
+- **Reservation** - reservation record for one field on a `date` between `start_time` and `end_time`; reads include the reservation status object.
 - **TimeSlot** - value object representing a same-day reservation slot.
-- **Event** - message published after creation or status change.
 
 **Main business invariants**
 
@@ -27,9 +26,11 @@ groups.
 - A `cancelled` reservation no longer blocks the slot.
 - A reservation in this context only represents field occupancy, not player or team assignment.
 
-**Main produced events**
+**Persistence and Read Models**
 
-- **FieldCreated** - `field_id`, `name`, `status_id`, `occurred_at`, `trace_id`
-- **FieldStatusChanged** - `field_id`, `previous_status_id`, `status_id`, `occurred_at`, `trace_id`
-- **ReservationCreated** - `reservation_id`, `field_id`, `status_id`, `date`, `start_time`, `end_time`, `occurred_at`, `trace_id`
-- **ReservationStatusChanged** - `reservation_id`, `field_id`, `previous_status_id`, `status_id`, `occurred_at`, `trace_id`
+- The application user reads only views and executes procedures for writes.
+- `v_field_details` joins fields with their field status.
+- `v_active_field` exposes only fields eligible for availability checks.
+- `v_reservation_details` joins reservations with their reservation status.
+- `v_blocking_reservation` exposes only pending or confirmed reservations that can block a slot.
+- No domain events are emitted by the Kotlin application at this stage.

@@ -65,14 +65,15 @@ paths:
     get:
       tags: [Fields]
       summary: Get a field
+      description: Return a field with its status and the reservations attached to it, including each reservation status.
       operationId: getField
       responses:
         '200':
-          description: Field
+          description: Field detail
           content:
             application/json:
               schema:
-                $ref: './tests/schemas/field.schema.json'
+                $ref: './tests/schemas/field-detail.schema.json'
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -104,6 +105,20 @@ paths:
   /v1/fields/{field_id}/reservations:
     parameters:
       - $ref: '#/components/parameters/FieldIdParam'
+    get:
+      tags: [Reservations]
+      summary: List field reservations
+      description: Return all reservations attached to one field, including their reservation statuses.
+      operationId: listFieldReservations
+      responses:
+        '200':
+          description: Field reservation list
+          content:
+            application/json:
+              schema:
+                $ref: './tests/schemas/reservation-list.schema.json'
+        '404':
+          $ref: '#/components/responses/NotFound'
     post:
       tags: [Reservations]
       summary: Create a reservation

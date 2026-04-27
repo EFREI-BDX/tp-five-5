@@ -9,6 +9,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -27,6 +28,11 @@ class ReservationController(
     private val reservationService: ReservationService,
     private val reservationApiMapper: ReservationApiMapper
 ) {
+    @GetMapping
+    fun listByFieldId(@PathVariable("field_id") @NotBlank fieldId: String): List<ReservationResponseDto> {
+        return reservationApiMapper.toReservationResponses(reservationService.listByFieldId(fieldId))
+    }
+
     @PostMapping
     fun create(
         @PathVariable("field_id") @NotBlank fieldId: String,

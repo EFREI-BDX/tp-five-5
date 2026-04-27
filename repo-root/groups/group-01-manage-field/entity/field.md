@@ -9,6 +9,8 @@ Reservable field from the catalog.
 - **id** - *UUID* - technical identifier
 - **name** - *string* - business field name
 - **status_id** - *UUID* - reference to `field_status.id`
+- **status** - *object* - detailed read representation of the field status
+- **reservations** - *array* - detailed field read includes reservations with their statuses
 
 **Invariants**
 
@@ -20,8 +22,11 @@ Reservable field from the catalog.
 **Expected JSON format**
 
 - **Schema** : `tests/schemas/field.schema.json`
+- **Detail schema** : `tests/schemas/field-detail.schema.json`
 - **Valid fixture** : `tests/fixtures/field.valid.json`
+- **Detail valid fixture** : `tests/fixtures/field-detail.valid.json`
 - **Invalid fixture** : `tests/fixtures/field.invalid.json`
+- **Detail invalid fixture** : `tests/fixtures/field-detail.invalid.json`
 
 **Minimum expected tests**
 

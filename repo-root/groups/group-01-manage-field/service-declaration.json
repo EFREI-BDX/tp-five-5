@@ -38,7 +38,7 @@
       "path": "/v1/fields/{field_id}",
       "method": "GET",
       "operationId": "getField",
-      "responseSchema": "./tests/schemas/field.schema.json",
+      "responseSchema": "./tests/schemas/field-detail.schema.json",
       "auth": "ApiKeyAuth"
     },
     {
@@ -47,6 +47,13 @@
       "operationId": "updateFieldStatus",
       "requestSchema": "./openapi.yaml#/components/schemas/UpdateFieldStatusRequest",
       "responseSchema": "./tests/schemas/field.schema.json",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/v1/fields/{field_id}/reservations",
+      "method": "GET",
+      "operationId": "listFieldReservations",
+      "responseSchema": "./tests/schemas/reservation-list.schema.json",
       "auth": "ApiKeyAuth"
     },
     {
@@ -66,24 +73,7 @@
       "auth": "ApiKeyAuth"
     }
   ],
-  "eventsProduced": [
-    {
-      "name": "FieldCreated",
-      "schema": "./tests/schemas/field-created.event.schema.json"
-    },
-    {
-      "name": "FieldStatusChanged",
-      "schema": "./tests/schemas/field-status-changed.event.schema.json"
-    },
-    {
-      "name": "ReservationCreated",
-      "schema": "./tests/schemas/reservation-created.event.schema.json"
-    },
-    {
-      "name": "ReservationStatusChanged",
-      "schema": "./tests/schemas/reservation-status-changed.event.schema.json"
-    }
-  ],
+  "eventsProduced": [],
   "eventsConsumed": [],
   "schemas": [
     "./tests/schemas/id.schema.json",
@@ -98,7 +88,9 @@
     "./tests/schemas/field-status.schema.json",
     "./tests/schemas/reservation-status.schema.json",
     "./tests/schemas/field.schema.json",
-    "./tests/schemas/reservation.schema.json"
+    "./tests/schemas/field-detail.schema.json",
+    "./tests/schemas/reservation.schema.json",
+    "./tests/schemas/reservation-list.schema.json"
   ],
   "health": {
     "path": "/health",
@@ -112,6 +104,6 @@
   },
   "metadata": {
     "schemaVersion": "1.0",
-    "lastUpdated": "2026-03-30"
+    "lastUpdated": "2026-04-27"
   }
 }

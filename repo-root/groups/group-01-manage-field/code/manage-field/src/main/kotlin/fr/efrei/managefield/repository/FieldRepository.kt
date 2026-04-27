@@ -9,16 +9,11 @@ import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
 /**
- * Repository exposing field reads through a view and writes through stored
- * procedures. No procedure is invoked from an entity.
+ * Repository exposing detailed field reads through a view and writes through
+ * stored procedures. No procedure is invoked from an entity.
  */
 @Repository
 interface FieldRepository : JpaRepository<FieldEntity, String> {
-    /**
-     * Returns active field candidates sorted by name.
-     */
-    fun findAllByStatusIdOrderByNameAsc(statusId: String): List<FieldEntity>
-
     /**
      * Calls the `app_create_field` stored procedure.
      */

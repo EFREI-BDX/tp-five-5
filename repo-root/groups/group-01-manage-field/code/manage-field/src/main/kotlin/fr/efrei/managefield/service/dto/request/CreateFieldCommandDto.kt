@@ -1,4 +1,4 @@
-package fr.efrei.managefield.service.dto
+package fr.efrei.managefield.service.dto.request
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size

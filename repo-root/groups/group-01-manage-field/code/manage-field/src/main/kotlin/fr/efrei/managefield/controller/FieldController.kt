@@ -1,6 +1,7 @@
 package fr.efrei.managefield.controller
 
 import fr.efrei.managefield.controller.dto.request.UpdateFieldStatusRequestDto
+import fr.efrei.managefield.controller.dto.response.FieldDetailsResponseDto
 import fr.efrei.managefield.controller.dto.response.FieldResponseDto
 import fr.efrei.managefield.mapper.FieldApiMapper
 import fr.efrei.managefield.service.FieldService
@@ -36,8 +37,8 @@ class FieldController(
     }
 
     @GetMapping("/{field_id}")
-    fun findById(@PathVariable("field_id") @NotBlank fieldId: String): FieldResponseDto {
-        return fieldApiMapper.toFieldResponse(fieldService.findById(fieldId))
+    fun findById(@PathVariable("field_id") @NotBlank fieldId: String): FieldDetailsResponseDto {
+        return fieldApiMapper.toFieldDetailsResponse(fieldService.findById(fieldId))
     }
 
     @PatchMapping("/{field_id}/status")

@@ -8,12 +8,12 @@ import org.hibernate.annotations.Immutable
 import java.time.LocalDateTime
 
 /**
- * Immutable JPA projection backed by the `v_field_details` database view.
+ * Immutable JPA projection backed by the `v_active_field` availability read view.
  */
 @Entity
 @Immutable
-@Table(name = "v_field_details")
-class FieldEntity(
+@Table(name = "v_active_field")
+class ActiveFieldEntity(
     @Id
     @Column(name = "id", nullable = false, length = 36)
     var id: String = "",

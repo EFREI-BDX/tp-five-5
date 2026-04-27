@@ -2,8 +2,8 @@ package fr.efrei.managefield.mapper
 
 import fr.efrei.managefield.entity.FieldStatusEntity
 import fr.efrei.managefield.entity.ReservationStatusEntity
-import fr.efrei.managefield.service.dto.FieldStatusViewResultDto
-import fr.efrei.managefield.service.dto.ReservationStatusViewResultDto
+import fr.efrei.managefield.service.dto.response.FieldStatusViewResultDto
+import fr.efrei.managefield.service.dto.response.ReservationStatusViewResultDto
 import org.mapstruct.BeanMapping
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping

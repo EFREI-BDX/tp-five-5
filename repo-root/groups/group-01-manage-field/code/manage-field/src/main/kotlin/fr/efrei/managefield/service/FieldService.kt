@@ -1,9 +1,10 @@
 package fr.efrei.managefield.service
 
-import fr.efrei.managefield.service.dto.ChangeFieldStatusCommandDto
-import fr.efrei.managefield.service.dto.CreateFieldCommandDto
-import fr.efrei.managefield.service.dto.FieldViewResultDto
-import fr.efrei.managefield.service.dto.ListAvailableFieldsCommandDto
+import fr.efrei.managefield.service.dto.request.ChangeFieldStatusCommandDto
+import fr.efrei.managefield.service.dto.request.CreateFieldCommandDto
+import fr.efrei.managefield.service.dto.response.FieldDetailsViewResultDto
+import fr.efrei.managefield.service.dto.response.FieldViewResultDto
+import fr.efrei.managefield.service.dto.request.ListAvailableFieldsCommandDto
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import org.jetbrains.annotations.NotNull
@@ -20,7 +21,7 @@ interface FieldService {
     /**
      * Returns a field by identifier.
      */
-    fun findById(@NotBlank fieldId: String): FieldViewResultDto
+    fun findById(@NotBlank fieldId: String): FieldDetailsViewResultDto
 
     /**
      * Internal operation creating a field through the stored procedure.

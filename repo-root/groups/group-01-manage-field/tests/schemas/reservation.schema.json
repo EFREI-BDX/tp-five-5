@@ -13,6 +13,9 @@
     "status_id": {
       "$ref": "./id.schema.json#/properties/id"
     },
+    "status": {
+      "$ref": "./reservation-status.schema.json"
+    },
     "date": {
       "$ref": "./time-slot.schema.json#/definitions/date"
     },
@@ -27,6 +30,7 @@
     "id",
     "field_id",
     "status_id",
+    "status",
     "date",
     "start_time",
     "end_time"

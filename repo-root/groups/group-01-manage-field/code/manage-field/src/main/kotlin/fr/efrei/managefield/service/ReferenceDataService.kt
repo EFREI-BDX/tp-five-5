@@ -1,7 +1,7 @@
 package fr.efrei.managefield.service
 
-import fr.efrei.managefield.service.dto.FieldStatusViewResultDto
-import fr.efrei.managefield.service.dto.ReservationStatusViewResultDto
+import fr.efrei.managefield.service.dto.response.FieldStatusViewResultDto
+import fr.efrei.managefield.service.dto.response.ReservationStatusViewResultDto
 
 /**
  * Defines reference data read operations exposed by the application layer.

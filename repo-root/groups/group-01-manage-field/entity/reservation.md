@@ -9,6 +9,7 @@ Reservation for one field on a same-day slot.
 - **id** - *UUID* - technical identifier
 - **field_id** - *UUID* - reference to `field.id`
 - **status_id** - *UUID* - reference to `reservation_status.id`
+- **status** - *object* - read representation of the reservation status
 - **date** - *date* - reservation date
 - **start_time** - *string* - reservation start time in `HH:MM`
 - **end_time** - *string* - reservation end time in `HH:MM`

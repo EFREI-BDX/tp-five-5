@@ -9,8 +9,9 @@ Source of truth for field metadata, reference statuses, reservations, and slot a
 - `GET /v1/field-statuses` - list field statuses
 - `GET /v1/reservation-statuses` - list reservation statuses
 - `GET /v1/fields/available` - list fields available for a requested slot
-- `GET /v1/fields/{field_id}` - get one field
+- `GET /v1/fields/{field_id}` - get one field with its field status and attached reservations with their statuses
 - `PATCH /v1/fields/{field_id}/status` - change a field status
+- `GET /v1/fields/{field_id}/reservations` - list reservations for one field
 - `POST /v1/fields/{field_id}/reservations` - create a reservation
 - `PATCH /v1/fields/{field_id}/reservations/{reservation_id}/status` - change a reservation status
 
@@ -25,6 +26,14 @@ Source of truth for field metadata, reference statuses, reservations, and slot a
 **Consumed APIs**
 
 - No mandatory synchronous dependency is documented for Field Management itself.
+
+**Read Models**
+
+- Field details are read through `v_field_details`.
+- Availability candidates are read through `v_active_field`.
+- Field reservation lists are read through `v_reservation_details`.
+- Availability conflicts are read through `v_blocking_reservation`.
+- Application writes go through stored procedures only.
 
 **Invariants**
 

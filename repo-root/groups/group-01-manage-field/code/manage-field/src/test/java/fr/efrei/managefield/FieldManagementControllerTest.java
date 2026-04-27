@@ -12,14 +12,15 @@ import fr.efrei.managefield.mapper.ReservationApiMapperImpl;
 import fr.efrei.managefield.service.FieldService;
 import fr.efrei.managefield.service.ReferenceDataService;
 import fr.efrei.managefield.service.ReservationService;
-import fr.efrei.managefield.service.dto.ChangeFieldStatusCommandDto;
-import fr.efrei.managefield.service.dto.ChangeReservationStatusCommandDto;
-import fr.efrei.managefield.service.dto.CreateReservationCommandDto;
-import fr.efrei.managefield.service.dto.FieldStatusViewResultDto;
-import fr.efrei.managefield.service.dto.FieldViewResultDto;
-import fr.efrei.managefield.service.dto.ListAvailableFieldsCommandDto;
-import fr.efrei.managefield.service.dto.ReservationStatusViewResultDto;
-import fr.efrei.managefield.service.dto.ReservationViewResultDto;
+import fr.efrei.managefield.service.dto.request.ChangeFieldStatusCommandDto;
+import fr.efrei.managefield.service.dto.request.ChangeReservationStatusCommandDto;
+import fr.efrei.managefield.service.dto.request.CreateReservationCommandDto;
+import fr.efrei.managefield.service.dto.response.FieldDetailsViewResultDto;
+import fr.efrei.managefield.service.dto.response.FieldStatusViewResultDto;
+import fr.efrei.managefield.service.dto.response.FieldViewResultDto;
+import fr.efrei.managefield.service.dto.request.ListAvailableFieldsCommandDto;
+import fr.efrei.managefield.service.dto.response.ReservationStatusViewResultDto;
+import fr.efrei.managefield.service.dto.response.ReservationViewResultDto;
 import fr.efrei.managefield.service.exception.ApplicationNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -141,6 +142,44 @@ class FieldManagementControllerTest {
     }
 
     @Test
+    void getsFieldDetailsWithStatusesAndReservations() throws Exception {
+        var reservation = reservationView();
+        when(fieldService.findById(FIELD_ID))
+            .thenReturn(new FieldDetailsViewResultDto(
+                FIELD_ID,
+                "Field A",
+                FIELD_STATUS_ID,
+                new FieldStatusViewResultDto(FIELD_STATUS_ID, "active", "Active"),
+                List.of(reservation)
+            ));
+
+        mockMvc.perform(get("/v1/fields/{field_id}", FIELD_ID).header(ApiKeyInterceptor.API_KEY_HEADER, API_KEY))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(FIELD_ID))
+            .andExpect(jsonPath("$.name").value("Field A"))
+            .andExpect(jsonPath("$.status_id").value(FIELD_STATUS_ID))
+            .andExpect(jsonPath("$.status.code").value("active"))
+            .andExpect(jsonPath("$.reservations[0].id").value(RESERVATION_ID))
+            .andExpect(jsonPath("$.reservations[0].status.code").value("confirmed"));
+
+        verify(fieldService).findById(FIELD_ID);
+    }
+
+    @Test
+    void listsReservationsForAField() throws Exception {
+        when(reservationService.listByFieldId(FIELD_ID)).thenReturn(List.of(reservationView()));
+
+        mockMvc.perform(get("/v1/fields/{field_id}/reservations", FIELD_ID).header(ApiKeyInterceptor.API_KEY_HEADER, API_KEY))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(RESERVATION_ID))
+            .andExpect(jsonPath("$[0].field_id").value(FIELD_ID))
+            .andExpect(jsonPath("$[0].status_id").value(RESERVATION_STATUS_ID))
+            .andExpect(jsonPath("$[0].status.code").value("confirmed"));
+
+        verify(reservationService).listByFieldId(FIELD_ID);
+    }
+
+    @Test
     void createsReservationAndReturnsLocation() throws Exception {
         var command = new CreateReservationCommandDto(
             FIELD_ID,
@@ -150,14 +189,7 @@ class FieldManagementControllerTest {
             "12:00"
         );
         when(reservationService.create(command))
-            .thenReturn(new ReservationViewResultDto(
-                RESERVATION_ID,
-                FIELD_ID,
-                RESERVATION_STATUS_ID,
-                "2026-03-18",
-                "10:00",
-                "12:00"
-            ));
+            .thenReturn(reservationView());
 
         mockMvc.perform(
                 post("/v1/fields/{field_id}/reservations", FIELD_ID)
@@ -176,7 +208,8 @@ class FieldManagementControllerTest {
             .andExpect(header().string("Location", "/v1/fields/" + FIELD_ID + "/reservations/" + RESERVATION_ID))
             .andExpect(jsonPath("$.id").value(RESERVATION_ID))
             .andExpect(jsonPath("$.field_id").value(FIELD_ID))
-            .andExpect(jsonPath("$.status_id").value(RESERVATION_STATUS_ID));
+            .andExpect(jsonPath("$.status_id").value(RESERVATION_STATUS_ID))
+            .andExpect(jsonPath("$.status.label").value("Confirmed"));
 
         verify(reservationService).create(command);
     }
@@ -185,14 +218,7 @@ class FieldManagementControllerTest {
     void changesReservationStatusThroughAServiceCommand() throws Exception {
         var command = new ChangeReservationStatusCommandDto(FIELD_ID, RESERVATION_ID, RESERVATION_STATUS_ID);
         when(reservationService.changeStatus(command))
-            .thenReturn(new ReservationViewResultDto(
-                RESERVATION_ID,
-                FIELD_ID,
-                RESERVATION_STATUS_ID,
-                "2026-03-18",
-                "10:00",
-                "12:00"
-            ));
+            .thenReturn(reservationView());
 
         mockMvc.perform(
                 patch("/v1/fields/{field_id}/reservations/{reservation_id}/status", FIELD_ID, RESERVATION_ID)
@@ -217,5 +243,17 @@ class FieldManagementControllerTest {
             .andExpect(jsonPath("$.message").value("field not found"));
 
         verify(fieldService).findById(FIELD_ID);
+    }
+
+    private ReservationViewResultDto reservationView() {
+        return new ReservationViewResultDto(
+            RESERVATION_ID,
+            FIELD_ID,
+            RESERVATION_STATUS_ID,
+            new ReservationStatusViewResultDto(RESERVATION_STATUS_ID, "confirmed", "Confirmed"),
+            "2026-03-18",
+            "10:00",
+            "12:00"
+        );
     }
 }

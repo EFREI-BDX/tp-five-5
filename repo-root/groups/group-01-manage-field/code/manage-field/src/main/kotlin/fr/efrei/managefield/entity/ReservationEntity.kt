@@ -10,11 +10,11 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 /**
- * Immutable JPA projection backed by the `v_reservation` database view.
+ * Immutable JPA projection backed by the `v_reservation_details` database view.
  */
 @Entity
 @Immutable
-@Table(name = "v_reservation")
+@Table(name = "v_reservation_details")
 class ReservationEntity(
     @Id
     @Column(name = "id", nullable = false, length = 36)
@@ -25,6 +25,12 @@ class ReservationEntity(
 
     @Column(name = "status_id", nullable = false, length = 36)
     var statusId: String = "",
+
+    @Column(name = "status_code", nullable = false, length = 32)
+    var statusCode: String = "",
+
+    @Column(name = "status_label", nullable = false, length = 100)
+    var statusLabel: String = "",
 
     @Column(name = "date", nullable = false)
     var date: LocalDate? = null,

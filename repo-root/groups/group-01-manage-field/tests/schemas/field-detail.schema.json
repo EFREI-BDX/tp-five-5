@@ -1,0 +1,30 @@
+{
+  "$id": "https://example.org/schemas/field-detail.schema.json",
+  "title": "FieldDetail",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "./id.schema.json#/properties/id"
+    },
+    "name": {
+      "$ref": "./field-name.schema.json#/properties/name"
+    },
+    "status_id": {
+      "$ref": "./id.schema.json#/properties/id"
+    },
+    "status": {
+      "$ref": "./field-status.schema.json"
+    },
+    "reservations": {
+      "$ref": "./reservation-list.schema.json"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "status_id",
+    "status",
+    "reservations"
+  ],
+  "additionalProperties": false
+}
