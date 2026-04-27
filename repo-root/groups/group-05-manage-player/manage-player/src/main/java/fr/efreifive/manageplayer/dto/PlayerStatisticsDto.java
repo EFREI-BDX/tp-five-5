@@ -4,6 +4,9 @@ public record PlayerStatisticsDto(
     int matchesPlayed,
     int goalsScored,
     int assists,
-    int wins
+    int wins,
+    int losses,
+    int draws,
+    int mvps
 ) {
 }

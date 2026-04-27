@@ -10,6 +10,7 @@ Représente les statistiques de performance d’un joueur dans le système.
 - goalsScored - *VO GoalsScored*
 - assists - *VO Assists*
 - wins - *VO Wins*
+- losses - *VO Losses*
 - draws - *VO Draws*
 - mvps - *VO MVPs*
 
@@ -23,10 +24,11 @@ Représente les statistiques de performance d’un joueur dans le système.
 - assists doit être un nombre entier supérieur ou égal à 0
 - wins doit être non vide
 - wins doit être un nombre entier supérieur ou égal à 0
-- wins doit être inférieur ou égal à matchesPlayed
+- losses doit être non vide
+- losses doit être un nombre entier supérieur ou égal à 0
 - draws doit être non vide
 - draws doit être un nombre entier supérieur ou égal à 0
-- draws doit être inférieur ou égal à matchesPlayed
+- wins + losses + draws doit être inférieur ou égal à matchesPlayed
 - mvps doit être un nombre entier supérieur ou égal à 0
 - mvps doit être inférieur ou égal à matchesPlayed
 
@@ -42,10 +44,10 @@ Représente les statistiques de performance d’un joueur dans le système.
 - Vérifier que matchesPlayed = 0 est accepté
 - Vérifier que draws = 0 est accepté
 - Vérifier qu'un draws négatif est rejeté
-- Vérifier que draws > matchesPlayed est rejetéeté
 - Vérifier qu’un goalsScored négatif est rejeté
 - Vérifier qu’un assists négatif est rejeté
 - Vérifier qu’un wins négatif est rejeté
-- Vérifier que wins > matchesPlayed est rejeté
+- Vérifier qu’un losses négatif est rejeté
+- Vérifier que wins + losses + draws > matchesPlayed est rejeté
 - Vérifier qu’une valeur non numérique est rejetée
 - Vérifier que mvps > matchesPlayed est rejeté

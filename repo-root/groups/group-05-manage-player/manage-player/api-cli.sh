@@ -14,7 +14,7 @@ Usage:
   ./api-cli.sh players create <firstName> <lastName> <email> <phone> <gender> <birthDate> <height>
   ./api-cli.sh players update <player-id> <firstName|-> <lastName|-> <email|-> <phone|-> <gender|-> <birthDate|-> <height|->
   ./api-cli.sh players delete <player-id>
-  ./api-cli.sh players stats <player-id> <matchesPlayed> <goalsScored> <assists> <wins>
+  ./api-cli.sh players stats <player-id> <matchesPlayed> <goalsScored> <assists> <wins> <losses> <draws> <mvps>
   ./api-cli.sh demo
 
 Environment:
@@ -23,7 +23,7 @@ Environment:
 
 Examples:
   ./api-cli.sh players create Jean Dupont jean@example.com +33612345678 homme 15/06/1995 178.5
-  ./api-cli.sh players stats 11111111-1111-1111-1111-111111111111 10 4 2 6
+  ./api-cli.sh players stats 11111111-1111-4111-8111-111111111111 10 4 2 6 2 2 1
 EOF
 }
 
@@ -32,6 +32,17 @@ pretty_print() {
         jq .
     else
         cat
+    fi
+}
+
+python_cmd() {
+    if command -v python3 >/dev/null 2>&1; then
+        python3 "$@"
+    elif command -v python >/dev/null 2>&1; then
+        python "$@"
+    else
+        printf 'python3 or python is required to run this command\n' >&2
+        return 1
     fi
 }
 
@@ -60,7 +71,7 @@ request() {
 
 extract_json_field() {
     local field="$1"
-    python3 -c 'import json,sys; print(json.load(sys.stdin).get(sys.argv[1], ""))' "$field"
+    python_cmd -c 'import json,sys; print(json.load(sys.stdin).get(sys.argv[1], ""))' "$field"
 }
 
 health() {
@@ -78,7 +89,7 @@ player_create() {
 player_update() {
     local body="{}"
 
-    body="$(python3 - "$2" "$3" "$4" "$5" "$6" "$7" "$8" <<'PY'
+    body="$(python_cmd - "$2" "$3" "$4" "$5" "$6" "$7" "$8" <<'PY'
 import json, sys
 keys = ["firstName", "lastName", "email", "phone", "gender", "birthDate", "height"]
 values = sys.argv[1:]
@@ -98,7 +109,7 @@ player_delete() {
 }
 
 player_stats() {
-    request POST "/players/$1/statistics" "$(printf '{"matchesPlayed":%s,"goalsScored":%s,"assists":%s,"wins":%s}' "$2" "$3" "$4" "$5")"
+    request POST "/players/$1/statistics" "$(printf '{"matchesPlayed":%s,"goalsScored":%s,"assists":%s,"wins":%s,"losses":%s,"draws":%s,"mvps":%s}' "$2" "$3" "$4" "$5" "$6" "$7" "$8")"
 }
 
 demo() {
@@ -113,8 +124,12 @@ demo() {
     printf '\n[POST] %s/players\n' "$BASE_URL"
     printf '%s\n' "$player_response" | pretty_print
     player_id="$(printf '%s' "$player_response" | extract_json_field id)"
+    if [[ -z "$player_id" ]]; then
+        printf 'Demo stopped: player creation did not return an id.\n' >&2
+        return 1
+    fi
 
-    player_stats "$player_id" 10 4 2 6
+    player_stats "$player_id" 10 4 2 6 2 2 1
     player_get "$player_id"
 
     printf '\nDemo ids:\n'
@@ -137,7 +152,7 @@ main() {
                 create) player_create "$3" "$4" "$5" "$6" "$7" "$8" "$9" ;;
                 update) player_update "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10:-}" ;;
                 delete) player_delete "$3" ;;
-                stats) player_stats "$3" "$4" "$5" "$6" "$7" ;;
+                stats) player_stats "$3" "$4" "$5" "$6" "$7" "$8" "$9" "${10:-}" ;;
                 *) print_usage; exit 1 ;;
             esac
             ;;

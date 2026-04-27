@@ -1,10 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "Business rules not expressible in standard draft-07: birthDate must not be in the future; updatedAt must be greater than or equal to createdAt; statistics.wins + statistics.losses + statistics.draws must be less than or equal to statistics.matchesPlayed; statistics.mvps must be less than or equal to statistics.matchesPlayed.",
   "type": "object",
   "properties": {
     "id": {
       "type": "string",
-      "minLength": 1
+      "format": "uuid"
     },
     "firstName": {
       "type": "string",
@@ -22,13 +23,15 @@
     },
     "phone": {
       "type": "string",
-      "pattern": "^(\\+33|0)[1-9]([0-9]{8}|[0-9\\s.\\-]{8,})$"
+      "maxLength": 20,
+      "pattern": "^(\\+33|0)[1-9]([0-9 .\\-]{8,})$"
     },
     "gender": {
       "type": "string",
       "enum": ["homme", "femme", "non binaire", "non spécifié"]
     },
     "birthDate": {
+      "$comment": "Must not be in the future; enforce with domain validation or tests.",
       "type": "string",
       "pattern": "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/[0-9]{4}$"
     },
@@ -45,16 +48,18 @@
       "uniqueItems": true
     },
     "statistics": {
+      "$comment": "wins + losses + draws must be <= matchesPlayed; mvps must be <= matchesPlayed. Enforce with domain validation or tests.",
       "type": "object",
       "properties": {
         "matchesPlayed": { "type": "integer", "minimum": 0 },
         "goalsScored": { "type": "integer", "minimum": 0 },
         "assists": { "type": "integer", "minimum": 0 },
         "wins": { "type": "integer", "minimum": 0 },
+        "losses": { "type": "integer", "minimum": 0 },
         "draws": { "type": "integer", "minimum": 0 },
         "mvps": { "type": "integer", "minimum": 0 }
       },
-      "required": ["matchesPlayed", "goalsScored", "assists", "wins", "draws", "mvps"]
+      "required": ["matchesPlayed", "goalsScored", "assists", "wins", "losses", "draws", "mvps"]
     },
     "status": {
       "type": "string",
@@ -65,10 +70,11 @@
       "format": "date-time"
     },
     "updatedAt": {
+      "$comment": "Must be greater than or equal to createdAt; enforce with domain validation or tests.",
       "type": "string",
       "format": "date-time"
     }
   },
-  "required": ["id", "firstName", "lastName", "email", "phone", "gender", "birthDate", "height", "statistics", "status", "createdAt", "updatedAt"],
+  "required": ["id", "firstName", "lastName", "email", "phone", "gender", "birthDate", "height", "teamIds", "statistics", "status", "createdAt", "updatedAt"],
   "additionalProperties": false
 }

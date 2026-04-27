@@ -23,6 +23,25 @@ tags:
 paths:
 
   /players:
+    get:
+      tags: [Players]
+      operationId: getPlayers
+      summary: Lister les joueurs
+      description: Retourne tous les joueurs enregistrés.
+      responses:
+        '200':
+          description: Liste des joueurs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     post:
       tags: [Players]
       operationId: createPlayer
@@ -133,10 +152,9 @@ components:
     # --- Identifiants ---
     Id:
       type: string
-      minLength: 1
-      pattern: '^\S.*\S$|^\S$'
-      description: Identifiant unique d'un joueur. Non vide, sans espaces seuls.
-      example: "player-abc-123"
+      format: uuid
+      description: Identifiant UUID unique d'un joueur.
+      example: "11111111-1111-4111-8111-111111111111"
 
     TeamId:
       type: string
@@ -172,7 +190,8 @@ components:
     Phone:
       type: string
       minLength: 1
-      pattern: '^\+?[0-9\s\-().]{7,20}$'
+      maxLength: 20
+      pattern: '^(\+33|0)[1-9]([0-9 .\-]{8,})$'
       description: Numéro de téléphone valide du joueur.
       example: "+33612345678"
 
@@ -228,14 +247,32 @@ components:
     Wins:
       type: integer
       minimum: 0
-      description: Nombre de victoires. Entier >= 0. Doit être <= matchesPlayed.
+      description: Nombre de victoires. Entier >= 0.
       example: 7
+
+    Losses:
+      type: integer
+      minimum: 0
+      description: Nombre de défaites. Entier >= 0.
+      example: 3
+
+    Draws:
+      type: integer
+      minimum: 0
+      description: Nombre de matchs nuls. Entier >= 0.
+      example: 2
+
+    Mvps:
+      type: integer
+      minimum: 0
+      description: Nombre de titres MVP. Entier >= 0. Doit être <= matchesPlayed.
+      example: 1
 
     # --- Value Objects composites ---
     PlayerStatistics:
       type: object
       description: Statistiques de performance d'un joueur.
-      required: [matchesPlayed, goalsScored, assists, wins]
+      required: [matchesPlayed, goalsScored, assists, wins, losses, draws, mvps]
       properties:
         matchesPlayed:
           $ref: '#/components/schemas/MatchesPlayed'
@@ -245,6 +282,12 @@ components:
           $ref: '#/components/schemas/Assists'
         wins:
           $ref: '#/components/schemas/Wins'
+        losses:
+          $ref: '#/components/schemas/Losses'
+        draws:
+          $ref: '#/components/schemas/Draws'
+        mvps:
+          $ref: '#/components/schemas/Mvps'
 
     # --- Agrégat Player (lecture complète) ---
     Player:
@@ -382,7 +425,7 @@ components:
     UpdatePlayerStatisticsRequest:
       type: object
       description: Corps de la requête pour mettre à jour les statistiques d'un joueur.
-      required: [matchesPlayed, goalsScored, assists, wins]
+      required: [matchesPlayed, goalsScored, assists, wins, losses, draws, mvps]
       properties:
         matchesPlayed:
           $ref: '#/components/schemas/MatchesPlayed'
@@ -392,6 +435,12 @@ components:
           $ref: '#/components/schemas/Assists'
         wins:
           $ref: '#/components/schemas/Wins'
+        losses:
+          $ref: '#/components/schemas/Losses'
+        draws:
+          $ref: '#/components/schemas/Draws'
+        mvps:
+          $ref: '#/components/schemas/Mvps'
 
     UpdatePlayerStatisticsResponse:
       type: object
@@ -483,6 +532,9 @@ components:
             goalsScored: 7
             assists: 4
             wins: 9
+            losses: 4
+            draws: 2
+            mvps: 3
 
   # ─────────────────────────────────────────────
   # RESPONSES
@@ -495,7 +547,7 @@ components:
           schema:
             $ref: '#/components/schemas/CreatePlayerResponse'
           example:
-            id: "player-abc-123"
+            id: "11111111-1111-4111-8111-111111111111"
             status: "actif"
             createdAt: "2026-03-18T10:00:00Z"
 
@@ -506,7 +558,7 @@ components:
           schema:
             $ref: '#/components/schemas/Player'
           example:
-            id: "player-abc-123"
+            id: "11111111-1111-4111-8111-111111111111"
             firstName: "Jean"
             lastName: "Dupont"
             email: "jean.dupont@example.com"
@@ -520,6 +572,9 @@ components:
               goalsScored: 5
               assists: 3
               wins: 7
+              losses: 3
+              draws: 2
+              mvps: 1
             teamIds: ["team-xyz-456"]
             createdAt: "2026-03-18T10:00:00Z"
             updatedAt: "2026-03-18T10:00:00Z"
@@ -531,7 +586,7 @@ components:
           schema:
             $ref: '#/components/schemas/UpdatePlayerResponse'
           example:
-            id: "player-abc-123"
+            id: "11111111-1111-4111-8111-111111111111"
             updatedAt: "2026-03-18T11:30:00Z"
 
     DeletePlayerResponse:
@@ -541,7 +596,7 @@ components:
           schema:
             $ref: '#/components/schemas/DeletePlayerResponse'
           example:
-            id: "player-abc-123"
+            id: "11111111-1111-4111-8111-111111111111"
             status: "supprimé"
             updatedAt: "2026-03-18T12:00:00Z"
 
@@ -552,12 +607,15 @@ components:
           schema:
             $ref: '#/components/schemas/UpdatePlayerStatisticsResponse'
           example:
-            id: "player-abc-123"
+            id: "11111111-1111-4111-8111-111111111111"
             statistics:
               matchesPlayed: 15
               goalsScored: 7
               assists: 4
               wins: 9
+              losses: 4
+              draws: 2
+              mvps: 3
             updatedAt: "2026-03-18T13:00:00Z"
 
     BadRequest:

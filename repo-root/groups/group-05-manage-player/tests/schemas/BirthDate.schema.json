@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "Business rule not expressible in standard draft-07: value must not be in the future.",
   "type": "object",
   "properties": {
     "value": {

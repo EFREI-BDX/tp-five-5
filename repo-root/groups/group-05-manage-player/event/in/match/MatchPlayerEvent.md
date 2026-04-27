@@ -18,6 +18,7 @@ Il permet de mettre à jour les statistiques de performance d'un joueur identifi
 - goalsScored — *Integer* (≥ 0)
 - assists — *Integer* (≥ 0)
 - wins — *Integer* (≥ 0)
+- losses — *Integer* (≥ 0)
 - draws — *Integer* (≥ 0)
 - mvps — *Integer* (≥ 0)
 
@@ -29,10 +30,10 @@ Il permet de mettre à jour les statistiques de performance d'un joueur identifi
 - goalsScored doit être ≥ 0
 - assists doit être ≥ 0
 - wins doit être ≥ 0
+- losses doit être ≥ 0
 - draws doit être ≥ 0
 - mvps doit être ≥ 0
-- wins doit être ≤ matchesPlayed
-- draws doit être ≤ matchesPlayed
+- wins + losses + draws doit être ≤ matchesPlayed
 - mvps doit être ≤ matchesPlayed
 - playerId doit correspondre à un joueur existant si cette règle est retenue
 
@@ -45,6 +46,7 @@ Il permet de mettre à jour les statistiques de performance d'un joueur identifi
   "goalsScored": 2,
   "assists": 1,
   "wins": 1,
+  "losses": 0,
   "draws": 0,
   "mvps": 1
 }
@@ -71,8 +73,7 @@ Il permet de mettre à jour les statistiques de performance d'un joueur identifi
 - vérifier qu'un payload avec toutes les statistiques valides et cohérentes est accepté
 - vérifier qu'un payload avec un playerId invalide est rejeté
 - vérifier qu'un payload avec une valeur négative de statistiques est rejeté
-- vérifier qu'un payload avec wins > matchesPlayed est rejeté
-- vérifier qu'un payload avec draws > matchesPlayed est rejeté
+- vérifier qu'un payload avec wins + losses + draws > matchesPlayed est rejeté
 - vérifier qu'un payload avec mvps > matchesPlayed est rejeté
 
 **Remarques**

@@ -98,7 +98,10 @@ curl -X POST http://localhost:8080/players/<player-id>/statistics \
     "matchesPlayed": 10,
     "goalsScored": 4,
     "assists": 2,
-    "wins": 6
+    "wins": 6,
+    "losses": 2,
+    "draws": 2,
+    "mvps": 1
   }'
 ```
 
@@ -125,7 +128,7 @@ Exemples :
 ./api-cli.sh players create Jean Dupont jean.dupont@example.com +33612345678 homme 15/06/1995 178.5
 ./api-cli.sh players get <player-id>
 ./api-cli.sh players update <player-id> - - new.email@example.com - - - -
-./api-cli.sh players stats <player-id> 10 4 2 6
+./api-cli.sh players stats <player-id> 10 4 2 6 2 2 1
 ./api-cli.sh players delete <player-id>
 ./api-cli.sh demo
 ```

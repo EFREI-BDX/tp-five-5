@@ -10,6 +10,7 @@ import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsRequest;
 import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsResponse;
 import fr.efreifive.manageplayer.service.PlayerService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,11 @@ public class PlayerController {
 
     public PlayerController(PlayerService playerService) {
         this.playerService = playerService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PlayerDto>> findAll() {
+        return ResponseEntity.ok(this.playerService.findAll());
     }
 
     @GetMapping("/{id}")

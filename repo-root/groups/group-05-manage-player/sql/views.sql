@@ -1,43 +1,48 @@
-DROP VIEW IF EXISTS fiveplayer.TeamView;
-CREATE VIEW fiveplayer.TeamView AS
-SELECT `fiveplayer`.`team`.`id`   AS `id`,
-       `fiveplayer`.`team`.`name` AS `name`
-FROM `fiveplayer`.`team`;
-GRANT SELECT ON fiveplayer.TeamView TO 'jad_efrei_five_2526'@'%';
+DROP VIEW IF EXISTS fiveplayer.PlayerStatisticsView;
+CREATE VIEW fiveplayer.PlayerStatisticsView AS
+SELECT ps.idPlayer      AS idPlayer,
+       ps.matchesPlayed AS matchesPlayed,
+       ps.goalsScored   AS goalsScored,
+       ps.assists       AS assists,
+       ps.wins          AS wins,
+       ps.losses        AS losses,
+       ps.draws         AS draws,
+       ps.mvps          AS mvps
+FROM fiveplayer.player_statistics ps;
+GRANT SELECT ON fiveplayer.PlayerStatisticsView TO 'fiveplayer'@'%';
 
 DROP VIEW IF EXISTS fiveplayer.PlayerView;
 CREATE VIEW fiveplayer.PlayerView AS
-SELECT `fiveplayer`.`player`.`id`        AS `id`,
-       `fiveplayer`.`player`.`firstName` AS `firstName`,
-       `fiveplayer`.`player`.`lastName`  AS `lastName`,
-       `fiveplayer`.`player`.`email`     AS `email`,
-       `fiveplayer`.`player`.`phone`     AS `phone`,
-       `fiveplayer`.`player`.`gender`    AS `gender`,
-       DATE_FORMAT(`fiveplayer`.`player`.`birthDate`, '%d/%m/%Y') AS `birthDate`,
-       `fiveplayer`.`player`.`height`    AS `height`,
-       `fiveplayer`.`player`.`status`    AS `status`,
-       DATE_FORMAT(`fiveplayer`.`player`.`createdAt`, '%Y-%m-%dT%H:%i:%sZ') AS `createdAt`,
-       DATE_FORMAT(`fiveplayer`.`player`.`updatedAt`, '%Y-%m-%dT%H:%i:%sZ') AS `updatedAt`
-FROM `fiveplayer`.`player`;
-GRANT SELECT ON fiveplayer.PlayerView TO 'jad_efrei_five_2526'@'%';
-
-DROP VIEW IF EXISTS fiveplayer.PlayerStatisticsView;
-CREATE VIEW fiveplayer.PlayerStatisticsView AS
-SELECT `fiveplayer`.`player_statistics`.`idPlayer`      AS `idPlayer`,
-       `fiveplayer`.`player_statistics`.`matchesPlayed` AS `matchesPlayed`,
-       `fiveplayer`.`player_statistics`.`goalsScored`   AS `goalsScored`,
-       `fiveplayer`.`player_statistics`.`assists`       AS `assists`,
-       `fiveplayer`.`player_statistics`.`wins`          AS `wins`,
-       `fiveplayer`.`player_statistics`.`draws`         AS `draws`,
-       `fiveplayer`.`player_statistics`.`mvps`          AS `mvps`
-FROM `fiveplayer`.`player_statistics`;
-GRANT SELECT ON fiveplayer.PlayerStatisticsView TO 'jad_efrei_five_2526'@'%';
-
-DROP VIEW IF EXISTS fiveplayer.PlayerTeamView;
-CREATE VIEW fiveplayer.PlayerTeamView AS
-SELECT `fiveplayer`.`player_team`.`idPlayer` AS `idPlayer`,
-       `fiveplayer`.`player_team`.`idTeam`   AS `idTeam`
-FROM `fiveplayer`.`player_team`;
-GRANT SELECT ON fiveplayer.PlayerTeamView TO 'jad_efrei_five_2526'@'%';
+SELECT p.id        AS id,
+       p.firstName AS firstName,
+       p.lastName  AS lastName,
+       p.email     AS email,
+       p.phone     AS phone,
+       p.gender    AS gender,
+       DATE_FORMAT(p.birthDate, '%d/%m/%Y') AS birthDate,
+       p.height    AS height,
+       JSON_ARRAY() AS teamIds,
+       COALESCE(ps.matchesPlayed, 0) AS matchesPlayed,
+       COALESCE(ps.goalsScored, 0)   AS goalsScored,
+       COALESCE(ps.assists, 0)       AS assists,
+       COALESCE(ps.wins, 0)          AS wins,
+       COALESCE(ps.losses, 0)        AS losses,
+       COALESCE(ps.draws, 0)         AS draws,
+       COALESCE(ps.mvps, 0)          AS mvps,
+       JSON_OBJECT(
+           'matchesPlayed', COALESCE(ps.matchesPlayed, 0),
+           'goalsScored', COALESCE(ps.goalsScored, 0),
+           'assists', COALESCE(ps.assists, 0),
+           'wins', COALESCE(ps.wins, 0),
+           'losses', COALESCE(ps.losses, 0),
+           'draws', COALESCE(ps.draws, 0),
+           'mvps', COALESCE(ps.mvps, 0)
+       ) AS statistics,
+       p.status AS status,
+       DATE_FORMAT(p.createdAt, '%Y-%m-%dT%H:%i:%sZ') AS createdAt,
+       DATE_FORMAT(p.updatedAt, '%Y-%m-%dT%H:%i:%sZ') AS updatedAt
+FROM fiveplayer.player p
+         LEFT JOIN fiveplayer.player_statistics ps ON ps.idPlayer = p.id;
+GRANT SELECT ON fiveplayer.PlayerView TO 'fiveplayer'@'%';
 
 FLUSH PRIVILEGES;
