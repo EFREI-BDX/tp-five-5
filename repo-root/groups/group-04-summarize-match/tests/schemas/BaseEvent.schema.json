@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/BaseEvent.schema.json",
+  "title": "BaseEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "matchId", "type", "occurredAt", "matchTime", "payload"],
+  "properties": {
+    "eventId": { "type": "string", "format": "uuid" },
+    "matchId": { "type": "string", "format": "uuid" },
+    "type": { "type": "string" },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "matchTime": {
+      "type": "object",
+      "required": ["minute","second","period"],
+      "additionalProperties": false,
+      "properties": {
+        "minute": { "type": "integer", "minimum": 0 },
+        "second": { "type": "integer", "minimum": 0, "maximum": 59 },
+        "period": { "type": "string", "enum": ["FIRST_HALF","SECOND_HALF"] }
+      }
+    },
+    "payload": { "type": "object" }
+  }
+}

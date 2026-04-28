@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pass-attempted.schema.json",
+  "title": "PASS_ATTEMPTED",
+  "type": "object",
+  "allOf": [
+    { "$ref": "BaseEvent.schema.json" },
+    {
+      "properties": {
+        "type": { "const": "PASS_ATTEMPTED" },
+        "payload": {
+          "type": "object",
+          "required": ["passerId","teamId","succeeded"],
+          "additionalProperties": false,
+          "properties": {
+            "passerId": { "type": "string", "format": "uuid" },
+            "teamId": { "type": "string", "format": "uuid" },
+            "receiverId": { "type": ["string","null"], "format": "uuid" },
+            "succeeded": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  ]
+}

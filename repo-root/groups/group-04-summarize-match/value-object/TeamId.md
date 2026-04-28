@@ -1,0 +1,35 @@
+# Value Object — TeamId
+
+**Résumé métier**
+
+`TeamId` représente l'identifiant unique d'une équipe dans le contexte `summarize-match`.
+
+**Attributs**
+
+- **value** — *String* — identifiant opaque (ex: UUID format), encapsulé dans `TeamId(pub String)`.
+
+**Invariants**
+
+- Aucune validation stricte de format pour l'instant; la valeur doit être non vide.
+
+**Format JSON attendu**
+
+- Représentation JSON: une chaîne (ex: `"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"`).
+
+**Schéma / Fixtures**
+
+- Le VO n'a pas de schéma isolé — il est utilisé dans les schémas d'events (ex: `tests/schemas/match-started.schema.json`).
+
+**Tests minimaux attendus**
+
+- Sérialisation/désérialisation via `serde`.
+- Comparaison d'égalité, clonage et conversion depuis `String`/`&str`.
+
+**Génération des fixtures**
+
+- Voir fixtures d'events sous `tests/fixtures`.
+
+**Références de code**
+
+- Définition: [src/domain.rs](src/domain.rs#L1-L200)
+- Usage: `Team.team_id`, `MatchState.home_team_id` — voir [src/application.rs](src/application.rs)

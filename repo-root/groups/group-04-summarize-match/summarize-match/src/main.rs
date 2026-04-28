@@ -4,6 +4,8 @@ use serde::Serialize;
 use std::{env, net::SocketAddr};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+// consumer wiring lives in the library; no direct use here to keep main focused
+
 #[derive(Clone)]
 struct AppState {
     db: DatabaseConnection,
@@ -60,3 +62,5 @@ async fn health(State(state): State<AppState>) -> Json<HealthResponse> {
         service: "summarize-match",
     })
 }
+
+// Keep main small; consumer wiring and application implementation live in modules.

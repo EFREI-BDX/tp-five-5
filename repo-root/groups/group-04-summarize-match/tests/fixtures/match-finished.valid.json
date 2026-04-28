@@ -1,0 +1,13 @@
+{
+  "eventId": "750e8400-e29b-41d4-a716-446655440001",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "MATCH_FINISHED",
+  "occurredAt": "2026-04-28T12:40:00Z",
+  "matchTime": { "minute": 40, "second": 0, "period": "SECOND_HALF" },
+  "payload": {
+    "finalScore": {
+      "home": 1,
+      "away": 0
+    }
+  }
+}

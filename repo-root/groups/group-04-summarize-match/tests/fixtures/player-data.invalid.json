@@ -1,5 +1,5 @@
 {
-  "palyerId": "not-a-uuid",
+  "playerId": "not-a-uuid",
   "goals": -1,
   "assists": -2,
   "saves": -3,

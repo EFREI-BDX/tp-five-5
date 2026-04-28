@@ -1,0 +1,13 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440001",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "GOAL_SCORED",
+  "occurredAt": "2026-04-28T12:07:43Z",
+  "matchTime": { "minute": 7, "second": 43, "period": "FIRST_HALF" },
+  "payload": {
+    "scoringTeamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "scorerId": "00000000-0000-0000-0000-000000000002",
+    "assistId": "00000000-0000-0000-0000-000000000003",
+    "isOwnGoal": false
+  }
+}

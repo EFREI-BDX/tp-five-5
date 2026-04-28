@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MATCH_FINISHED payload",
+  "type": "object",
+  "required": ["finalScore"],
+  "additionalProperties": false,
+  "properties": {
+    "finalScore": {
+      "type": "object",
+      "required": ["home", "away"],
+      "additionalProperties": false,
+      "properties": {
+        "home": { "type": "integer", "minimum": 0 },
+        "away": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

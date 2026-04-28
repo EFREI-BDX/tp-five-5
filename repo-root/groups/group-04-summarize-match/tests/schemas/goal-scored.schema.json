@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GOAL_SCORED payload",
+  "type": "object",
+  "required": ["scoringTeamId", "scorerId", "isOwnGoal"],
+  "additionalProperties": false,
+  "properties": {
+    "scoringTeamId": { "type": "string", "format": "uuid" },
+    "scorerId": { "type": "string", "format": "uuid" },
+    "assistId": { "type": ["string", "null"], "format": "uuid" },
+    "isOwnGoal": { "type": "boolean" }
+  }
+}

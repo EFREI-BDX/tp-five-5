@@ -1,2 +1,149 @@
 {
+	"serviceId": "group-04-summarize-match",
+	"name": "Summarize Match",
+	"version": "1.0.0",
+	"description": "Service responsable du resume d'un match a partir du flux d'events consommes depuis le contexte record-match.",
+	"owner": {
+		"team": "group-04-summarize-match",
+		"contact": "todo@example.org"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@example.com:org/repo.git",
+		"path": "groups/group-04-summarize-match"
+	},
+	"endpoints": [],
+	"eventsProduced": [
+		{
+			"name": "PlayerData",
+			"description": "Résumé des statistiques par joueur produit par le service après calcul du match.",
+			"documentation": "./events/outbound/PlayerData.md",
+			"schema": "./tests/schemas/player-data.schema.json"
+		}
+	],
+	"eventsConsumed": [
+		{
+			"name": "BaseEvent",
+			"description": "Enveloppe commune a tous les events de match.",
+			"documentation": "./events/inbound/BaseEvent.md"
+		},
+		{
+			"name": "MATCH_STARTED",
+			"description": "Demarrage du match et composition initiale.",
+			"documentation": "./events/inbound/MATCH_STARTED.md"
+		},
+		{
+			"name": "MATCH_PAUSED",
+			"description": "Interruption de jeu temporaire.",
+			"documentation": "./events/inbound/MATCH_PAUSED.md"
+		},
+		{
+			"name": "MATCH_RESUMED",
+			"description": "Reprise du match apres interruption.",
+			"documentation": "./events/inbound/MATCH_RESUMED.md"
+		},
+		{
+			"name": "MATCH_FINISHED",
+			"description": "Cloture du match avec score final.",
+			"documentation": "./events/inbound/MATCH_FINISHED.md"
+		},
+		{
+			"name": "MATCH_FORFEITED",
+			"description": "Match perdu par forfait.",
+			"documentation": "./events/inbound/MATCH_FORFEITED.md"
+		},
+		{
+			"name": "MATCH_CANCELLED",
+			"description": "Match annule sans resultat exploitable.",
+			"documentation": "./events/inbound/MATCH_CANCELLED.md"
+		},
+		{
+			"name": "GOAL_SCORED",
+			"description": "But valide par l'arbitre.",
+			"documentation": "./events/inbound/GOAL_SCORED.md"
+		},
+		{
+			"name": "GOAL_CANCELLED",
+			"description": "But annule apres verification.",
+			"documentation": "./events/inbound/GOAL_CANCELLED.md"
+		},
+		{
+			"name": "SHOT_ATTEMPTED",
+			"description": "Tentative de tir, cadre ou non.",
+			"documentation": "./events/inbound/SHOT_ATTEMPTED.md"
+		},
+		{
+			"name": "SAVE_MADE",
+			"description": "Arret realise par le gardien.",
+			"documentation": "./events/inbound/SAVE_MADE.md"
+		},
+		{
+			"name": "PASS_ATTEMPTED",
+			"description": "Tentative de passe. Le cas reussi est porte par succeeded=true.",
+			"documentation": "./events/inbound/PASS_ATTEMPTED.md"
+		},
+		{
+			"name": "FOUL_COMMITTED",
+			"description": "Faute commise par un joueur.",
+			"documentation": "./events/inbound/FOUL_COMMITTED.md"
+		},
+		{
+			"name": "YELLOW_CARD",
+			"description": "Carton jaune attribue.",
+			"documentation": "./events/inbound/YELLOW_CARD.md"
+		},
+		{
+			"name": "RED_CARD",
+			"description": "Expulsion d'un joueur.",
+			"documentation": "./events/inbound/RED_CARD.md"
+		},
+		{
+			"name": "SUBSTITUTION",
+			"description": "Remplacement d'un joueur pendant le match.",
+			"documentation": "./events/inbound/SUBSTITUTION.md"
+		}
+	],
+	"schemas": [
+		"./tests/schemas/player-data.schema.json",
+		"./tests/schemas/BaseEvent.schema.json"
+	],
+	"notes": {
+		"inbound": "Le service consomme le flux d'events de record-match.",
+		"outbound": "Produit `PlayerData` (voir events/outbound/PlayerData.md). Mettre a jour si d'autres sorties apparaissent."
+	},
+	"health": {
+		"path": "/health",
+		"method": "GET",
+		"expectedStatus": 200
+	},
+	"security": {
+		"type": "none"
+	},
+	"deployment": {
+		"image": "registry.example.org/group-04-summarize-match:1.0.0",
+		"replicas": 1,
+		"resources": {
+			"cpu": "250m",
+			"memory": "256Mi"
+		}
+	},
+	"ci": {
+		"validateCommand": "cd groups/group-04-summarize-match/summarize-match && cargo test"
+	},
+	"contacts": [
+		{
+			"role": "PO",
+			"name": "TODO PO",
+			"email": "po@example.org"
+		},
+		{
+			"role": "Tech lead",
+			"name": "TODO TL",
+			"email": "tl@example.org"
+		}
+	],
+	"metadata": {
+		"schemaVersion": "1.0",
+		"lastUpdated": "2026-04-27"
+	}
 }

@@ -1,0 +1,30 @@
+{
+  "eventId": "550e8400-e29b-41d4-a716-446655440000",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "MATCH_STARTED",
+  "occurredAt": "2026-04-27T12:00:00Z",
+  "matchTime": { "minute": 0, "second": 0, "period": "FIRST_HALF" },
+  "payload": {
+    "homeTeam": {
+      "teamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "startingPlayers": [
+        { "playerId": "00000000-0000-0000-0000-000000000001", "isGoalkeeper": true },
+        { "playerId": "00000000-0000-0000-0000-000000000002", "isGoalkeeper": false },
+        { "playerId": "00000000-0000-0000-0000-000000000003", "isGoalkeeper": false },
+        { "playerId": "00000000-0000-0000-0000-000000000004", "isGoalkeeper": false },
+        { "playerId": "00000000-0000-0000-0000-000000000005", "isGoalkeeper": false }
+      ]
+    },
+    "awayTeam": {
+      "teamId": "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb",
+      "startingPlayers": [
+        { "playerId": "00000000-0000-0000-0000-000000000006", "isGoalkeeper": true },
+        { "playerId": "00000000-0000-0000-0000-000000000007", "isGoalkeeper": false },
+        { "playerId": "00000000-0000-0000-0000-000000000008", "isGoalkeeper": false },
+        { "playerId": "00000000-0000-0000-0000-000000000009", "isGoalkeeper": false },
+        { "playerId": "00000000-0000-0000-0000-000000000010", "isGoalkeeper": false }
+      ]
+    },
+    "scheduledDurationMinutes": 40
+  }
+}

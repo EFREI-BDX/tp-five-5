@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MATCH_STARTED payload",
+  "type": "object",
+  "required": ["homeTeam", "awayTeam", "scheduledDurationMinutes"],
+  "additionalProperties": false,
+  "properties": {
+    "homeTeam": {
+      "type": "object",
+      "required": ["teamId", "startingPlayers"],
+      "additionalProperties": false,
+      "properties": {
+        "teamId": { "type": "string", "format": "uuid" },
+        "startingPlayers": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["playerId", "isGoalkeeper"],
+            "additionalProperties": false,
+            "properties": {
+              "playerId": { "type": "string", "format": "uuid" },
+              "isGoalkeeper": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "awayTeam": {
+      "type": "object",
+      "required": ["teamId", "startingPlayers"],
+      "additionalProperties": false,
+      "properties": {
+        "teamId": { "type": "string", "format": "uuid" },
+        "startingPlayers": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "required": ["playerId", "isGoalkeeper"],
+            "additionalProperties": false,
+            "properties": {
+              "playerId": { "type": "string", "format": "uuid" },
+              "isGoalkeeper": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "scheduledDurationMinutes": { "type": "integer", "minimum": 1 }
+  }
+}

@@ -1,23 +1,20 @@
-# group-xx-xxxxxxxx
+# summarize-match
 
-**Contexte**
+Service de resume de match dans une architecture DDD hexagonale.
 
-**Membres**
+## Documentation canonique
 
-- **Nom Prénom** — identifiant GitHub
+- `value-object/*.md` - fiches par Value Object (PlayerId, TeamId)
 
-**Stack choisie** :
+## Ce que fait le service
 
-**Livrables attendus**
+- Consomme un flux d'events de match venant du contexte amont `record-match`.
+- Reconstitue une timeline coherente.
+- Calcule les scores et les statistiques derives.
+- Signale les anomalies metier quand la timeline ou le score final ne sont pas coherents.
 
-- `domain-summary.md`
-- `contexts-map.md`
-- `value-objects/*.md` (un fichier par VO)
-- `openapi.yaml`
-- `mock/postman-collection.json`
-- `tests/schemas/*.schema.json` et `tests/fixtures/*.valid.json` / `*.invalid.json`
-- `CONTRIBUTION.md`
+## Ce que le service ne fait pas encore
 
-**Commandes utiles**
-
-**Notes**
+- Pas de port HTTP metier expose a part le healthcheck.
+- Pas d'adapters persistants documentes dans ce repo.
+- Pas de schemas JSON par event encore formalisés dans `tests/schemas` pour toute la matrice du contrat.
