@@ -1,0 +1,8 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440010",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "MATCH_RESUMED",
+  "occurredAt": "2026-04-28T12:25:00Z",
+  "matchTime": { "minute": 20, "second": 0, "period": "SECOND_HALF" },
+  "payload": { "reason": "HALF_TIME_END" }
+}

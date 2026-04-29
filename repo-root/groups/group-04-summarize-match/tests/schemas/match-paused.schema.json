@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/match-paused.schema.json",
+  "title": "MATCH_PAUSED payload",
+  "type": "object",
+  "required": ["reason"],
+  "additionalProperties": false,
+  "properties": {
+    "reason": { "type": "string", "enum": ["HALF_TIME", "INCIDENT", "OTHER"] }
+  }
+}

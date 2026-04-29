@@ -15,16 +15,20 @@
 
 ## Architecture hexagonale cible
 
-- **Adapter entrant** : consumer d'events du contexte `record-match`.
-- **Port entrant** : cas d'usage de resume du match.
+- **Adapter entrant** : consumer HTTP d'events et endpoint query REST.
+- **Port entrant (commandes)** : `ApplicationService` — cas d'usage de traitement d'event.
+- **Port entrant (requetes)** : `MatchQueryService` — lecture du resume du match (CQRS).
 - **Noyau metier** : regles de cohérence, score, sanctions, remplacements, statistiques derivees.
-- **Adapters sortants** : aucun event de sortie documente pour l'instant.
+- **Port sortant (persistance)** : `MatchRepository` — event store.
+- **Port sortant (publication)** : `DomainEventPublisher` — notification des contextes descendants.
+- **Adapters sortants** : `SeaOrmMatchRepository` (PostgreSQL), `NoOpEventPublisher` (a remplacer par un adapter Kafka/AMQP).
 
 ## APIs produits
 
-- Aucun endpoint metier HTTP pour le moment.
-- `GET /health` - controle technique.
+- `POST /events` — reception d'un event de match (validation schema + dispatch domaine).
+- `GET /matches/{matchId}/summary` — lecture du resume courant du match.
+- `GET /health` — controle technique.
 
 ## Events produits
 
-- Aucun event produit actuellement.
+- `PlayerData` — resume des statistiques par joueur (port `DomainEventPublisher` câblé, adapter NoOp par defaut, event outbound documente dans `events/outbound/PlayerData.md`).

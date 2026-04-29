@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/save-made.schema.json",
+  "title": "SAVE_MADE payload",
+  "type": "object",
+  "required": ["keeperId", "keeperTeamId"],
+  "additionalProperties": false,
+  "properties": {
+    "keeperId": { "type": "string", "format": "uuid" },
+    "keeperTeamId": { "type": "string", "format": "uuid" },
+    "relatedShotEventId": { "type": ["string", "null"], "format": "uuid" }
+  }
+}

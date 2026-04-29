@@ -1,0 +1,81 @@
+name: summarize-match CI
+
+on:
+  push:
+    branches: [ master, 'group-04-summarize-match/develop' ]
+    paths:
+      - 'groups/group-04-summarize-match/**'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'groups/group-04-summarize-match/**'
+
+jobs:
+  test:
+    name: cargo test (unit + in-memory integration)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: groups/group-04-summarize-match/summarize-match
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry & build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            groups/group-04-summarize-match/summarize-match/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('groups/group-04-summarize-match/summarize-match/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: cargo test
+        run: cargo test
+
+  test-with-postgres:
+    name: cargo test (full — with PostgreSQL)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: groups/group-04-summarize-match/summarize-match
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: summarize_match
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d summarize_match"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo registry & build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            groups/group-04-summarize-match/summarize-match/target
+          key: ${{ runner.os }}-cargo-pg-${{ hashFiles('groups/group-04-summarize-match/summarize-match/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-pg-
+
+      - name: Write .env for Neon-like test
+        run: echo "DATABASE_URL=postgres://app:app@localhost:5432/summarize_match" > .env
+
+      - name: cargo test (including ignored neon tests)
+        run: cargo test -- --include-ignored

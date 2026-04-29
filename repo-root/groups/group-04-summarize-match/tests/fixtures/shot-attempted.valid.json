@@ -1,0 +1,13 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440003",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "SHOT_ATTEMPTED",
+  "occurredAt": "2026-04-28T12:05:12Z",
+  "matchTime": { "minute": 5, "second": 12, "period": "FIRST_HALF" },
+  "payload": {
+    "shooterId": "00000000-0000-0000-0000-000000000004",
+    "teamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "onTarget": true,
+    "outcome": "SAVED"
+  }
+}

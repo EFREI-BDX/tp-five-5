@@ -1,0 +1,13 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440002",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "PASS_ATTEMPTED",
+  "occurredAt": "2026-04-28T12:03:05Z",
+  "matchTime": { "minute": 3, "second": 5, "period": "FIRST_HALF" },
+  "payload": {
+    "passerId": "00000000-0000-0000-0000-000000000002",
+    "teamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "receiverId": "00000000-0000-0000-0000-000000000003",
+    "succeeded": true
+  }
+}

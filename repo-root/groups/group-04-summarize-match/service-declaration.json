@@ -12,7 +12,40 @@
 		"url": "git@example.com:org/repo.git",
 		"path": "groups/group-04-summarize-match"
 	},
-	"endpoints": [],
+	"endpoints": [
+		{
+			"path": "/events",
+			"method": "POST",
+			"description": "Reception et validation d'un event de match. Dispatche vers le domaine apres validation JSON Schema.",
+			"requestBody": "BaseEvent envelope (JSON)",
+			"responses": {
+				"202": "Event accepte",
+				"400": "JSON invalide ou schema non respecte",
+				"422": "Regle metier violee"
+			}
+		},
+		{
+			"path": "/matches/{matchId}/summary",
+			"method": "GET",
+			"description": "Lecture du resume calcule du match : score, buts, cartons, remplacements.",
+			"pathParams": {
+				"matchId": "UUID du match"
+			},
+			"responses": {
+				"200": "MatchSummary JSON",
+				"400": "matchId n'est pas un UUID valide",
+				"404": "Match introuvable"
+			}
+		},
+		{
+			"path": "/health",
+			"method": "GET",
+			"description": "Controle de sante du service.",
+			"responses": {
+				"200": "{ status: ok, service: summarize-match }"
+			}
+		}
+	],
 	"eventsProduced": [
 		{
 			"name": "PlayerData",

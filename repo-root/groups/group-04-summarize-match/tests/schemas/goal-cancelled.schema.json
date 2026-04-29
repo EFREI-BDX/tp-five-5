@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/goal-cancelled.schema.json",
+  "title": "GOAL_CANCELLED payload",
+  "type": "object",
+  "required": ["cancelledGoalEventId", "reason"],
+  "additionalProperties": false,
+  "properties": {
+    "cancelledGoalEventId": { "type": "string", "format": "uuid" },
+    "reason": { "type": "string", "enum": ["OFFSIDE", "FOUL", "OTHER"] }
+  }
+}

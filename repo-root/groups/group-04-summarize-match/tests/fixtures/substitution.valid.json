@@ -1,0 +1,12 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440007",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "SUBSTITUTION",
+  "occurredAt": "2026-04-28T12:18:00Z",
+  "matchTime": { "minute": 18, "second": 0, "period": "SECOND_HALF" },
+  "payload": {
+    "teamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "playerOutId": "00000000-0000-0000-0000-000000000004",
+    "playerInId": "00000000-0000-0000-0000-000000000011"
+  }
+}

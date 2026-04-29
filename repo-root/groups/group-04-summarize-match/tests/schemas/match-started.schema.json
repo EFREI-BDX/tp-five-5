@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/match-started.schema.json",
   "title": "MATCH_STARTED payload",
   "type": "object",
   "required": ["homeTeam", "awayTeam", "scheduledDurationMinutes"],

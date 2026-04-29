@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/match-forfeited.schema.json",
+  "title": "MATCH_FORFEITED payload",
+  "type": "object",
+  "required": ["forfeitingTeamId", "reason", "administrativeScore", "statsPolicy"],
+  "additionalProperties": false,
+  "properties": {
+    "forfeitingTeamId": { "type": "string", "format": "uuid" },
+    "reason": { "type": "string", "enum": ["TEAM_ABSENT", "PLAYER_SHORTAGE", "WALKOUT", "OTHER"] },
+    "administrativeScore": {
+      "type": "object",
+      "required": ["home", "away"],
+      "additionalProperties": false,
+      "properties": {
+        "home": { "type": "integer", "minimum": 0 },
+        "away": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "statsPolicy": { "type": "string", "enum": ["DISCARDED", "KEPT", "NON_OFFICIAL"] }
+  }
+}

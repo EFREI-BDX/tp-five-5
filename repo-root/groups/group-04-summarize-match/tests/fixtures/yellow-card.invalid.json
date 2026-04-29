@@ -1,0 +1,12 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440005",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "YELLOW_CARD",
+  "occurredAt": "2026-04-28T12:09:05Z",
+  "matchTime": { "minute": 9, "second": 5, "period": "FIRST_HALF" },
+  "payload": {
+    "playerId": "00000000-0000-0000-0000-000000000005",
+    "teamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "cardNumber": 3
+  }
+}

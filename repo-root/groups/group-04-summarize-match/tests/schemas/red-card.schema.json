@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/red-card.schema.json",
+  "title": "RED_CARD payload",
+  "type": "object",
+  "required": ["playerId", "teamId", "isDoubleYellow"],
+  "additionalProperties": false,
+  "properties": {
+    "playerId": { "type": "string", "format": "uuid" },
+    "teamId": { "type": "string", "format": "uuid" },
+    "isDoubleYellow": { "type": "boolean" },
+    "relatedFoulEventId": { "type": ["string", "null"], "format": "uuid" }
+  }
+}

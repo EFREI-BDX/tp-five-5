@@ -1,25 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "shot-attempted.schema.json",
-  "title": "SHOT_ATTEMPTED",
+  "$id": "https://example.org/schemas/shot-attempted.schema.json",
+  "title": "SHOT_ATTEMPTED payload",
   "type": "object",
-  "allOf": [
-    { "$ref": "BaseEvent.schema.json" },
-    {
-      "properties": {
-        "type": { "const": "SHOT_ATTEMPTED" },
-        "payload": {
-          "type": "object",
-          "required": ["shooterId","teamId","onTarget","outcome"],
-          "additionalProperties": false,
-          "properties": {
-            "shooterId": { "type": "string", "format": "uuid" },
-            "teamId": { "type": "string", "format": "uuid" },
-            "onTarget": { "type": "boolean" },
-            "outcome": { "type": "string", "enum": ["GOAL","SAVED","BLOCKED","WIDE","POST"] }
-          }
-        }
-      }
-    }
-  ]
+  "required": ["shooterId", "teamId", "onTarget", "outcome"],
+  "additionalProperties": false,
+  "properties": {
+    "shooterId": { "type": "string", "format": "uuid" },
+    "teamId": { "type": "string", "format": "uuid" },
+    "onTarget": { "type": "boolean" },
+    "outcome": { "type": "string", "enum": ["GOAL", "SAVED", "BLOCKED", "WIDE", "POST"] }
+  }
 }

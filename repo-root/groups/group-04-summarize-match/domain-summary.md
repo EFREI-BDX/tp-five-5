@@ -30,7 +30,9 @@ Le contexte `resume-match` consomme les events de `record-match` et produit une 
 - **Inbound port** : consommation des events de match venant de `record-match`.
 - **Application service** : orchestration du cas d'usage de resume du match.
 - **Domain model** : validation des invariants et calcul des derives.
-- **Outbound ports** : aucun port metier documente pour l'instant; le service ne publie pas encore d'event de sortie.
+- **Outbound port (publication)** : `DomainEventPublisher` — interface de notification des contextes descendants apres chaque event accepte. Adapter actuel : `NoOpEventPublisher` (infra). A remplacer par un adapter Kafka/AMQP.
+- **Outbound port (persistance)** : `MatchRepository` — event store append-only (PostgreSQL via SeaORM, ou InMemory pour tests).
+- **Query port** : `MatchQueryService` — lecture du `MatchSummary` reconstruit par replay (CQRS).
 
 ### Interpretation operationnelle
 
@@ -51,7 +53,8 @@ Le contexte `resume-match` consomme les events de `record-match` et produit une 
 
 - **Outbound ports (sorties metier)**
 	- Definissent les interfaces de sortie du coeur (publication d'evenements, persistance, integration externe).
-	- Dans l'etat actuel, aucun port de sortie metier n'est encore active/documente.
+	- `MatchRepository` : port de persistance (event store append-only).
+	- `DomainEventPublisher` : port de publication vers les contextes descendants (reporting, ranking, statistics). Adapter NoOp par defaut, a remplacer par Kafka/AMQP.
 
 ### Regle de dependance (important)
 

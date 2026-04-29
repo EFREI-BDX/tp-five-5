@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/yellow-card.schema.json",
+  "title": "YELLOW_CARD payload",
+  "type": "object",
+  "required": ["playerId", "teamId", "cardNumber"],
+  "additionalProperties": false,
+  "properties": {
+    "playerId": { "type": "string", "format": "uuid" },
+    "teamId": { "type": "string", "format": "uuid" },
+    "relatedFoulEventId": { "type": ["string", "null"], "format": "uuid" },
+    "cardNumber": { "type": "integer", "minimum": 1, "maximum": 2 }
+  }
+}

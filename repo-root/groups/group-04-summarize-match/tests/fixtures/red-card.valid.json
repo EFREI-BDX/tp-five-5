@@ -1,0 +1,13 @@
+{
+  "eventId": "660e8400-e29b-41d4-a716-446655440000",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "RED_CARD",
+  "occurredAt": "2026-04-27T12:22:00Z",
+  "matchTime": { "minute": 22, "second": 0, "period": "FIRST_HALF" },
+  "payload": {
+    "playerId": "00000000-0000-0000-0000-000000000002",
+    "teamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+    "isDoubleYellow": false,
+    "relatedFoulEventId": null
+  }
+}

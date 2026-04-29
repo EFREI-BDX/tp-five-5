@@ -34,7 +34,7 @@
     },
     "result": {
       "type": "string",
-      "enum": ["Win", "Loose", "Draw"]
+      "enum": ["Win", "Loss", "Draw"]
     },
     "bestScorer": {
       "type": "boolean"

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/substitution.schema.json",
+  "title": "SUBSTITUTION payload",
+  "type": "object",
+  "required": ["teamId", "playerOutId", "playerInId"],
+  "additionalProperties": false,
+  "properties": {
+    "teamId": { "type": "string", "format": "uuid" },
+    "playerOutId": { "type": "string", "format": "uuid" },
+    "playerInId": { "type": "string", "format": "uuid" }
+  }
+}

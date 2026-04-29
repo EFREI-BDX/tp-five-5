@@ -6,8 +6,6 @@ use std::collections::HashMap;
 use std::fs;
 use std::sync::{Arc, Mutex};
 
-static SCHEMA_DOCS: Lazy<Mutex<HashMap<String, Box<Value>>>> =
-    Lazy::new(|| Mutex::new(HashMap::new()));
 static SCHEMA_VALIDATORS: Lazy<Mutex<HashMap<String, Arc<JSONSchema>>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
@@ -23,23 +21,15 @@ impl SchemaRegistry {
         }
 
         let schema_text = fs::read_to_string(schema_path).map_err(ValidationError::from)?;
-        let schema_json: Value = serde_json::from_str(&schema_text).map_err(ValidationError::from)?;
+        let schema_json: Value =
+            serde_json::from_str(&schema_text).map_err(ValidationError::from)?;
 
-        // jsonschema::compile may keep internal references to the schema Value.
-        // Keep schema ownership in SCHEMA_DOCS while compiling a stable validator.
-        let boxed_schema = Box::new(schema_json);
-        let raw = Box::into_raw(boxed_schema);
-        let schema_static: &'static Value = unsafe { &*raw };
+        // Box::leak gives a &'static reference without unsafe.
+        // Memory is intentionally permanent for the process lifetime (static cache).
+        let static_ref: &'static Value = Box::leak(Box::new(schema_json));
 
-        let compiled = JSONSchema::compile(schema_static)
+        let compiled = JSONSchema::compile(static_ref)
             .map_err(|e| ValidationError::Other(e.to_string()))?;
-
-        let boxed_schema = unsafe { Box::from_raw(raw) };
-
-        {
-            let mut docs = SCHEMA_DOCS.lock().unwrap();
-            docs.insert(schema_path.to_owned(), boxed_schema);
-        }
 
         let compiled = Arc::new(compiled);
         {
@@ -51,8 +41,6 @@ impl SchemaRegistry {
     }
 
     pub fn clear() {
-        let mut docs = SCHEMA_DOCS.lock().unwrap();
-        docs.clear();
         let mut vals = SCHEMA_VALIDATORS.lock().unwrap();
         vals.clear();
     }

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/foul-committed.schema.json",
+  "title": "FOUL_COMMITTED payload",
+  "type": "object",
+  "required": ["playerId", "teamId"],
+  "additionalProperties": false,
+  "properties": {
+    "playerId": { "type": "string", "format": "uuid" },
+    "teamId": { "type": "string", "format": "uuid" },
+    "againstPlayerId": { "type": ["string", "null"], "format": "uuid" }
+  }
+}

@@ -10,7 +10,8 @@
 
 **Invariants**
 
-- Aucune validation stricte de format pour l'instant; la valeur doit être non vide.
+- La valeur doit être un UUID valide.
+- La validation est appliquée à la désérialisation du VO dans `src/domain.rs`.
 
 **Format JSON attendu**
 

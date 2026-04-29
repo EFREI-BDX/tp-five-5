@@ -1,3 +1,4 @@
+use crate::application::ApplicationError;
 use std::fmt;
 
 #[derive(Debug)]
@@ -33,8 +34,11 @@ impl From<serde_json::Error> for ValidationError {
     }
 }
 
-impl From<anyhow::Error> for ValidationError {
-    fn from(e: anyhow::Error) -> Self {
-        ValidationError::Other(e.to_string())
+impl From<ApplicationError> for ValidationError {
+    fn from(error: ApplicationError) -> Self {
+        match error {
+            ApplicationError::DomainRuleViolation(message) => ValidationError::Other(message),
+            ApplicationError::Repository(message) => ValidationError::Other(message),
+        }
     }
 }

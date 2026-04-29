@@ -1,2 +1,31 @@
-// Event-specific mappers can be split into dedicated files as the catalog grows.
-// For now, the default mapper set lives in mapper_registry.rs.
+mod foul_committed;
+mod goal_cancelled;
+mod goal_scored;
+mod match_cancelled;
+mod match_finished;
+mod match_forfeited;
+mod match_paused;
+mod match_resumed;
+mod match_started;
+mod pass_attempted;
+mod red_card;
+mod save_made;
+mod shot_attempted;
+mod substitution;
+mod yellow_card;
+
+pub use foul_committed::FoulCommittedMapper;
+pub use goal_cancelled::GoalCancelledMapper;
+pub use goal_scored::GoalScoredMapper;
+pub use match_cancelled::MatchCancelledMapper;
+pub use match_finished::MatchFinishedMapper;
+pub use match_forfeited::MatchForfeitedMapper;
+pub use match_paused::MatchPausedMapper;
+pub use match_resumed::MatchResumedMapper;
+pub use match_started::MatchStartedMapper;
+pub use pass_attempted::PassAttemptedMapper;
+pub use red_card::RedCardMapper;
+pub use save_made::SaveMadeMapper;
+pub use shot_attempted::ShotAttemptedMapper;
+pub use substitution::SubstitutionMapper;
+pub use yellow_card::YellowCardMapper;

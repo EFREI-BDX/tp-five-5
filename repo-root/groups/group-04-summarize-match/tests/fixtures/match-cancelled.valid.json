@@ -1,0 +1,8 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440011",
+  "matchId": "22222222-2222-3333-4444-555555555555",
+  "type": "MATCH_CANCELLED",
+  "occurredAt": "2026-04-28T11:00:00Z",
+  "matchTime": { "minute": 0, "second": 0, "period": "FIRST_HALF" },
+  "payload": { "reason": "PITCH_UNAVAILABLE" }
+}

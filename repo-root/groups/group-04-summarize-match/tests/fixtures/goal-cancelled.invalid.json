@@ -1,0 +1,11 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440008",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "GOAL_CANCELLED",
+  "occurredAt": "2026-04-28T12:07:55Z",
+  "matchTime": { "minute": 7, "second": 55, "period": "FIRST_HALF" },
+  "payload": {
+    "cancelledGoalEventId": "650e8400-e29b-41d4-a716-446655440001",
+    "reason": "UNKNOWN_REASON"
+  }
+}

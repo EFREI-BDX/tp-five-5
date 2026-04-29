@@ -1,0 +1,13 @@
+{
+  "eventId": "650e8400-e29b-41d4-a716-446655440012",
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "type": "MATCH_FORFEITED",
+  "occurredAt": "2026-04-28T12:12:30Z",
+  "matchTime": { "minute": 12, "second": 30, "period": "FIRST_HALF" },
+  "payload": {
+    "forfeitingTeamId": "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb",
+    "reason": "TEAM_ABSENT",
+    "administrativeScore": { "home": 3, "away": 0 },
+    "statsPolicy": "DISCARDED"
+  }
+}
