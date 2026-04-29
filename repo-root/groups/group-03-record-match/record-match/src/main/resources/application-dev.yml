@@ -6,3 +6,22 @@ spring:
 
 logging:
   config: classpath:log4j2-dev.xml
+
+match:
+  outbound:
+    notify-urls:
+      match_started:
+        - http://localhost:8081/api/inbounds/matches/started #URL d'exemple
+      match_finished:
+        - http://localhost:8081/api/inbounds/matches/finished #URL d'exemple
+      match_cancelled: []
+      match_forfeited: []
+      goal_scored: []
+      goal_cancelled: []
+      yellow_card: []
+      red_card: []
+      foul_committed: []
+      pass_attempted: []
+      shot_attempted: []
+      save_made: []
+      substitution: []

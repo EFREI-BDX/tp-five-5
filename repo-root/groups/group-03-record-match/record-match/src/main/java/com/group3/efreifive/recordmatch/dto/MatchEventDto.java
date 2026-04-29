@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * DTO pour représenter un événement de match, incluant les détails du match, de l'événement, des joueurs impliqués, et d'autres informations pertinentes.
+ * DTO pour représenter un événement de match (interne au service)
  * 
  * On avait deux options pour la gestions des informations supplémentaire en fonction de l'événement :
  * - Soit on ajoute des champs spécifiques pour chaque type d'événement (ex: team1Id pour un événement de type "score", referenceEventId pour un événement de type "foul", etc.)
