@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${RECORD_MATCH_DB_URL}
+    username: ${RECORD_MATCH_DB_USERNAME}
+    password: ${RECORD_MATCH_DB_PASSWORD}
+
+server:
+  port: 8080
+
+app:
+  console:
+    enabled: false
+
+logging:
+  config: classpath:log4j2-prod.xml

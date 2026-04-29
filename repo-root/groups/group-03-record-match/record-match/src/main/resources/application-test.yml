@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiverecordmatch-test
+    username: fiverecordmatch
+    password: ${RECORD_MATCH_DB_PASSWORD}
+    hikari:
+      initialization-fail-timeout: 0
+
+app:
+  console:
+    enabled: false
+
+logging:
+  config: classpath:log4j2-test.xml

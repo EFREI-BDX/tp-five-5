@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiverecordmatch
+    username: fiverecordmatch
+    password: ${RECORD_MATCH_DB_PASSWORD}
+
+logging:
+  config: classpath:log4j2-dev.xml

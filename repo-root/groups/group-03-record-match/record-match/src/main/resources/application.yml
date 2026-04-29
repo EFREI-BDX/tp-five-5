@@ -1,6 +1,8 @@
 spring:
   application:
     name: record-match
+  profiles:
+    default: dev
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiverecordmatch
@@ -12,3 +14,10 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
+server:
+  port: 8080
+
+app:
+  console:
+    enabled: true
