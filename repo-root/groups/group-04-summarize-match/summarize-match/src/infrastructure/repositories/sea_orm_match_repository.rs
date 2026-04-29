@@ -1,8 +1,12 @@
 use super::in_memory::replay_events;
 use crate::application::{ApplicationError, ApplicationResult, MatchRepository};
-use crate::domain::{DomainEvent, MatchAggregate, MatchSummary};
+use crate::domain::{
+    DomainEvent, MatchAggregate, MatchSummary, PlayerId, PlayerStats, TeamId, TeamStats,
+};
 use async_trait::async_trait;
-use sea_orm::{ConnectionTrait, DatabaseConnection, DbBackend, Statement};
+use sea_orm::{
+    ConnectionTrait, DatabaseConnection, DbBackend, QueryResult, Statement, TransactionTrait,
+};
 
 #[derive(Clone)]
 pub struct SeaOrmMatchRepository {
@@ -47,69 +51,39 @@ impl MatchRepository for SeaOrmMatchRepository {
         let match_id = event.match_id().to_string();
         let event_type = event.event_type().to_string();
         let occurred_at = event_occurred_at(&event).to_string();
-        let event_id = event_id(&event).to_string();
-        let match_time = event_match_time(&event);
         let payload_json = serde_json::to_value(&event)
             .map_err(|e| ApplicationError::repository(e.to_string()))?;
 
-        let values = || {
-            vec![
-                match_id.clone().into(),
-                event_type.clone().into(),
-                payload_json.clone().into(),
-                occurred_at.clone().into(),
-            ]
-        };
+        let txn = self
+            .db
+            .begin()
+            .await
+            .map_err(|error| ApplicationError::repository(error.to_string()))?;
 
-        let insert_text = Statement::from_sql_and_values(
+        txn.execute(Statement::from_sql_and_values(
             DbBackend::Postgres,
             "INSERT INTO match_events (match_id, event_type, payload, occurred_at) VALUES ($1, $2, $3, $4)",
-            values(),
-        );
-
-        if let Err(first_error) = self.db.execute(insert_text).await {
-            if let DomainEvent::MatchStarted(started) = &event {
-                let insert_match = Statement::from_sql_and_values(
-                    DbBackend::Postgres,
-                    "INSERT INTO matches (match_id, home_team_id, away_team_id, scheduled_duration_minutes, occurred_at, computed_home_score, computed_away_score, current_status) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5::timestamptz, 0, 0, 'IN_PROGRESS') ON CONFLICT (match_id) DO NOTHING",
-                    vec![
-                        started.match_id.clone().into(),
-                        started.home_team.team_id.0.clone().into(),
-                        started.away_team.team_id.0.clone().into(),
-                        (started.scheduled_duration_minutes as i16).into(),
-                        started.occurred_at.clone().into(),
-                    ],
-                );
-
-                self.db
-                    .execute(insert_match)
-                    .await
-                    .map_err(|error| ApplicationError::repository(error.to_string()))?;
-            }
-
-            let typed_values = vec![
-                event_id.into(),
+            vec![
                 match_id.into(),
                 event_type.into(),
+                payload_json.clone().into(),
                 occurred_at.into(),
-                (match_time.minute as i16).into(),
-                (match_time.second as i16).into(),
-                match_time.period.clone().into(),
-                payload_json.into(),
-            ];
-            let insert_uuid = Statement::from_sql_and_values(
-                DbBackend::Postgres,
-                "INSERT INTO match_events (event_id, match_id, event_type, occurred_at, time_minute, time_second, time_period, payload) VALUES ($1::uuid, $2::uuid, $3, $4::timestamptz, $5, $6, $7, $8)",
-                typed_values,
-            );
+            ],
+        ))
+        .await
+        .map_err(|error| ApplicationError::repository(error.to_string()))?;
 
-            self.db.execute(insert_uuid).await.map_err(|second_error| {
-                ApplicationError::repository(format!(
-                    "{}; fallback with uuid cast failed: {}",
-                    first_error, second_error
-                ))
-            })?;
-        }
+        txn.execute(Statement::from_sql_and_values(
+            DbBackend::Postgres,
+            "SELECT apply_match_event_stats($1::jsonb)",
+            vec![payload_json.into()],
+        ))
+        .await
+        .map_err(|error| ApplicationError::repository(error.to_string()))?;
+
+        txn.commit()
+            .await
+            .map_err(|error| ApplicationError::repository(error.to_string()))?;
 
         Ok(())
     }
@@ -122,26 +96,128 @@ impl MatchRepository for SeaOrmMatchRepository {
             Ok(None)
         }
     }
+
+    async fn read_team_stats(
+        &self,
+        match_id: &str,
+        team_id: &TeamId,
+    ) -> ApplicationResult<Option<TeamStats>> {
+        let row = self
+            .db
+            .query_one(Statement::from_sql_and_values(
+                DbBackend::Postgres,
+                r#"
+                SELECT
+                    match_id::text AS match_id,
+                    team_id::text AS team_id,
+                    goals,
+                    shots,
+                    shots_on_target,
+                    passes_attempted,
+                    passes_succeeded,
+                    saves,
+                    fouls_committed,
+                    yellow_cards,
+                    red_cards,
+                    substitutions,
+                    players_used
+                FROM match_team_stats
+                WHERE match_id = $1::uuid AND team_id = $2::uuid
+                "#,
+                vec![match_id.into(), team_id.0.clone().into()],
+            ))
+            .await
+            .map_err(|error| ApplicationError::repository(error.to_string()))?;
+
+        row.map(team_stats_from_row).transpose()
+    }
+
+    async fn read_player_stats(
+        &self,
+        match_id: &str,
+        player_id: &PlayerId,
+    ) -> ApplicationResult<Option<PlayerStats>> {
+        let row = self
+            .db
+            .query_one(Statement::from_sql_and_values(
+                DbBackend::Postgres,
+                r#"
+                SELECT
+                    match_id::text AS match_id,
+                    player_id::text AS player_id,
+                    team_id::text AS team_id,
+                    goals,
+                    assists,
+                    shots,
+                    shots_on_target,
+                    passes_attempted,
+                    passes_succeeded,
+                    saves,
+                    fouls_committed,
+                    yellow_cards,
+                    red_cards,
+                    substitutions_in,
+                    substitutions_out
+                FROM match_player_stats
+                WHERE match_id = $1::uuid AND player_id = $2::uuid
+                "#,
+                vec![match_id.into(), player_id.0.clone().into()],
+            ))
+            .await
+            .map_err(|error| ApplicationError::repository(error.to_string()))?;
+
+        row.map(player_stats_from_row).transpose()
+    }
 }
 
-fn event_id(event: &DomainEvent) -> &str {
-    match event {
-        DomainEvent::MatchStarted(event) => &event.event_id,
-        DomainEvent::GoalScored(event) => &event.event_id,
-        DomainEvent::GoalCancelled(event) => &event.event_id,
-        DomainEvent::MatchFinished(event) => &event.event_id,
-        DomainEvent::RedCard(event) => &event.event_id,
-        DomainEvent::PassAttempted(event) => &event.event_id,
-        DomainEvent::ShotAttempted(event) => &event.event_id,
-        DomainEvent::FoulCommitted(event) => &event.event_id,
-        DomainEvent::YellowCard(event) => &event.event_id,
-        DomainEvent::SaveMade(event) => &event.event_id,
-        DomainEvent::Substitution(event) => &event.event_id,
-        DomainEvent::MatchPaused(event) => &event.event_id,
-        DomainEvent::MatchResumed(event) => &event.event_id,
-        DomainEvent::MatchCancelled(event) => &event.event_id,
-        DomainEvent::MatchForfeited(event) => &event.event_id,
-    }
+fn team_stats_from_row(row: QueryResult) -> ApplicationResult<TeamStats> {
+    Ok(TeamStats {
+        match_id: row_string(&row, "match_id")?,
+        team_id: TeamId(row_string(&row, "team_id")?),
+        goals: row_u32(&row, "goals")?,
+        shots: row_u32(&row, "shots")?,
+        shots_on_target: row_u32(&row, "shots_on_target")?,
+        passes_attempted: row_u32(&row, "passes_attempted")?,
+        passes_succeeded: row_u32(&row, "passes_succeeded")?,
+        saves: row_u32(&row, "saves")?,
+        fouls_committed: row_u32(&row, "fouls_committed")?,
+        yellow_cards: row_u32(&row, "yellow_cards")?,
+        red_cards: row_u32(&row, "red_cards")?,
+        substitutions: row_u32(&row, "substitutions")?,
+        players_used: row_u32(&row, "players_used")?,
+    })
+}
+
+fn player_stats_from_row(row: QueryResult) -> ApplicationResult<PlayerStats> {
+    Ok(PlayerStats {
+        match_id: row_string(&row, "match_id")?,
+        player_id: PlayerId(row_string(&row, "player_id")?),
+        team_id: TeamId(row_string(&row, "team_id")?),
+        goals: row_u32(&row, "goals")?,
+        assists: row_u32(&row, "assists")?,
+        shots: row_u32(&row, "shots")?,
+        shots_on_target: row_u32(&row, "shots_on_target")?,
+        passes_attempted: row_u32(&row, "passes_attempted")?,
+        passes_succeeded: row_u32(&row, "passes_succeeded")?,
+        saves: row_u32(&row, "saves")?,
+        fouls_committed: row_u32(&row, "fouls_committed")?,
+        yellow_cards: row_u32(&row, "yellow_cards")?,
+        red_cards: row_u32(&row, "red_cards")?,
+        substitutions_in: row_u32(&row, "substitutions_in")?,
+        substitutions_out: row_u32(&row, "substitutions_out")?,
+    })
+}
+
+fn row_string(row: &QueryResult, column: &str) -> ApplicationResult<String> {
+    row.try_get("", column)
+        .map_err(|error| ApplicationError::repository(error.to_string()))
+}
+
+fn row_u32(row: &QueryResult, column: &str) -> ApplicationResult<u32> {
+    let value: i32 = row
+        .try_get("", column)
+        .map_err(|error| ApplicationError::repository(error.to_string()))?;
+    u32::try_from(value).map_err(|error| ApplicationError::repository(error.to_string()))
 }
 
 fn event_occurred_at(event: &DomainEvent) -> &str {
@@ -161,25 +237,5 @@ fn event_occurred_at(event: &DomainEvent) -> &str {
         DomainEvent::MatchResumed(event) => &event.occurred_at,
         DomainEvent::MatchCancelled(event) => &event.occurred_at,
         DomainEvent::MatchForfeited(event) => &event.occurred_at,
-    }
-}
-
-fn event_match_time(event: &DomainEvent) -> &crate::domain::MatchTime {
-    match event {
-        DomainEvent::MatchStarted(event) => &event.match_time,
-        DomainEvent::GoalScored(event) => &event.match_time,
-        DomainEvent::GoalCancelled(event) => &event.match_time,
-        DomainEvent::MatchFinished(event) => &event.match_time,
-        DomainEvent::RedCard(event) => &event.match_time,
-        DomainEvent::PassAttempted(event) => &event.match_time,
-        DomainEvent::ShotAttempted(event) => &event.match_time,
-        DomainEvent::FoulCommitted(event) => &event.match_time,
-        DomainEvent::YellowCard(event) => &event.match_time,
-        DomainEvent::SaveMade(event) => &event.match_time,
-        DomainEvent::Substitution(event) => &event.match_time,
-        DomainEvent::MatchPaused(event) => &event.match_time,
-        DomainEvent::MatchResumed(event) => &event.match_time,
-        DomainEvent::MatchCancelled(event) => &event.match_time,
-        DomainEvent::MatchForfeited(event) => &event.match_time,
     }
 }

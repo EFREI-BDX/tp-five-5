@@ -23,6 +23,14 @@ Service de resume de match dans une architecture DDD hexagonale.
 - `GET /matches/{matchId}/players/{playerId}/stats` - lecture des statistiques calculees pour un joueur.
 - `GET /health` - controle technique.
 
+## Stockage et stats SQL
+
+- Les events acceptes par `POST /events` sont persistes dans `match_events`.
+- Les stats equipes et joueurs sont materialisees dans Postgres par la fonction stockee `apply_match_event_stats(event_json JSONB)`.
+- Les tables `match_team_stats` et `match_player_stats` servent directement les endpoints `/stats`.
+- `match_goal_index` permet d'annuler proprement un but avec `GOAL_CANCELLED`.
+- `match_player_registry` conserve l'association joueur/equipe et le nombre de joueurs utilises.
+
 ## Ce que le service ne fait pas encore
 
 - Publication d'events sortants reels : le port `DomainEventPublisher` est cable, mais l'adapter est NoOp. Remplacer par un adapter Kafka/AMQP pour notifier les contextes `reporting`, `ranking`, `statistics`.

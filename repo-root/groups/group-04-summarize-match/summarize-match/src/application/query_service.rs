@@ -38,11 +38,7 @@ impl<R: MatchRepository> MatchQueryService for MatchReadService<R> {
         match_id: &str,
         team_id: &TeamId,
     ) -> ApplicationResult<Option<TeamStats>> {
-        let aggregate = self.repository.load(match_id).await?;
-        if !aggregate.is_known() {
-            return Ok(None);
-        }
-        Ok(aggregate.to_team_stats(match_id, team_id))
+        self.repository.read_team_stats(match_id, team_id).await
     }
 
     async fn get_player_stats(
@@ -50,10 +46,6 @@ impl<R: MatchRepository> MatchQueryService for MatchReadService<R> {
         match_id: &str,
         player_id: &PlayerId,
     ) -> ApplicationResult<Option<PlayerStats>> {
-        let aggregate = self.repository.load(match_id).await?;
-        if !aggregate.is_known() {
-            return Ok(None);
-        }
-        Ok(aggregate.to_player_stats(match_id, player_id))
+        self.repository.read_player_stats(match_id, player_id).await
     }
 }
