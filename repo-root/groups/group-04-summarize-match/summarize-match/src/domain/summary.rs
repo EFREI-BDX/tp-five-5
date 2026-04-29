@@ -8,7 +8,7 @@ pub enum MatchResult {
     Draw,
 }
 
-#[derive(Debug, Clone, Serialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum MatchStatus {
     NotStarted,
