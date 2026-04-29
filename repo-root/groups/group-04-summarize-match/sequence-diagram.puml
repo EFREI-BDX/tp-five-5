@@ -1,0 +1,85 @@
+@startuml
+skinparam maxMessageSize 150
+
+actor Client
+
+box "Infrastructure (Inbound)" #LightCyan
+participant "HTTP API\n(POST /events)" as API
+participant "HTTP API\n(GET /summary)" as API_GET
+end box
+
+box "Application" #LightYellow
+participant "ApplicationService\n(MatchSummaryService)" as AppSvc
+participant "MatchQueryService\n(MatchReadService)" as QuerySvc
+end box
+
+box "Domain" #LightGreen
+participant "MatchAggregate" as Domain
+end box
+
+box "Infrastructure (Outbound)" #LightCyan
+participant "MatchRepository" as Repo
+participant "DomainEventPublisher" as Publisher
+end box
+
+== Process Match Event ==
+
+Client -> API : POST /events (BaseEvent JSON)
+activate API
+
+API -> API : Validate technical contract\n(Schema, Format)
+
+API -> AppSvc : handle_event(domain_event)
+activate AppSvc
+
+AppSvc -> Repo : load(matchId)
+activate Repo
+Repo --> AppSvc : MatchAggregate
+deactivate Repo
+
+AppSvc -> Domain : handle_event(domain_event)
+activate Domain
+Domain --> AppSvc : ok / error
+deactivate Domain
+
+AppSvc -> Repo : append(domain_event)
+activate Repo
+Repo --> AppSvc : ok
+deactivate Repo
+
+AppSvc -> Publisher : publish(domain_event)
+activate Publisher
+Publisher --> AppSvc : ok
+deactivate Publisher
+
+AppSvc --> API : ok
+deactivate AppSvc
+
+API --> Client : HTTP 202 Accepted
+deactivate API
+
+== Get Match Summary ==
+
+Client -> API_GET : GET /matches/{matchId}/summary
+activate API_GET
+
+API_GET -> QuerySvc : get_summary(matchId)
+activate QuerySvc
+
+QuerySvc -> Repo : load(matchId)
+activate Repo
+Repo --> QuerySvc : MatchAggregate
+deactivate Repo
+
+QuerySvc -> Domain : to_summary(matchId)
+activate Domain
+Domain --> QuerySvc : MatchSummary
+deactivate Domain
+
+QuerySvc --> API_GET : MatchSummary
+deactivate QuerySvc
+
+API_GET --> Client : HTTP 200 OK (MatchSummary JSON)
+deactivate API_GET
+
+@enduml

@@ -1,0 +1,106 @@
+@startuml
+
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+package "infrastructure::inbound" {
+    class Consumer {
+        + process_json(json_str: String): Result<(), ValidationError>
+    }
+
+    interface EventSchemaValidator {
+        + validate_base(instance: &Value): Result<(), ValidationError>
+        + validate_payload(payload: &Value, event_type: &str): Result<(), ValidationError>
+    }
+
+    class FileBasedSchemaValidator
+    EventSchemaValidator <|-- FileBasedSchemaValidator
+
+    class MapperRegistry {
+        + map(event: &BaseEvent): Result<DomainEvent, ValidationError>
+    }
+
+    struct BaseEvent
+}
+
+package "application" {
+    interface ApplicationService {
+        + handle_event(event: DomainEvent): ApplicationResult<()>
+    }
+
+    class MatchSummaryService {
+        + handle_event(event: DomainEvent): ApplicationResult<()>
+    }
+    ApplicationService <|-- MatchSummaryService
+
+    interface MatchRepository {
+        + load(match_id: &str): ApplicationResult<MatchAggregate>
+        + append(event: DomainEvent): ApplicationResult<()>
+    }
+
+    interface DomainEventPublisher {
+        + publish(event: &DomainEvent): ApplicationResult<()>
+    }
+
+    interface PlayerDataPort {
+        + publish(events: &Vec<PlayerData>): ApplicationResult<()>
+    }
+
+    class MatchReadService {
+        + get_summary(match_id: &str): ApplicationResult<MatchSummary>
+        + get_player_stats(player_id: &str): ApplicationResult<Vec<PlayerMatchStats>>
+    }
+}
+
+package "domain" {
+    class MatchAggregate {
+        - started: bool
+        - finished: bool
+        - computed_home_score: u32
+        - computed_away_score: u32
+        - goals: Vec<GoalEntry>
+        - cards: Vec<CardEntry>
+        - substitutions: Vec<SubstitutionEntry>
+        + handle_event(event: DomainEvent): Result<()>
+        + to_summary(match_id: &str): MatchSummary
+        + to_player_data_events(): Vec<PlayerData>
+    }
+
+    enum DomainEvent {
+        MatchStarted
+        GoalScored
+        GoalCancelled
+        MatchFinished
+        RedCard
+        ...
+    }
+}
+
+package "infrastructure::repositories" {
+    class SeaOrmMatchRepository
+    MatchRepository <|-- SeaOrmMatchRepository
+}
+
+package "infrastructure::outbound" {
+    class LoggingPublisher
+    DomainEventPublisher <|-- LoggingPublisher
+}
+
+Consumer --> ApplicationService : uses
+Consumer --> EventSchemaValidator : uses
+Consumer --> MapperRegistry : uses
+MapperRegistry ..> DomainEvent : creates
+Consumer ..> BaseEvent : deserializes
+
+MatchSummaryService --> MatchRepository : uses
+MatchSummaryService --> DomainEventPublisher : uses
+MatchSummaryService --> PlayerDataPort : uses
+
+MatchSummaryService ..> MatchAggregate : loads/manipulates
+MatchAggregate ..> DomainEvent : consumes
+
+MatchReadService --> MatchRepository : uses (Read side)
+
+@enduml
+
