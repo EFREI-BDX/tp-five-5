@@ -4,7 +4,7 @@
 
 Date d'occurrence de l'événement.
 
-Ce Value Object représente une date/heure métier stockée en base dans la colonne SQL `occuredAt` (`date`).
+Ce Value Object représente une date/heure métier stockée en base dans la colonne SQL `occuredAt` (`timestamp`).
 
 **Utilisé par**
 
@@ -12,7 +12,7 @@ Ce Value Object représente une date/heure métier stockée en base dans la colo
 
 **Valeur portée**
 
-- date
+- timestamp (date-time)
 
 **Invariants**
 

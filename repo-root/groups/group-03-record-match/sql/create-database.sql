@@ -30,7 +30,7 @@ CREATE TABLE fiverecordmatch.matchEvent
     eventId      binary(16) not null,
     player1Id    binary(16) null,
     player2Id    binary(16) null,
-    occuredAt    date       not null,
+    occuredAt    timestamp  not null,
 
     foreign key (matchId) references fiverecordmatch.match (matchId),
     foreign key (eventId) references fiverecordmatch.event (eventId),

@@ -88,14 +88,14 @@ INSERT INTO fiverecordmatch.`match` (matchId, team1Id, team2Id) VALUES
 
 -- MATCH EVENTS
 INSERT INTO fiverecordmatch.matchEvent (matchEventId, matchId, eventId, player1Id, player2Id, occuredAt) VALUES
-(@me_1,  @match_1, @e_SHOT,  @p_1_1, NULL, '2025-06-15'), -- SHOT (1 joueur) : tir cadré de l'attaquant 1
-(@me_2,  @match_1, @e_GOAL,  @p_1_1, NULL, '2025-06-15'), -- GOAL (1 joueur) : but de l'attaquant 1
-(@me_3,  @match_1, @e_ASST,  @p_1_2, NULL, '2025-06-15'), -- ASST (1 joueur) : passe décisive du milieu 1
-(@me_4,  @match_1, @e_SAVE,  @p_2_3, NULL, '2025-06-15'), -- SAVE (1 joueur) : arrêt du gardien 2
-(@me_5,  @match_1, @e_FOUL,  @p_2_2, @p_1_1, '2025-06-15'), -- FOUL (2 joueurs) : faute du défenseur 2 sur l'attaquant 1
-(@me_6,  @match_1, @e_YEL,   @p_2_2, NULL, '2025-06-15'), -- YEL (1 joueur) : carton jaune pour le défenseur 2 suite à la faute
-(@me_7,  @match_1, @e_GOAL,  @p_2_1, NULL, '2025-06-15'), -- GOAL (1 joueur) : but égalisateur de l'attaquant 2
-(@me_8,  @match_1, @e_SHBLK, @p_1_1, @p_2_2, '2025-06-15'), -- SHBLK (2 joueurs) : tir de 1 bloqué par 2
-(@me_9,  @match_1, @e_SUBEV, @p_1_3, @p_1_2, '2025-06-15'), -- SUBEV (2 joueurs) : le remplaçant 1 entre, le milieu 1 sort
-(@me_10, @match_1, @e_SUBIN, @p_1_3, NULL, '2025-06-15'), -- SUBIN (1 joueur) : entrée du remplaçant 1
-(@me_11, @match_1, @e_RED,   @p_2_2, NULL, '2025-06-15'); -- RED (1 joueur) : expulsion du défenseur 2
+(@me_1,  @match_1, @e_SHOT,  @p_1_1, NULL, '2025-06-15 20:01:00'), -- SHOT (1 joueur) : tir cadré de l'attaquant 1
+(@me_2,  @match_1, @e_GOAL,  @p_1_1, NULL, '2025-06-15 20:03:00'), -- GOAL (1 joueur) : but de l'attaquant 1
+(@me_3,  @match_1, @e_ASST,  @p_1_2, NULL, '2025-06-15 20:03:00'), -- ASST (1 joueur) : passe décisive du milieu 1
+(@me_4,  @match_1, @e_SAVE,  @p_2_3, NULL, '2025-06-15 20:10:00'), -- SAVE (1 joueur) : arrêt du gardien 2
+(@me_5,  @match_1, @e_FOUL,  @p_2_2, @p_1_1, '2025-06-15 20:11:00'), -- FOUL (2 joueurs) : faute du défenseur 2 sur l'attaquant 1
+(@me_6,  @match_1, @e_YEL,   @p_2_2, NULL, '2025-06-15 20:12:00'), -- YEL (1 joueur) : carton jaune pour le défenseur 2 suite à la faute
+(@me_7,  @match_1, @e_GOAL,  @p_2_1, NULL, '2025-06-15 20:18:00'), -- GOAL (1 joueur) : but égalisateur de l'attaquant 2
+(@me_8,  @match_1, @e_SHBLK, @p_1_1, @p_2_2, '2025-06-15 20:24:00'), -- SHBLK (2 joueurs) : tir de 1 bloqué par 2
+(@me_9,  @match_1, @e_SUBEV, @p_1_3, @p_1_2, '2025-06-15 20:30:00'), -- SUBEV (2 joueurs) : le remplaçant 1 entre, le milieu 1 sort
+(@me_10, @match_1, @e_SUBIN, @p_1_3, NULL, '2025-06-15 20:30:00'), -- SUBIN (1 joueur) : entrée du remplaçant 1
+(@me_11, @match_1, @e_RED,   @p_2_2, NULL, '2025-06-15 20:39:00'); -- RED (1 joueur) : expulsion du défenseur 2
