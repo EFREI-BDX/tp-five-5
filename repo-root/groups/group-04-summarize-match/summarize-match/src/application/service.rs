@@ -1,6 +1,6 @@
 use super::{
     ApplicationError, ApplicationResult, ApplicationService, DomainEventPublisher, MatchRepository,
-    NoOpPlayerDataPort, NoOpPublisher, PlayerDataPort,
+    NoOpPublisher,
 };
 use crate::domain::DomainEvent;
 use async_trait::async_trait;
@@ -8,7 +8,6 @@ use async_trait::async_trait;
 pub struct MatchSummaryService<R: MatchRepository> {
     repository: R,
     publisher: Box<dyn DomainEventPublisher>,
-    player_data_port: Box<dyn PlayerDataPort>,
 }
 
 impl<R: MatchRepository> MatchSummaryService<R> {
@@ -22,20 +21,6 @@ impl<R: MatchRepository> MatchSummaryService<R> {
         Self {
             repository,
             publisher: Box::new(publisher),
-            player_data_port: Box::new(NoOpPlayerDataPort),
-        }
-    }
-
-    /// Creates the service with all ports wired explicitly.
-    pub fn with_all(
-        repository: R,
-        publisher: impl DomainEventPublisher + 'static,
-        player_data_port: impl PlayerDataPort + 'static,
-    ) -> Self {
-        Self {
-            repository,
-            publisher: Box::new(publisher),
-            player_data_port: Box::new(player_data_port),
         }
     }
 }
@@ -49,14 +34,6 @@ impl<R: MatchRepository> ApplicationService for MatchSummaryService<R> {
             .handle_event(event.clone())
             .map_err(|error| ApplicationError::domain(error.to_string()))?;
         self.repository.append(event.clone()).await?;
-
-        if matches!(event, DomainEvent::MatchFinished(_)) {
-            let player_data = aggregate.to_player_data_events();
-            self.player_data_port
-                .publish(&player_data)
-                .await
-                .map_err(|e| ApplicationError::repository(format!("player data port error: {}", e)))?;
-        }
 
         self.publisher
             .publish(&event)

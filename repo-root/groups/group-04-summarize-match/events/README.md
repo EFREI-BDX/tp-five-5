@@ -30,11 +30,7 @@ Contrat d'entree du bounded context `resume-match` (physiquement dans `inbound/`
 
 ## Outbound contract
 
-Contrat de sortie du bounded context `resume-match` (physiquement dans `outbound/`).
-
-### Events produits
-
-- [PlayerData](outbound/PlayerData.md) — résumé des statistiques par joueur produit après calcul du match.
+Le bounded context `resume-match` ne produit pas d'event metier sortant aujourd'hui.
 
 ## Convention de conception
 

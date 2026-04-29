@@ -28,7 +28,7 @@ Sérialisation Rust : `#[derive(Serialize)]` sans attribut → les variantes s'�
 
 **Schéma**
 
-Défini dans `tests/schemas/player-data.schema.json` pour l'event outbound `PlayerData` :
+Expose par les read models de statistiques joueur :
 ```json
 "result": { "type": "string", "enum": ["Win", "Loss", "Draw"] }
 ```
@@ -37,9 +37,9 @@ La route `GET /matches/{matchId}/players/stats` expose le meme contrat de valeur
 
 **Constructeur domaine**
 
-Calculé dans `MatchAggregate::to_player_data_events()` via comparaison `computed_home_score.cmp(&computed_away_score)`.
+Calcule via comparaison du score final quand un read model de statistiques joueur est produit.
 
 **Références de code**
 
 - Définition: `summarize-match/src/domain/summary.rs`
-- Utilisation: `PlayerData.result`, `PlayerMatchStats.result`, `MatchAggregate::to_player_data_events()`, `MatchAggregate::to_player_stats()` — voir `summarize-match/src/domain/aggregate.rs`
+- Utilisation cible: `PlayerMatchStats.result`

@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let write_repo = SeaOrmMatchRepository::new(db.clone());
     let read_repo = SeaOrmMatchRepository::new(db);
 
-    let command_service = MatchSummaryService::with_all(write_repo, LoggingPublisher, LoggingPublisher);
+    let command_service = MatchSummaryService::with_publisher(write_repo, LoggingPublisher);
     let query_service = MatchReadService::new(read_repo);
 
     let consumer = Consumer::new(command_service, base_event_schema_path());

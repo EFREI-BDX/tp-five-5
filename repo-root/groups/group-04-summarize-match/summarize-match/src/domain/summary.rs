@@ -8,21 +8,6 @@ pub enum MatchResult {
     Draw,
 }
 
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PlayerData {
-    pub player_id: PlayerId,
-    pub goals: u32,
-    pub assists: u32,
-    pub saves: u32,
-    pub result: MatchResult,
-    pub best_scorer: bool,
-    pub best_assists_provider: bool,
-    #[serde(rename = "MVP")]
-    pub mvp: bool,
-    pub play_time: u32,
-}
-
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum MatchStatus {

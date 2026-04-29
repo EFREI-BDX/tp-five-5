@@ -34,8 +34,8 @@ def main():
     SCHEMA_DIR_ABS = str(SCHEMA_DIR.resolve())
     success = True
     for fixture in FIXTURES_DIR.glob('*.json'):
-        base = fixture.stem  # e.g. player-data.valid -> player-data.valid => want player-data
-        # handle names like player-data.valid.json -> baseParts
+        base = fixture.stem  # e.g. match-summary.valid -> match-summary.valid
+        # handle names like match-summary.valid.json -> baseParts
         parts = base.split('.')
         schema_base = parts[0]
         expect_schema_failure = len(parts) > 1 and parts[1] == 'invalid'

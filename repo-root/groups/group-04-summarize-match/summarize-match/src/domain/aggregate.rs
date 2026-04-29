@@ -1,32 +1,9 @@
 use super::{
-    CardEntry, CardType, DomainEvent, GoalEntry, MatchResult, MatchStarted, MatchStatus,
-    MatchSummary, PlayerData, PlayerId, Score, SubstitutionEntry, TeamId,
+    CardEntry, CardType, DomainEvent, GoalEntry, MatchStarted, MatchStatus, MatchSummary,
+    PlayerId, Score, SubstitutionEntry, TeamId,
 };
 use anyhow::{Result, anyhow};
 use std::collections::{HashMap, HashSet};
-
-#[derive(Clone)]
-struct PlayerStat {
-    team_id: TeamId,
-    goals: u32,
-    assists: u32,
-    saves: u32,
-    join_second: u32,
-    leave_second: Option<u32>,
-}
-
-impl PlayerStat {
-    fn new(team_id: TeamId, join_second: u32) -> Self {
-        Self {
-            team_id,
-            goals: 0,
-            assists: 0,
-            saves: 0,
-            join_second,
-            leave_second: None,
-        }
-    }
-}
 
 #[derive(Clone, Default)]
 pub struct MatchAggregate {
@@ -44,7 +21,6 @@ pub struct MatchAggregate {
     goals: Vec<GoalEntry>,
     cards: Vec<CardEntry>,
     substitutions: Vec<SubstitutionEntry>,
-    player_stats: HashMap<PlayerId, PlayerStat>,
     match_end_second: u32,
 }
 
@@ -52,71 +28,6 @@ impl MatchAggregate {
     /// Returns true if at least one event has been applied to this aggregate.
     pub fn is_known(&self) -> bool {
         self.started || self.cancelled
-    }
-
-    /// Produces one `PlayerData` event per registered player. Only meaningful after MATCH_FINISHED.
-    pub fn to_player_data_events(&self) -> Vec<PlayerData> {
-        let home_result = match self.computed_home_score.cmp(&self.computed_away_score) {
-            std::cmp::Ordering::Greater => MatchResult::Win,
-            std::cmp::Ordering::Less => MatchResult::Loss,
-            std::cmp::Ordering::Equal => MatchResult::Draw,
-        };
-        let away_result = match &home_result {
-            MatchResult::Win => MatchResult::Loss,
-            MatchResult::Loss => MatchResult::Win,
-            MatchResult::Draw => MatchResult::Draw,
-        };
-
-        let max_goals = self.player_stats.values().map(|s| s.goals).max().unwrap_or(0);
-        let max_assists = self.player_stats.values().map(|s| s.assists).max().unwrap_or(0);
-        let max_mvp_score = self
-            .player_stats
-            .values()
-            .map(|s| s.goals + s.assists + s.saves)
-            .max()
-            .unwrap_or(0);
-
-        let mvp_id = if max_mvp_score > 0 {
-            self.player_stats
-                .iter()
-                .filter(|(_, s)| s.goals + s.assists + s.saves == max_mvp_score)
-                .map(|(id, _)| id.clone())
-                .next()
-        } else {
-            None
-        };
-
-        self.player_stats
-            .iter()
-            .map(|(player_id, stats)| {
-                let is_home = self
-                    .home_team_id
-                    .as_ref()
-                    .map(|t| t == &stats.team_id)
-                    .unwrap_or(false);
-                let result = if is_home {
-                    home_result.clone()
-                } else {
-                    away_result.clone()
-                };
-                let play_time = stats
-                    .leave_second
-                    .unwrap_or(self.match_end_second)
-                    .saturating_sub(stats.join_second);
-
-                PlayerData {
-                    player_id: player_id.clone(),
-                    goals: stats.goals,
-                    assists: stats.assists,
-                    saves: stats.saves,
-                    result,
-                    best_scorer: max_goals > 0 && stats.goals == max_goals,
-                    best_assists_provider: max_assists > 0 && stats.assists == max_assists,
-                    mvp: mvp_id.as_ref() == Some(player_id),
-                    play_time,
-                }
-            })
-            .collect()
     }
 
     pub fn to_summary(&self, match_id: &str) -> MatchSummary {
@@ -180,17 +91,6 @@ impl MatchAggregate {
 
                 self.goal_teams
                     .insert(goal.event_id.clone(), goal.scoring_team_id.clone());
-
-                if !goal.is_own_goal {
-                    if let Some(stat) = self.player_stats.get_mut(&goal.scorer_id) {
-                        stat.goals += 1;
-                    }
-                    if let Some(assist_id) = &goal.assist_id {
-                        if let Some(stat) = self.player_stats.get_mut(assist_id) {
-                            stat.assists += 1;
-                        }
-                    }
-                }
 
                 self.goals.push(GoalEntry {
                     event_id: goal.event_id,
@@ -259,23 +159,12 @@ impl MatchAggregate {
             }
             DomainEvent::SaveMade(save) => {
                 self.validate_active("SAVE_MADE")?;
-                self.reject_if_expelled(&save.keeper_id)?;
-                if let Some(stat) = self.player_stats.get_mut(&save.keeper_id) {
-                    stat.saves += 1;
-                }
-                Ok(())
+                self.reject_if_expelled(&save.keeper_id)
             }
             DomainEvent::Substitution(sub) => {
                 self.validate_active("SUBSTITUTION")?;
                 self.reject_if_expelled(&sub.player_out)?;
                 self.reject_if_expelled(&sub.player_in)?;
-                let sub_second = sub.match_time.minute * 60 + sub.match_time.second;
-                if let Some(stat) = self.player_stats.get_mut(&sub.player_out) {
-                    stat.leave_second = Some(sub_second);
-                }
-                self.player_stats
-                    .entry(sub.player_in.clone())
-                    .or_insert_with(|| PlayerStat::new(sub.team_id.clone(), sub_second));
                 self.substitutions.push(SubstitutionEntry {
                     event_id: sub.event_id,
                     team_id: sub.team_id,
@@ -377,18 +266,6 @@ impl MatchAggregate {
         self.home_team_id = Some(event.home_team.team_id.clone());
         self.away_team_id = Some(event.away_team.team_id.clone());
 
-        for player in &event.home_team.starting_players {
-            self.player_stats.insert(
-                player.player_id.clone(),
-                PlayerStat::new(event.home_team.team_id.clone(), 0),
-            );
-        }
-        for player in &event.away_team.starting_players {
-            self.player_stats.insert(
-                player.player_id.clone(),
-                PlayerStat::new(event.away_team.team_id.clone(), 0),
-            );
-        }
         Ok(())
     }
 

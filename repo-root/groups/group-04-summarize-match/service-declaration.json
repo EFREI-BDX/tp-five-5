@@ -46,14 +46,7 @@
 			}
 		}
 	],
-	"eventsProduced": [
-		{
-			"name": "PlayerData",
-			"description": "Résumé des statistiques par joueur produit par le service après calcul du match.",
-			"documentation": "./events/outbound/PlayerData.md",
-			"schema": "./tests/schemas/player-data.schema.json"
-		}
-	],
+	"eventsProduced": [],
 	"eventsConsumed": [
 		{
 			"name": "BaseEvent",
@@ -137,12 +130,11 @@
 		}
 	],
 	"schemas": [
-		"./tests/schemas/player-data.schema.json",
 		"./tests/schemas/BaseEvent.schema.json"
 	],
 	"notes": {
 		"inbound": "Le service consomme le flux d'events de record-match.",
-		"outbound": "Produit `PlayerData` (voir events/outbound/PlayerData.md). Mettre a jour si d'autres sorties apparaissent."
+		"outbound": "Aucun event metier sortant n'est produit aujourd'hui."
 	},
 	"health": {
 		"path": "/health",

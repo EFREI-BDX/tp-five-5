@@ -4,8 +4,6 @@
 
 `PlayerMatchStats` expose les statistiques calculees pour chaque joueur d'un match.
 
-Ce read model est volontairement separe de l'event outbound `PlayerData` : les champs sont proches aujourd'hui, mais les deux contrats peuvent evoluer independamment.
-
 ## Route HTTP
 
 ```txt
@@ -60,7 +58,7 @@ La route retourne un tableau, un element par joueur connu du match.
 
 Calcul effectue par `MatchAggregate::to_player_stats()`.
 
-`PlayerData` reste le contrat outbound produit apres `MATCH_FINISHED`; `PlayerMatchStats` est le contrat de lecture expose par HTTP.
+`PlayerMatchStats` est un contrat de lecture HTTP, pas un event outbound.
 
 Fixture de contrat : `tests/fixtures/player-match-stats.valid.json`
 

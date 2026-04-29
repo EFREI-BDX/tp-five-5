@@ -31,4 +31,4 @@
 
 ## Events produits
 
-- `PlayerData` — resume des statistiques par joueur (port `DomainEventPublisher` câblé, adapter NoOp par defaut, event outbound documente dans `events/outbound/PlayerData.md`).
+Aucun event metier sortant n'est produit aujourd'hui. Les autres contextes lisent le resume via l'API HTTP.
