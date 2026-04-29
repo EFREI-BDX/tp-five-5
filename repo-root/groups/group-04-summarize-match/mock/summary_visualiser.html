@@ -402,6 +402,15 @@
       font-weight: 900;
     }
 
+    .event-id-line {
+      max-width: 100%;
+      color: #9ca3af;
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 9px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
     .event-meta {
       max-width: 100%;
       color: var(--muted);
@@ -582,6 +591,28 @@
   </main>
 
   <script>
+    const teamNames = {
+      "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": "Arracheurs2Tana FC",
+      "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb": "Mangeurs2Cavu FS"
+    };
+
+    const playerNames = {
+      "00000000-0000-0000-0000-000000000001": "Gardien2Tana",
+      "00000000-0000-0000-0000-000000000002": "Arracheur2Tana",
+      "00000000-0000-0000-0000-000000000003": "Croqueur2Crampon",
+      "00000000-0000-0000-0000-000000000004": "Frappeur2Beton",
+      "00000000-0000-0000-0000-000000000005": "Glisseur2Surface",
+      "00000000-0000-0000-0000-000000000006": "Gardien2Cavu",
+      "00000000-0000-0000-0000-000000000007": "Mangeur2Cavu",
+      "00000000-0000-0000-0000-000000000008": "Tacleur2Minuit",
+      "00000000-0000-0000-0000-000000000009": "Voleur2Ballon",
+      "00000000-0000-0000-0000-000000000010": "Passeur2Chaos",
+      "00000000-0000-0000-0000-000000000011": "Finisseur2Tana",
+      "00000000-0000-0000-0000-000000000012": "Sprinteur2Bitume",
+      "00000000-0000-0000-0000-000000000013": "Buteur2Cavu",
+      "00000000-0000-0000-0000-000000000014": "Dribbleur2Panik"
+    };
+
     const sampleSummary = {
       matchId: "721b3f59-9868-444d-9908-3262fd52ed1e",
       status: "FINISHED",
@@ -688,8 +719,12 @@
       scoreLine.textContent = `${score.home ?? 0} - ${score.away ?? 0}`;
       matchState.textContent = summary.status || "-";
       matchIdLine.textContent = summary.matchId || "-";
-      homeTeamId.textContent = summary.homeTeamId || "-";
-      awayTeamId.textContent = summary.awayTeamId || "-";
+      homeTeamId.textContent = teamLabel(summary.homeTeamId);
+      homeTeamId.title = summary.homeTeamId || "";
+      awayTeamId.textContent = teamLabel(summary.awayTeamId);
+      awayTeamId.title = summary.awayTeamId || "";
+      document.querySelector(".team.home .team-name").textContent = teamName(summary.homeTeamId, "Home");
+      document.querySelector(".team.away .team-name").textContent = teamName(summary.awayTeamId, "Away");
       jsonInput.value = JSON.stringify(summary, null, 2);
       renderTimeline(summary);
       showNotice("");
@@ -738,8 +773,13 @@
           side: sideFor(goal.scoringTeamId, home, away),
           matchTime: goal.matchTime,
           eventId: goal.eventId,
-          title: goal.cancelled ? "Goal cancelled" : goal.scorerId,
-          meta: goal.assistId ? `Assist ${goal.assistId}` : "No assist",
+          title: goal.cancelled ? "Goal cancelled" : playerName(goal.scorerId),
+          meta: goal.assistId ? `Assist ${playerName(goal.assistId)}` : "No assist",
+          idMeta: [
+            `scorer ${shortId(goal.scorerId)}`,
+            goal.assistId ? `assist ${shortId(goal.assistId)}` : null,
+            `team ${shortId(goal.scoringTeamId)}`
+          ].filter(Boolean).join(" / "),
           scoringTeamId: goal.scoringTeamId,
           cancelled: Boolean(goal.cancelled)
         });
@@ -752,8 +792,9 @@
           side: sideFor(card.teamId, home, away),
           matchTime: card.matchTime,
           eventId: card.eventId,
-          title: card.playerId,
+          title: playerName(card.playerId),
           meta: `${type}${card.card_number ? ` ${card.card_number}` : ""}`,
+          idMeta: `player ${shortId(card.playerId)} / team ${shortId(card.teamId)}`,
         });
       });
 
@@ -763,8 +804,9 @@
           side: sideFor(substitution.teamId, home, away),
           matchTime: substitution.matchTime,
           eventId: substitution.eventId,
-          title: substitution.playerIn,
-          meta: `Out ${substitution.playerOut}`,
+          title: playerName(substitution.playerIn),
+          meta: `Out ${playerName(substitution.playerOut)}`,
+          idMeta: `in ${shortId(substitution.playerIn)} / out ${shortId(substitution.playerOut)} / team ${shortId(substitution.teamId)}`,
         });
       });
 
@@ -808,7 +850,8 @@
       main.appendChild(element("span", "event-title", event.title || "-"));
       wrap.appendChild(main);
       wrap.appendChild(element("div", "event-meta", event.meta || ""));
-      wrap.appendChild(element("div", "event-meta", event.eventId || ""));
+      wrap.appendChild(element("div", "event-id-line", event.idMeta || ""));
+      wrap.appendChild(element("div", "event-id-line", `event ${shortId(event.eventId)}`));
       return wrap;
     }
 
@@ -867,6 +910,26 @@
     function showNotice(message) {
       notice.textContent = message;
       notice.classList.toggle("visible", Boolean(message));
+    }
+
+    function teamName(teamId, fallback) {
+      return teamNames[teamId] || fallback || teamId || "-";
+    }
+
+    function teamLabel(teamId) {
+      if (!teamId) return "-";
+      const name = teamNames[teamId];
+      return name ? `${name} (${shortId(teamId)})` : teamId;
+    }
+
+    function playerName(playerId) {
+      return playerNames[playerId] || playerId || "-";
+    }
+
+    function shortId(value) {
+      if (!value) return "-";
+      const parts = String(value).split("-");
+      return parts.length === 5 ? `#${parts[4].slice(-4)}` : String(value).slice(0, 8);
     }
 
     function element(tag, className, text) {

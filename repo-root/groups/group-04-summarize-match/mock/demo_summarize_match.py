@@ -43,6 +43,28 @@ AWAY_BENCH = [
     "00000000-0000-0000-0000-000000000014",
 ]
 
+TEAM_NAMES = {
+    HOME_TEAM_ID: "Arracheurs2Tana FC",
+    AWAY_TEAM_ID: "Mangeurs2Cavu FS",
+}
+
+PLAYER_NAMES = {
+    "00000000-0000-0000-0000-000000000001": "Gardien2Tana",
+    "00000000-0000-0000-0000-000000000002": "Arracheur2Tana",
+    "00000000-0000-0000-0000-000000000003": "Croqueur2Crampon",
+    "00000000-0000-0000-0000-000000000004": "Frappeur2Beton",
+    "00000000-0000-0000-0000-000000000005": "Glisseur2Surface",
+    "00000000-0000-0000-0000-000000000006": "Gardien2Cavu",
+    "00000000-0000-0000-0000-000000000007": "Mangeur2Cavu",
+    "00000000-0000-0000-0000-000000000008": "Tacleur2Minuit",
+    "00000000-0000-0000-0000-000000000009": "Voleur2Ballon",
+    "00000000-0000-0000-0000-000000000010": "Passeur2Chaos",
+    "00000000-0000-0000-0000-000000000011": "Finisseur2Tana",
+    "00000000-0000-0000-0000-000000000012": "Sprinteur2Bitume",
+    "00000000-0000-0000-0000-000000000013": "Buteur2Cavu",
+    "00000000-0000-0000-0000-000000000014": "Dribbleur2Panik",
+}
+
 
 def main():
     args = parse_args()
@@ -344,41 +366,47 @@ def format_event_for_print(event):
 
     if event_type == "GOAL_SCORED":
         return (
-            f"{time_label} GOAL_SCORED team={payload['scoringTeamId']} "
-            f"scorer={payload['scorerId']} assist={payload.get('assistId')}"
+            f"{time_label} GOAL_SCORED team={team_label(payload['scoringTeamId'])} "
+            f"scorer={player_label(payload['scorerId'])} "
+            f"assist={player_label(payload.get('assistId'))}"
         )
     if event_type == "YELLOW_CARD":
         return (
-            f"{time_label} YELLOW_CARD team={payload['teamId']} "
-            f"player={payload['playerId']} cardNumber={payload['cardNumber']}"
+            f"{time_label} YELLOW_CARD team={team_label(payload['teamId'])} "
+            f"player={player_label(payload['playerId'])} cardNumber={payload['cardNumber']}"
         )
     if event_type == "RED_CARD":
-        return f"{time_label} RED_CARD team={payload['teamId']} player={payload['playerId']}"
+        return (
+            f"{time_label} RED_CARD team={team_label(payload['teamId'])} "
+            f"player={player_label(payload['playerId'])}"
+        )
     if event_type == "SUBSTITUTION":
         return (
-            f"{time_label} SUBSTITUTION team={payload['teamId']} "
-            f"out={payload['playerOutId']} in={payload['playerInId']}"
+            f"{time_label} SUBSTITUTION team={team_label(payload['teamId'])} "
+            f"out={player_label(payload['playerOutId'])} "
+            f"in={player_label(payload['playerInId'])}"
         )
     if event_type == "PASS_ATTEMPTED":
         return (
-            f"{time_label} PASS_ATTEMPTED team={payload['teamId']} "
-            f"passer={payload['passerId']} receiver={payload.get('receiverId')} "
+            f"{time_label} PASS_ATTEMPTED team={team_label(payload['teamId'])} "
+            f"passer={player_label(payload['passerId'])} "
+            f"receiver={player_label(payload.get('receiverId'))} "
             f"succeeded={payload['succeeded']}"
         )
     if event_type == "SHOT_ATTEMPTED":
         return (
-            f"{time_label} SHOT_ATTEMPTED team={payload['teamId']} "
-            f"shooter={payload['shooterId']} outcome={payload['outcome']}"
+            f"{time_label} SHOT_ATTEMPTED team={team_label(payload['teamId'])} "
+            f"shooter={player_label(payload['shooterId'])} outcome={payload['outcome']}"
         )
     if event_type == "SAVE_MADE":
         return (
-            f"{time_label} SAVE_MADE team={payload['keeperTeamId']} "
-            f"keeper={payload['keeperId']}"
+            f"{time_label} SAVE_MADE team={team_label(payload['keeperTeamId'])} "
+            f"keeper={player_label(payload['keeperId'])}"
         )
     if event_type == "FOUL_COMMITTED":
         return (
-            f"{time_label} FOUL_COMMITTED team={payload['teamId']} "
-            f"player={payload['playerId']}"
+            f"{time_label} FOUL_COMMITTED team={team_label(payload['teamId'])} "
+            f"player={player_label(payload['playerId'])}"
         )
     if event_type == "MATCH_FINISHED":
         score = payload["finalScore"]
@@ -391,6 +419,27 @@ def format_match_time(match_time):
     minute = str(match_time["minute"]).rjust(2, "0")
     second = str(match_time["second"]).rjust(2, "0")
     return f"{minute}:{second}"
+
+
+def team_label(team_id):
+    if not team_id:
+        return "-"
+    name = TEAM_NAMES.get(team_id)
+    return f"{name} ({short_id(team_id)})" if name else team_id
+
+
+def player_label(player_id):
+    if not player_id:
+        return "-"
+    name = PLAYER_NAMES.get(player_id)
+    return f"{name} ({short_id(player_id)})" if name else player_id
+
+
+def short_id(value):
+    parts = value.split("-")
+    if len(parts) == 5:
+        return f"#{parts[-1][-4:]}"
+    return value[:8]
 
 
 def envelope(match_id, event_type, minute, second, payload):
