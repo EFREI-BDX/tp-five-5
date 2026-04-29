@@ -4,8 +4,10 @@
 
 GRANT SELECT ON manage_field.v_field_status TO 'fivefield'@'%';
 GRANT SELECT ON manage_field.v_reservation_status TO 'fivefield'@'%';
-GRANT SELECT ON manage_field.v_field TO 'fivefield'@'%';
-GRANT SELECT ON manage_field.v_reservation TO 'fivefield'@'%';
+GRANT SELECT ON manage_field.v_field_details TO 'fivefield'@'%';
+GRANT SELECT ON manage_field.v_active_field TO 'fivefield'@'%';
+GRANT SELECT ON manage_field.v_reservation_details TO 'fivefield'@'%';
+GRANT SELECT ON manage_field.v_blocking_reservation TO 'fivefield'@'%';
 
 GRANT EXECUTE ON PROCEDURE manage_field.app_create_field TO 'fivefield'@'%';
 GRANT EXECUTE ON PROCEDURE manage_field.app_change_field_status TO 'fivefield'@'%';
