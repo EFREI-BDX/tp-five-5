@@ -4,7 +4,9 @@ import com.group3.efreifive.recordmatch.dto.MatchDto;
 import com.group3.efreifive.recordmatch.entity.MatchEntity;
 import com.group3.efreifive.recordmatch.mapper.MatchMapper;
 import com.group3.efreifive.recordmatch.repository.MatchRepository;
+import com.group3.efreifive.recordmatch.service.DomainErrorCode;
 import com.group3.efreifive.recordmatch.service.IMatchService;
+import com.group3.efreifive.recordmatch.service.RecordMatchServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +35,9 @@ public class MatchService implements IMatchService {
     @Override
     @Transactional(readOnly = true)
     public MatchDto findById(UUID id) {
-        final MatchEntity e = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Match not found: " + id));
+        final MatchEntity e = repository.findById(id).orElseThrow(() -> new RecordMatchServiceException(
+                DomainErrorCode.MATCH_NOT_FOUND,
+                "Match not found: " + id));
         return mapper.entityToDto(e);
     }
 

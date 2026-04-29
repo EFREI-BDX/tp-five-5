@@ -4,7 +4,9 @@ import com.group3.efreifive.recordmatch.dto.PlayerDto;
 import com.group3.efreifive.recordmatch.entity.PlayerEntity;
 import com.group3.efreifive.recordmatch.mapper.PlayerMapper;
 import com.group3.efreifive.recordmatch.repository.PlayerRepository;
+import com.group3.efreifive.recordmatch.service.DomainErrorCode;
 import com.group3.efreifive.recordmatch.service.IPlayerService;
+import com.group3.efreifive.recordmatch.service.RecordMatchServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +29,9 @@ public class PlayerService implements IPlayerService {
     @Override
     @Transactional(readOnly = true)
     public PlayerDto findById(UUID id) {
-        final PlayerEntity e = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Player not found: " + id));
+        final PlayerEntity e = repository.findById(id).orElseThrow(() -> new RecordMatchServiceException(
+                DomainErrorCode.PLAYER_NOT_FOUND,
+                "Player not found: " + id));
         return mapper.entityToDto(e);
     }
 

@@ -4,7 +4,9 @@ import com.group3.efreifive.recordmatch.dto.EventDto;
 import com.group3.efreifive.recordmatch.entity.EventEntity;
 import com.group3.efreifive.recordmatch.mapper.EventMapper;
 import com.group3.efreifive.recordmatch.repository.EventRepository;
+import com.group3.efreifive.recordmatch.service.DomainErrorCode;
 import com.group3.efreifive.recordmatch.service.IEventService;
+import com.group3.efreifive.recordmatch.service.RecordMatchServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +35,9 @@ public class EventService implements IEventService {
     @Override
     @Transactional(readOnly = true)
     public EventDto findById(UUID id) {
-        final EventEntity e = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Event not found: " + id));
+        final EventEntity e = repository.findById(id).orElseThrow(() -> new RecordMatchServiceException(
+                DomainErrorCode.EVENT_NOT_FOUND,
+                "Event not found: " + id));
         return mapper.entityToDto(e);
     }
 

@@ -1,6 +1,6 @@
-package com.jad.efreifive.manageteam.repository.result;
+package com.group3.efreifive.recordmatch.repository.result;
 
-import com.jad.efreifive.manageteam.service.DomainErrorCode;
+import com.group3.efreifive.recordmatch.service.DomainErrorCode;
 
 public record PersistenceOperationResult(
         boolean success,

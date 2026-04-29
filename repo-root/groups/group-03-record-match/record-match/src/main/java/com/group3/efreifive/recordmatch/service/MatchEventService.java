@@ -4,7 +4,9 @@ import com.group3.efreifive.recordmatch.dto.MatchEventDto;
 import com.group3.efreifive.recordmatch.entity.MatchEventEntity;
 import com.group3.efreifive.recordmatch.mapper.MatchEventMapper;
 import com.group3.efreifive.recordmatch.repository.MatchEventRepository;
+import com.group3.efreifive.recordmatch.service.DomainErrorCode;
 import com.group3.efreifive.recordmatch.service.IMatchEventService;
+import com.group3.efreifive.recordmatch.service.RecordMatchServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +29,16 @@ public class MatchEventService implements IMatchEventService {
     @Override
     @Transactional(readOnly = true)
     public MatchEventDto findById(UUID id) {
-        final MatchEventEntity e = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("MatchEvent not found: " + id));
+        final MatchEventEntity e = repository.findById(id).orElseThrow(() -> new RecordMatchServiceException(
+                DomainErrorCode.MATCH_EVENT_NOT_FOUND,
+                "MatchEvent not found: " + id));
         return mapper.entityToDto(e);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MatchEventDto> findByMatchId(UUID matchId) {
-        return repository.findByMatchIdOrderByOccuredAtAsc(matchId).stream().map(mapper::entityToDto).collect(Collectors.toList());
+        return repository.findByMatchId(matchId).stream().map(mapper::entityToDto).collect(Collectors.toList());
     }
 
     @Override
