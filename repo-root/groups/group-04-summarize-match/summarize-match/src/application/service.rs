@@ -85,6 +85,15 @@ mod tests {
             guard.entry(match_id).or_default().push(event);
             Ok(())
         }
+
+        async fn read_summary(&self, match_id: &str) -> ApplicationResult<Option<crate::domain::MatchSummary>> {
+            let aggregate = self.load(match_id).await?;
+            if aggregate.is_known() {
+                Ok(Some(aggregate.to_summary(match_id)))
+            } else {
+                Ok(None)
+            }
+        }
     }
 
     struct FakeEventPublisher;

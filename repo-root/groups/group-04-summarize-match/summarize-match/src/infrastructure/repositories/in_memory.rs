@@ -39,13 +39,18 @@ impl MatchRepository for InMemoryMatchRepository {
 
     async fn append(&self, event: DomainEvent) -> ApplicationResult<()> {
         let match_id = event.match_id().to_string();
-        let mut guard = self
-            .events
-            .lock()
-            .map_err(|_| ApplicationError::repository("match repository lock poisoned"))?;
-
+        let mut guard = self.events.lock().expect("repository lock should not fail");
         guard.entry(match_id).or_default().push(event);
         Ok(())
+    }
+
+    async fn read_summary(&self, match_id: &str) -> ApplicationResult<Option<crate::domain::MatchSummary>> {
+        let aggregate = self.load(match_id).await?;
+        if aggregate.is_known() {
+            Ok(Some(aggregate.to_summary(match_id)))
+        } else {
+            Ok(None)
+        }
     }
 }
 

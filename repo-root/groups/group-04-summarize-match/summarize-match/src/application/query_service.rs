@@ -20,10 +20,6 @@ impl<R: MatchRepository> MatchReadService<R> {
 #[async_trait]
 impl<R: MatchRepository> MatchQueryService for MatchReadService<R> {
     async fn get_summary(&self, match_id: &str) -> ApplicationResult<Option<MatchSummary>> {
-        let aggregate = self.repository.load(match_id).await?;
-        if !aggregate.is_known() {
-            return Ok(None);
-        }
-        Ok(Some(aggregate.to_summary(match_id)))
+        self.repository.read_summary(match_id).await
     }
 }

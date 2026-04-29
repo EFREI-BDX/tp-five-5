@@ -1,7 +1,7 @@
 use super::{MatchTime, PlayerId, Score, TeamId};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum MatchResult {
     Win,
     Loss,
@@ -19,14 +19,14 @@ pub enum MatchStatus {
     Forfeited,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum CardType {
     Yellow { card_number: u8 },
     Red { is_double_yellow: bool },
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GoalEntry {
     pub event_id: String,
@@ -38,7 +38,7 @@ pub struct GoalEntry {
     pub cancelled: bool,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CardEntry {
     pub event_id: String,
@@ -49,7 +49,7 @@ pub struct CardEntry {
     pub card_type: CardType,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubstitutionEntry {
     pub event_id: String,
@@ -59,7 +59,7 @@ pub struct SubstitutionEntry {
     pub match_time: MatchTime,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct MatchSummary {
     pub match_id: String,
