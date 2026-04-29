@@ -20,7 +20,7 @@ public record MatchEventDto(
         UUID player2Id,
         LocalDateTime occuredAt,
         Boolean succeeded, 
-        UUID team1Id,
+        UUID teamId,
         UUID referenceEventId
         
 ) {
