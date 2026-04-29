@@ -1,0 +1,2 @@
+# No external dependency is required.
+# demo_summarize_match.py only uses the Python standard library.

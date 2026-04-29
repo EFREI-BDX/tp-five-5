@@ -21,6 +21,9 @@ services:
       DATABASE_URL: postgres://app:app@postgres:5432/summarize_match
       PORT: 3000
       RUST_LOG: summarize_match=info
+      BASE_EVENT_SCHEMA_PATH: /schemas/BaseEvent.schema.json
+    volumes:
+      - ./tests/schemas:/schemas:ro
     ports:
       - "3000:3000"
     depends_on:
