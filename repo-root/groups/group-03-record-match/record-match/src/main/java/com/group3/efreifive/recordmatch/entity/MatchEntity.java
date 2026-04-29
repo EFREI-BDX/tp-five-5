@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @SuppressWarnings("DefaultAnnotationParam")
@@ -27,5 +28,11 @@ public class MatchEntity {
 
     @Column(name = "team2Id", nullable = false, columnDefinition = "BINARY(16)")
     private UUID team2Id;
+
+    @Column(name = "startedAt", nullable = false)
+    private LocalDateTime startedAt;
+
+    @Column(name = "scheduledDurationMinutes", nullable = false)
+    private Integer scheduledDurationMinutes;
 
 }

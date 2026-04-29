@@ -18,9 +18,11 @@ CREATE TABLE fiverecordmatch.player
 
 CREATE TABLE fiverecordmatch.match
 (
-    matchId binary(16) not null primary key,
-    team1Id binary(16) not null,
-    team2Id binary(16) not null
+    matchId                  binary(16)  not null primary key,
+    team1Id                  binary(16)  not null,
+    team2Id                  binary(16)  not null,
+    startedAt                timestamp   not null,
+    scheduledDurationMinutes int         not null
 );
 
 CREATE TABLE fiverecordmatch.matchEvent
@@ -47,6 +49,9 @@ ALTER TABLE fiverecordmatch.event
 
 ALTER TABLE fiverecordmatch.match
     ADD CONSTRAINT team1_team2_different CHECK (team1Id != team2Id);
+
+ALTER TABLE fiverecordmatch.match
+    ADD CONSTRAINT scheduledDurationMinutes_positive CHECK (scheduledDurationMinutes > 0);
 
 -- TRIGGERS
 DELIMITER $$
