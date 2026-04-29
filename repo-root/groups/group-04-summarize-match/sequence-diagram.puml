@@ -17,11 +17,6 @@ box "Domain" #LightGreen
 participant "MatchAggregate" as Domain
 end box
 
-box "Infrastructure (Outbound)" #LightCyan
-participant "MatchRepository" as Repo
-participant "DomainEventPublisher" as Publisher
-end box
-
 == Process Match Event ==
 
 Client -> API : POST /events (BaseEvent JSON)
@@ -32,25 +27,10 @@ API -> API : Validate technical contract\n(Schema, Format)
 API -> AppSvc : handle_event(domain_event)
 activate AppSvc
 
-AppSvc -> Repo : load(matchId)
-activate Repo
-Repo --> AppSvc : MatchAggregate
-deactivate Repo
-
 AppSvc -> Domain : handle_event(domain_event)
 activate Domain
 Domain --> AppSvc : ok / error
 deactivate Domain
-
-AppSvc -> Repo : append(domain_event)
-activate Repo
-Repo --> AppSvc : ok
-deactivate Repo
-
-AppSvc -> Publisher : publish(domain_event)
-activate Publisher
-Publisher --> AppSvc : ok
-deactivate Publisher
 
 AppSvc --> API : ok
 deactivate AppSvc
@@ -65,11 +45,6 @@ activate API_GET
 
 API_GET -> QuerySvc : get_summary(matchId)
 activate QuerySvc
-
-QuerySvc -> Repo : load(matchId)
-activate Repo
-Repo --> QuerySvc : MatchAggregate
-deactivate Repo
 
 QuerySvc -> Domain : to_summary(matchId)
 activate Domain
