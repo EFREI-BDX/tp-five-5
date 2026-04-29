@@ -8,6 +8,7 @@ use summarize_match::infrastructure::inbound::consumer::Consumer;
 use summarize_match::infrastructure::inbound::http::{event_routes, query_routes};
 use summarize_match::infrastructure::outbound::LoggingPublisher;
 use summarize_match::infrastructure::repositories::SeaOrmMatchRepository;
+use tower_http::cors::{Any, CorsLayer};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[derive(Serialize)]
@@ -44,7 +45,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .route("/health", get(health))
         .merge(event_routes(consumer))
-        .merge(query_routes(query_service));
+        .merge(query_routes(query_service))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
+        );
 
     let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = tokio::net::TcpListener::bind(addr).await?;

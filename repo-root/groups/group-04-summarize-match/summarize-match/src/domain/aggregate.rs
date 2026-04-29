@@ -1,9 +1,61 @@
 use super::{
     CardEntry, CardType, DomainEvent, GoalEntry, MatchStarted, MatchStatus, MatchSummary,
-    PlayerId, Score, SubstitutionEntry, TeamId,
+    PlayerId, PlayerStats, Score, SubstitutionEntry, TeamId, TeamStats,
 };
 use anyhow::{Result, anyhow};
 use std::collections::{HashMap, HashSet};
+
+#[derive(Clone, Default)]
+struct TeamStatsAccumulator {
+    goals: u32,
+    shots: u32,
+    shots_on_target: u32,
+    passes_attempted: u32,
+    passes_succeeded: u32,
+    saves: u32,
+    fouls_committed: u32,
+    yellow_cards: u32,
+    red_cards: u32,
+    substitutions: u32,
+    players_used: HashSet<PlayerId>,
+}
+
+#[derive(Clone)]
+struct PlayerStatsAccumulator {
+    team_id: TeamId,
+    goals: u32,
+    assists: u32,
+    shots: u32,
+    shots_on_target: u32,
+    passes_attempted: u32,
+    passes_succeeded: u32,
+    saves: u32,
+    fouls_committed: u32,
+    yellow_cards: u32,
+    red_cards: u32,
+    substitutions_in: u32,
+    substitutions_out: u32,
+}
+
+impl PlayerStatsAccumulator {
+    fn new(team_id: TeamId) -> Self {
+        Self {
+            team_id,
+            goals: 0,
+            assists: 0,
+            shots: 0,
+            shots_on_target: 0,
+            passes_attempted: 0,
+            passes_succeeded: 0,
+            saves: 0,
+            fouls_committed: 0,
+            yellow_cards: 0,
+            red_cards: 0,
+            substitutions_in: 0,
+            substitutions_out: 0,
+        }
+    }
+}
 
 #[derive(Clone, Default)]
 pub struct MatchAggregate {
@@ -21,6 +73,9 @@ pub struct MatchAggregate {
     goals: Vec<GoalEntry>,
     cards: Vec<CardEntry>,
     substitutions: Vec<SubstitutionEntry>,
+    team_stats: HashMap<TeamId, TeamStatsAccumulator>,
+    player_stats: HashMap<PlayerId, PlayerStatsAccumulator>,
+    player_teams: HashMap<PlayerId, TeamId>,
     match_end_second: u32,
 }
 
@@ -60,6 +115,46 @@ impl MatchAggregate {
         }
     }
 
+    pub fn to_team_stats(&self, match_id: &str, team_id: &TeamId) -> Option<TeamStats> {
+        let stats = self.team_stats.get(team_id)?;
+        Some(TeamStats {
+            match_id: match_id.to_string(),
+            team_id: team_id.clone(),
+            goals: stats.goals,
+            shots: stats.shots,
+            shots_on_target: stats.shots_on_target,
+            passes_attempted: stats.passes_attempted,
+            passes_succeeded: stats.passes_succeeded,
+            saves: stats.saves,
+            fouls_committed: stats.fouls_committed,
+            yellow_cards: stats.yellow_cards,
+            red_cards: stats.red_cards,
+            substitutions: stats.substitutions,
+            players_used: stats.players_used.len() as u32,
+        })
+    }
+
+    pub fn to_player_stats(&self, match_id: &str, player_id: &PlayerId) -> Option<PlayerStats> {
+        let stats = self.player_stats.get(player_id)?;
+        Some(PlayerStats {
+            match_id: match_id.to_string(),
+            player_id: player_id.clone(),
+            team_id: stats.team_id.clone(),
+            goals: stats.goals,
+            assists: stats.assists,
+            shots: stats.shots,
+            shots_on_target: stats.shots_on_target,
+            passes_attempted: stats.passes_attempted,
+            passes_succeeded: stats.passes_succeeded,
+            saves: stats.saves,
+            fouls_committed: stats.fouls_committed,
+            yellow_cards: stats.yellow_cards,
+            red_cards: stats.red_cards,
+            substitutions_in: stats.substitutions_in,
+            substitutions_out: stats.substitutions_out,
+        })
+    }
+
     pub fn handle_event(&mut self, event: DomainEvent) -> Result<()> {
         match event {
             DomainEvent::MatchStarted(match_started) => self.start_match(match_started),
@@ -92,6 +187,18 @@ impl MatchAggregate {
                 self.goal_teams
                     .insert(goal.event_id.clone(), goal.scoring_team_id.clone());
 
+                if let Some(stats) = self.team_stats.get_mut(&goal.scoring_team_id) {
+                    stats.goals += 1;
+                }
+                if !goal.is_own_goal {
+                    self.ensure_player_stats(&goal.scorer_id, &goal.scoring_team_id)
+                        .goals += 1;
+                    if let Some(assist_id) = &goal.assist_id {
+                        self.ensure_player_stats(assist_id, &goal.scoring_team_id)
+                            .assists += 1;
+                    }
+                }
+
                 self.goals.push(GoalEntry {
                     event_id: goal.event_id,
                     scoring_team_id: goal.scoring_team_id,
@@ -121,11 +228,25 @@ impl MatchAggregate {
                     self.computed_away_score = self.computed_away_score.saturating_sub(1);
                 }
 
+                if let Some(stats) = self.team_stats.get_mut(&scoring_team_id) {
+                    stats.goals = stats.goals.saturating_sub(1);
+                }
+
                 if let Some(entry) = self
                     .goals
                     .iter_mut()
                     .find(|g| g.event_id == cancelled.cancelled_goal_event_id.0)
                 {
+                    if !entry.is_own_goal {
+                        if let Some(stats) = self.player_stats.get_mut(&entry.scorer_id) {
+                            stats.goals = stats.goals.saturating_sub(1);
+                        }
+                        if let Some(assist_id) = &entry.assist_id {
+                            if let Some(stats) = self.player_stats.get_mut(assist_id) {
+                                stats.assists = stats.assists.saturating_sub(1);
+                            }
+                        }
+                    }
                     entry.cancelled = true;
                 }
 
@@ -133,19 +254,44 @@ impl MatchAggregate {
             }
             DomainEvent::PassAttempted(pass) => {
                 self.validate_active("PASS_ATTEMPTED")?;
-                self.reject_if_expelled(&pass.player_id)
+                self.reject_if_expelled(&pass.player_id)?;
+                self.ensure_team_stats(&pass.team_id).passes_attempted += 1;
+                self.ensure_player_stats(&pass.player_id, &pass.team_id)
+                    .passes_attempted += 1;
+                if pass.succeeded {
+                    self.ensure_team_stats(&pass.team_id).passes_succeeded += 1;
+                    self.ensure_player_stats(&pass.player_id, &pass.team_id)
+                        .passes_succeeded += 1;
+                }
+                Ok(())
             }
             DomainEvent::ShotAttempted(shot) => {
                 self.validate_active("SHOT_ATTEMPTED")?;
-                self.reject_if_expelled(&shot.player_id)
+                self.reject_if_expelled(&shot.player_id)?;
+                self.ensure_team_stats(&shot.team_id).shots += 1;
+                self.ensure_player_stats(&shot.player_id, &shot.team_id)
+                    .shots += 1;
+                if shot.on_target {
+                    self.ensure_team_stats(&shot.team_id).shots_on_target += 1;
+                    self.ensure_player_stats(&shot.player_id, &shot.team_id)
+                        .shots_on_target += 1;
+                }
+                Ok(())
             }
             DomainEvent::FoulCommitted(foul) => {
                 self.validate_active("FOUL_COMMITTED")?;
-                self.reject_if_expelled(&foul.player_id)
+                self.reject_if_expelled(&foul.player_id)?;
+                self.ensure_team_stats(&foul.team_id).fouls_committed += 1;
+                self.ensure_player_stats(&foul.player_id, &foul.team_id)
+                    .fouls_committed += 1;
+                Ok(())
             }
             DomainEvent::YellowCard(card) => {
                 self.validate_active("YELLOW_CARD")?;
                 self.reject_if_expelled(&card.player_id)?;
+                self.ensure_team_stats(&card.team_id).yellow_cards += 1;
+                self.ensure_player_stats(&card.player_id, &card.team_id)
+                    .yellow_cards += 1;
                 self.cards.push(CardEntry {
                     event_id: card.event_id,
                     player_id: card.player_id,
@@ -159,12 +305,22 @@ impl MatchAggregate {
             }
             DomainEvent::SaveMade(save) => {
                 self.validate_active("SAVE_MADE")?;
-                self.reject_if_expelled(&save.keeper_id)
+                self.reject_if_expelled(&save.keeper_id)?;
+                self.ensure_team_stats(&save.keeper_team_id).saves += 1;
+                self.ensure_player_stats(&save.keeper_id, &save.keeper_team_id)
+                    .saves += 1;
+                Ok(())
             }
             DomainEvent::Substitution(sub) => {
                 self.validate_active("SUBSTITUTION")?;
                 self.reject_if_expelled(&sub.player_out)?;
                 self.reject_if_expelled(&sub.player_in)?;
+                self.ensure_team_stats(&sub.team_id).substitutions += 1;
+                self.ensure_player_stats(&sub.player_out, &sub.team_id)
+                    .substitutions_out += 1;
+                self.ensure_player_stats(&sub.player_in, &sub.team_id)
+                    .substitutions_in += 1;
+                self.register_player(&sub.player_in, &sub.team_id);
                 self.substitutions.push(SubstitutionEntry {
                     event_id: sub.event_id,
                     team_id: sub.team_id,
@@ -176,6 +332,9 @@ impl MatchAggregate {
             }
             DomainEvent::RedCard(red) => {
                 self.validate_active("RED_CARD")?;
+                self.ensure_team_stats(&red.team_id).red_cards += 1;
+                self.ensure_player_stats(&red.player_id, &red.team_id)
+                    .red_cards += 1;
                 self.cards.push(CardEntry {
                     event_id: red.event_id.clone(),
                     player_id: red.player_id.clone(),
@@ -266,6 +425,15 @@ impl MatchAggregate {
         self.home_team_id = Some(event.home_team.team_id.clone());
         self.away_team_id = Some(event.away_team.team_id.clone());
 
+        self.ensure_team_stats(&event.home_team.team_id);
+        self.ensure_team_stats(&event.away_team.team_id);
+        for player in &event.home_team.starting_players {
+            self.register_player(&player.player_id, &event.home_team.team_id);
+        }
+        for player in &event.away_team.starting_players {
+            self.register_player(&player.player_id, &event.away_team.team_id);
+        }
+
         Ok(())
     }
 
@@ -296,6 +464,30 @@ impl MatchAggregate {
         }
 
         Ok(())
+    }
+
+    fn ensure_team_stats(&mut self, team_id: &TeamId) -> &mut TeamStatsAccumulator {
+        self.team_stats.entry(team_id.clone()).or_default()
+    }
+
+    fn ensure_player_stats(
+        &mut self,
+        player_id: &PlayerId,
+        team_id: &TeamId,
+    ) -> &mut PlayerStatsAccumulator {
+        self.register_player(player_id, team_id);
+        self.player_stats
+            .entry(player_id.clone())
+            .or_insert_with(|| PlayerStatsAccumulator::new(team_id.clone()))
+    }
+
+    fn register_player(&mut self, player_id: &PlayerId, team_id: &TeamId) {
+        self.player_teams
+            .entry(player_id.clone())
+            .or_insert_with(|| team_id.clone());
+        self.ensure_team_stats(team_id)
+            .players_used
+            .insert(player_id.clone());
     }
 
     fn reject_if_expelled(&self, player_id: &PlayerId) -> Result<()> {

@@ -79,6 +79,10 @@ def main():
 
     print(f"Demo match id: {match_id}")
     print(f"Expected final score: {expected_score['home']}-{expected_score['away']}")
+    print("Useful stats URLs:")
+    print(f"  Home team: {base_url}/matches/{match_id}/teams/{HOME_TEAM_ID}/stats")
+    print(f"  Away team: {base_url}/matches/{match_id}/teams/{AWAY_TEAM_ID}/stats")
+    print(f"  Example player: {base_url}/matches/{match_id}/players/{HOME_PLAYERS[1]}/stats")
     print()
     print_sent_events(events)
     print_expected_summary_events(events)
@@ -168,12 +172,44 @@ def build_demo_events(match_id, rng):
             ]
         )
 
+    def team_label_key(team_id):
+        return "home" if team_id == HOME_TEAM_ID else "away"
+
     def random_outfield(team_id):
         return rng.choice(active_players[team_id][1:])
 
     def random_opponent(team_id):
         opponent_id = AWAY_TEAM_ID if team_id == HOME_TEAM_ID else HOME_TEAM_ID
         return random_outfield(opponent_id)
+
+    def playable_times():
+        times = []
+        for minute in range(1, 40):
+            if minute == 20:
+                continue
+            for second in range(0, 60):
+                times.append((minute, second))
+        rng.shuffle(times)
+        return times
+
+    def next_time(times):
+        return times.pop()
+
+    def pick_goal_score():
+        scorelines = [
+            (12, 9),
+            (16, 4),
+            (14, 11),
+            (15, 13),
+            (18, 12),
+            (10, 8),
+            (9, 12),
+            (13, 7),
+        ]
+        home, away = rng.choice(scorelines)
+        if rng.choice([True, False]):
+            return home, away
+        return away, home
 
     add(
         "MATCH_STARTED",
@@ -186,46 +222,64 @@ def build_demo_events(match_id, rng):
         },
     )
 
-    goal_count = rng.randint(1, 3)
-    playable_goal_minutes = list(range(12, 20)) + list(range(21, 33))
-    goal_minutes = rng.sample(playable_goal_minutes, goal_count)
-    for minute in goal_minutes:
-        team_id, label = random_team()
-        scorer = random_outfield(team_id)
-        possible_assists = [
-            player for player in active_players[team_id][1:] if player != scorer
-        ]
-        add(
-            "GOAL_SCORED",
-            minute,
-            rng.randint(0, 59),
-            {
-                "scoringTeamId": team_id,
-                "scorerId": scorer,
-                "assistId": rng.choice(possible_assists),
-                "isOwnGoal": False,
-            },
-        )
-        score[label] += 1
+    times = playable_times()
+    target_home_goals, target_away_goals = pick_goal_score()
+    planned_actions = []
 
-    action_minutes = [minute for minute in range(2, 38) if minute not in goal_minutes]
-    random_actions = []
-    random_actions.extend(["PASS_ATTEMPTED"] * rng.randint(3, 6))
-    random_actions.extend(["SHOT_ATTEMPTED"] * rng.randint(2, 5))
-    random_actions.extend(["FOUL_COMMITTED"] * rng.randint(2, 4))
-    random_actions.extend(["YELLOW_CARD"] * rng.randint(1, 3))
-    random_actions.extend(["SUBSTITUTION"] * rng.randint(1, 3))
-    rng.shuffle(random_actions)
+    planned_actions.extend([(HOME_TEAM_ID, "GOAL_SEQUENCE")] * target_home_goals)
+    planned_actions.extend([(AWAY_TEAM_ID, "GOAL_SEQUENCE")] * target_away_goals)
+    planned_actions.extend([(None, "PASS_ATTEMPTED")] * rng.randint(45, 65))
+    planned_actions.extend([(None, "SHOT_SEQUENCE")] * rng.randint(28, 42))
+    planned_actions.extend([(None, "FOUL_COMMITTED")] * rng.randint(8, 14))
+    planned_actions.extend([(None, "YELLOW_CARD")] * rng.randint(3, 6))
+    planned_actions.extend([(None, "SUBSTITUTION")] * rng.randint(3, 4))
+    rng.shuffle(planned_actions)
+
+    scheduled_actions = []
+    for team_id, action_type in planned_actions:
+        minute, second = next_time(times)
+        scheduled_actions.append((minute, second, team_id, action_type))
+    scheduled_actions.sort(key=lambda action: (action[0], action[1]))
 
     used_foul_ids = []
     used_shot_ids = []
-    selected_minutes = rng.sample(action_minutes, len(random_actions))
 
-    for action_type, minute in zip(random_actions, selected_minutes):
-        second = rng.randint(0, 59)
+    for minute, second, planned_team_id, action_type in scheduled_actions:
         team_id, _ = random_team()
+        if planned_team_id:
+            team_id = planned_team_id
 
-        if action_type == "PASS_ATTEMPTED":
+        if action_type == "GOAL_SEQUENCE":
+            shooter = random_outfield(team_id)
+            shot_id = add(
+                "SHOT_ATTEMPTED",
+                minute,
+                second,
+                {
+                    "shooterId": shooter,
+                    "teamId": team_id,
+                    "onTarget": True,
+                    "outcome": "GOAL",
+                },
+            )
+            used_shot_ids.append((shot_id, team_id, minute, second))
+            scorer = shooter
+            possible_assists = [
+                player for player in active_players[team_id][1:] if player != scorer
+            ]
+            add(
+                "GOAL_SCORED",
+                minute,
+                min(second + 1, 59),
+                {
+                    "scoringTeamId": team_id,
+                    "scorerId": scorer,
+                    "assistId": rng.choice(possible_assists) if possible_assists else None,
+                    "isOwnGoal": False,
+                },
+            )
+            score[team_label_key(team_id)] += 1
+        elif action_type == "PASS_ATTEMPTED":
             passer = random_outfield(team_id)
             receivers = [
                 player for player in active_players[team_id][1:] if player != passer
@@ -238,10 +292,14 @@ def build_demo_events(match_id, rng):
                     "passerId": passer,
                     "teamId": team_id,
                     "receiverId": rng.choice(receivers) if receivers else None,
-                    "succeeded": rng.choice([True, True, True, False]),
+                    "succeeded": rng.choice([True, True, True, True, False]),
                 },
             )
-        elif action_type == "SHOT_ATTEMPTED":
+        elif action_type == "SHOT_SEQUENCE":
+            on_target = rng.choice([True, True, True, False, False])
+            outcome = rng.choice(["SAVED", "SAVED", "BLOCKED"]) if on_target else rng.choice(
+                ["WIDE", "POST", "BLOCKED"]
+            )
             shot_id = add(
                 "SHOT_ATTEMPTED",
                 minute,
@@ -249,12 +307,12 @@ def build_demo_events(match_id, rng):
                 {
                     "shooterId": random_outfield(team_id),
                     "teamId": team_id,
-                    "onTarget": rng.choice([True, False]),
-                    "outcome": rng.choice(["SAVED", "BLOCKED", "WIDE", "POST"]),
+                    "onTarget": on_target,
+                    "outcome": outcome,
                 },
             )
             used_shot_ids.append((shot_id, team_id, minute, second))
-            if rng.choice([True, False]):
+            if outcome == "SAVED":
                 keeper_team_id = AWAY_TEAM_ID if team_id == HOME_TEAM_ID else HOME_TEAM_ID
                 add(
                     "SAVE_MADE",
@@ -289,7 +347,7 @@ def build_demo_events(match_id, rng):
                     "playerId": random_outfield(card_team_id),
                     "teamId": card_team_id,
                     "relatedFoulEventId": related_foul[0],
-                    "cardNumber": rng.choice([1, 1, 2]),
+                    "cardNumber": rng.choice([1, 1, 1, 2]),
                 },
             )
         elif action_type == "SUBSTITUTION":
@@ -308,6 +366,25 @@ def build_demo_events(match_id, rng):
                         "playerInId": player_in,
                     },
                 )
+
+    for team_id in [HOME_TEAM_ID, AWAY_TEAM_ID]:
+        for _ in range(rng.randint(6, 10)):
+            minute, second = next_time(times)
+            passer = random_outfield(team_id)
+            receivers = [
+                player for player in active_players[team_id][1:] if player != passer
+            ]
+            add(
+                "PASS_ATTEMPTED",
+                minute,
+                second,
+                {
+                    "passerId": passer,
+                    "teamId": team_id,
+                    "receiverId": rng.choice(receivers) if receivers else None,
+                    "succeeded": True,
+                },
+            )
 
     add(
         "MATCH_PAUSED",

@@ -1,5 +1,5 @@
 use super::handlers::accept_event;
-use super::query_handlers::get_match_summary;
+use super::query_handlers::{get_match_summary, get_player_stats, get_team_stats};
 use super::query_state::QueryHttpState;
 use super::state::EventHttpState;
 use crate::application::{ApplicationService, MatchQueryService};
@@ -21,5 +21,13 @@ where
 {
     Router::new()
         .route("/matches/{match_id}/summary", get(get_match_summary::<Q>))
+        .route(
+            "/matches/{match_id}/teams/{team_id}/stats",
+            get(get_team_stats::<Q>),
+        )
+        .route(
+            "/matches/{match_id}/players/{player_id}/stats",
+            get(get_player_stats::<Q>),
+        )
         .with_state(QueryHttpState::new(query_service))
 }

@@ -215,8 +215,11 @@
     .tab {
       position: relative;
       flex: 0 0 auto;
+      border: 0;
+      background: transparent;
       padding: 13px 14px;
       color: var(--muted);
+      cursor: pointer;
       font-size: 12px;
       font-weight: 900;
       text-transform: uppercase;
@@ -420,6 +423,369 @@
       overflow-wrap: anywhere;
     }
 
+    .stats-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .stats-compare {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: 90px minmax(120px, 1fr) 90px;
+      align-items: center;
+      min-height: 38px;
+      padding: 0 10px;
+      border-top: 1px solid #f1f3f5;
+      gap: 10px;
+    }
+
+    .stats-row:first-child {
+      border-top: 0;
+      background: #f8fafc;
+      font-weight: 900;
+    }
+
+    .stats-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .stats-value {
+      font-size: 13px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 2px 0 4px;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .section-title span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: none;
+    }
+
+    .award-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .award-card {
+      display: grid;
+      gap: 5px;
+      min-height: 86px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: linear-gradient(180deg, #fff, #f8fafc);
+    }
+
+    .award-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .award-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 13px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .award-stat {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .chart-card {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+
+    .goal-chart {
+      width: 100%;
+      height: 180px;
+      overflow: visible;
+    }
+
+    .chart-axis {
+      stroke: #d1d5db;
+      stroke-width: 1;
+    }
+
+    .chart-grid {
+      stroke: #eef2f7;
+      stroke-width: 1;
+    }
+
+    .chart-home {
+      fill: none;
+      stroke: var(--blue);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart-away {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart-dot-home {
+      fill: var(--blue);
+    }
+
+    .chart-dot-away {
+      fill: var(--accent);
+    }
+
+    .chart-label {
+      fill: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-swatch {
+      width: 18px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+    .legend-swatch.away {
+      background: var(--accent);
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 64px minmax(120px, 1fr) 64px;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .bar-track {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      height: 14px;
+      overflow: hidden;
+      border-radius: 4px;
+      background: #eef2f7;
+    }
+
+    .bar-half {
+      position: relative;
+      min-width: 0;
+      background: #e5e7eb;
+    }
+
+    .bar-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: var(--w);
+      background: var(--blue);
+    }
+
+    .bar-half.left .bar-fill {
+      right: 0;
+    }
+
+    .bar-half.right .bar-fill {
+      left: 0;
+      background: var(--accent);
+    }
+
+    .compo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .team-sheet {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .team-sheet-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #f8fafc;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .court {
+      display: grid;
+      grid-template-rows: repeat(4, minmax(46px, auto));
+      gap: 8px;
+      margin: 0 10px;
+      padding: 12px 8px;
+      border: 1px solid #c7f0d8;
+      border-radius: 6px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.22) 49%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0.22) 51%),
+        linear-gradient(180deg, #dcfce7, #bbf7d0);
+    }
+
+    .court-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .player-chip {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+      max-width: 150px;
+      padding: 7px 8px;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .player-chip.keeper {
+      border-color: rgba(15, 91, 215, 0.4);
+      color: var(--blue);
+    }
+
+    .player-chip span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .goal-badge {
+      justify-self: center;
+      min-width: 26px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .bench {
+      display: grid;
+      gap: 6px;
+      padding: 0 10px 10px;
+    }
+
+    .bench-title {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .bench-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .players-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface);
+      font-size: 12px;
+    }
+
+    .players-table th,
+    .players-table td {
+      padding: 9px 8px;
+      border-bottom: 1px solid #f1f3f5;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .players-table th {
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .players-table td:first-child,
+    .players-table th:first-child {
+      text-align: left;
+      white-space: normal;
+    }
+
     .empty {
       padding: 32px 14px;
       color: var(--muted);
@@ -499,6 +865,11 @@
         grid-template-columns: 1fr;
       }
 
+      .award-grid,
+      .compo-grid {
+        grid-template-columns: 1fr;
+      }
+
       .event-row {
         grid-template-columns: minmax(0, 1fr) 66px minmax(0, 1fr);
       }
@@ -549,33 +920,16 @@
     </section>
 
     <nav class="tabs" aria-label="Summary sections">
-      <div class="tab active">Resume</div>
-      <div class="tab">Stats</div>
-      <div class="tab">Compos</div>
-      <div class="tab">Stats joueurs</div>
-      <div class="tab">Commentaires</div>
+      <button class="tab active" type="button" data-tab="resume">Resume</button>
+      <button class="tab" type="button" data-tab="stats">Stats</button>
+      <button class="tab" type="button" data-tab="compos">Compos</button>
+      <button class="tab" type="button" data-tab="players">Stats joueurs</button>
+      <button class="tab" type="button" data-tab="comments">Commentaires</button>
     </nav>
 
     <section class="content">
-      <div class="headline-strip">
-        <div class="headline">
-          <div class="thumb"></div>
-          <div class="headline-text">
-            <strong>Compte rendu</strong>
-            <span>Le resume calcule par le service.</span>
-          </div>
-        </div>
-        <div class="headline">
-          <div class="thumb"></div>
-          <div class="headline-text">
-            <strong>Timeline du match</strong>
-            <span>Buts, cartons et remplacements.</span>
-          </div>
-        </div>
-      </div>
-
       <div id="notice" class="notice"></div>
-      <div id="timeline" class="timeline">
+      <div id="mainPanel" class="timeline">
         <div class="empty">Fetch a match summary or paste JSON below.</div>
       </div>
 
@@ -611,6 +965,35 @@
       "00000000-0000-0000-0000-000000000012": "Sprinteur2Bitume",
       "00000000-0000-0000-0000-000000000013": "Buteur2Cavu",
       "00000000-0000-0000-0000-000000000014": "Dribbleur2Panik"
+    };
+
+    const teamRosters = {
+      "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": {
+        shape: [
+          ["00000000-0000-0000-0000-000000000001"],
+          ["00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000003"],
+          ["00000000-0000-0000-0000-000000000004"],
+          ["00000000-0000-0000-0000-000000000005"]
+        ],
+        bench: [
+          "00000000-0000-0000-0000-000000000011",
+          "00000000-0000-0000-0000-000000000012"
+        ],
+        keeper: "00000000-0000-0000-0000-000000000001"
+      },
+      "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb": {
+        shape: [
+          ["00000000-0000-0000-0000-000000000006"],
+          ["00000000-0000-0000-0000-000000000007", "00000000-0000-0000-0000-000000000008"],
+          ["00000000-0000-0000-0000-000000000009"],
+          ["00000000-0000-0000-0000-000000000010"]
+        ],
+        bench: [
+          "00000000-0000-0000-0000-000000000013",
+          "00000000-0000-0000-0000-000000000014"
+        ],
+        keeper: "00000000-0000-0000-0000-000000000006"
+      }
     };
 
     const sampleSummary = {
@@ -658,17 +1041,27 @@
     const sampleButton = document.querySelector("#sampleButton");
     const jsonInput = document.querySelector("#jsonInput");
     const notice = document.querySelector("#notice");
-    const timeline = document.querySelector("#timeline");
+    const mainPanel = document.querySelector("#mainPanel");
     const dateLine = document.querySelector("#dateLine");
     const scoreLine = document.querySelector("#scoreLine");
     const matchState = document.querySelector("#matchState");
     const matchIdLine = document.querySelector("#matchIdLine");
     const homeTeamId = document.querySelector("#homeTeamId");
     const awayTeamId = document.querySelector("#awayTeamId");
+    const tabs = Array.from(document.querySelectorAll(".tab"));
+    let currentSummary = null;
+    let activeTab = "resume";
 
     fetchButton.addEventListener("click", fetchSummary);
     renderJsonButton.addEventListener("click", renderPastedJson);
     sampleButton.addEventListener("click", () => renderSummary(sampleSummary));
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        activeTab = tab.dataset.tab;
+        tabs.forEach((item) => item.classList.toggle("active", item === tab));
+        renderActiveTab();
+      });
+    });
 
     const query = new URLSearchParams(window.location.search);
     if (query.get("baseUrl")) {
@@ -726,16 +1119,39 @@
       document.querySelector(".team.home .team-name").textContent = teamName(summary.homeTeamId, "Home");
       document.querySelector(".team.away .team-name").textContent = teamName(summary.awayTeamId, "Away");
       jsonInput.value = JSON.stringify(summary, null, 2);
-      renderTimeline(summary);
+      currentSummary = summary;
+      renderActiveTab();
       showNotice("");
+    }
+
+    function renderActiveTab() {
+      if (!currentSummary) {
+        mainPanel.innerHTML = "";
+        mainPanel.appendChild(element("div", "empty", "Fetch a match summary or paste JSON below."));
+        return;
+      }
+
+      if (activeTab === "resume") {
+        renderTimeline(currentSummary);
+      } else if (activeTab === "stats") {
+        renderTeamStats(currentSummary);
+      } else if (activeTab === "compos") {
+        renderCompositions(currentSummary);
+      } else if (activeTab === "players") {
+        renderPlayerStats(currentSummary);
+      } else {
+        mainPanel.innerHTML = "";
+        mainPanel.appendChild(element("div", "empty", "Section demo only."));
+      }
     }
 
     function renderTimeline(summary) {
       const events = buildTimelineEvents(summary);
-      timeline.innerHTML = "";
+      mainPanel.className = "timeline";
+      mainPanel.innerHTML = "";
 
       if (!events.length) {
-        timeline.appendChild(element("div", "empty", "No visible event in this summary."));
+        mainPanel.appendChild(element("div", "empty", "No visible event in this summary."));
         return;
       }
 
@@ -750,14 +1166,14 @@
       const header = element("div", "period-header");
       header.appendChild(element("span", "", title));
       header.appendChild(element("span", "", periodScore(events)));
-      timeline.appendChild(header);
+      mainPanel.appendChild(header);
 
       if (!events.length) {
-        timeline.appendChild(element("div", "empty", "No event"));
+        mainPanel.appendChild(element("div", "empty", "No event"));
         return;
       }
 
-      events.forEach((event) => timeline.appendChild(renderEventRow(event)));
+      events.forEach((event) => mainPanel.appendChild(renderEventRow(event)));
     }
 
     function buildTimelineEvents(summary) {
@@ -853,6 +1269,389 @@
       wrap.appendChild(element("div", "event-id-line", event.idMeta || ""));
       wrap.appendChild(element("div", "event-id-line", `event ${shortId(event.eventId)}`));
       return wrap;
+    }
+
+    async function renderTeamStats(summary) {
+      mainPanel.className = "stats-grid";
+      mainPanel.innerHTML = "";
+      mainPanel.appendChild(element("div", "empty", "Loading team stats..."));
+
+      try {
+        const [homeStats, awayStats] = await Promise.all([
+          fetchJson(`/matches/${summary.matchId}/teams/${summary.homeTeamId}/stats`),
+          fetchJson(`/matches/${summary.matchId}/teams/${summary.awayTeamId}/stats`)
+        ]);
+
+        mainPanel.innerHTML = "";
+        mainPanel.appendChild(sectionTitle("Evolution du score", "courbe cumulative des buts"));
+        mainPanel.appendChild(goalMomentumChart(summary));
+        mainPanel.appendChild(sectionTitle("Volumes equipes", "comparatif rapide"));
+        mainPanel.appendChild(teamStatsBars(homeStats, awayStats));
+        mainPanel.appendChild(sectionTitle("Details equipes", "stats calculees par replay"));
+        mainPanel.appendChild(teamStatsCompare(homeStats, awayStats));
+      } catch (error) {
+        mainPanel.innerHTML = "";
+        mainPanel.appendChild(element("div", "empty", error.message));
+      }
+    }
+
+    async function renderPlayerStats(summary) {
+      mainPanel.className = "stats-grid";
+      mainPanel.innerHTML = "";
+      mainPanel.appendChild(element("div", "empty", "Loading player stats..."));
+
+      try {
+        const knownRows = await fetchPlayerStatsRows(summary);
+
+        mainPanel.innerHTML = "";
+        if (!knownRows.length) {
+          mainPanel.appendChild(element("div", "empty", "No player stats found for mock players."));
+          return;
+        }
+        mainPanel.appendChild(sectionTitle("Tops du match", "meilleur joueur, buteur, gardien et passeur"));
+        mainPanel.appendChild(playerAwards(knownRows));
+        mainPanel.appendChild(sectionTitle("Tableau joueurs", "detail individuel"));
+        mainPanel.appendChild(playerStatsTable(knownRows));
+      } catch (error) {
+        mainPanel.innerHTML = "";
+        mainPanel.appendChild(element("div", "empty", error.message));
+      }
+    }
+
+    function renderCompositions(summary) {
+      mainPanel.className = "stats-grid";
+      mainPanel.innerHTML = "";
+      mainPanel.appendChild(sectionTitle("Compositions", "buts affiches sur chaque joueur"));
+
+      const goalsByPlayer = countGoalsByPlayer(summary);
+      const grid = element("div", "compo-grid");
+      grid.appendChild(teamSheet(summary.homeTeamId, goalsByPlayer));
+      grid.appendChild(teamSheet(summary.awayTeamId, goalsByPlayer));
+      mainPanel.appendChild(grid);
+    }
+
+    async function fetchPlayerStatsRows(summary) {
+      const playerIds = Object.keys(playerNames);
+      const rows = await Promise.all(
+        playerIds.map(async (playerId) => {
+          try {
+            return await fetchJson(`/matches/${summary.matchId}/players/${playerId}/stats`);
+          } catch (_error) {
+            return null;
+          }
+        })
+      );
+      return rows.filter(Boolean);
+    }
+
+    function teamStatsCompare(homeStats, awayStats) {
+      const box = element("div", "stats-compare");
+      box.appendChild(statsRow(teamName(homeStats.teamId, "Home"), "Stat", teamName(awayStats.teamId, "Away"), true));
+      [
+        ["goals", "Buts"],
+        ["shots", "Tirs"],
+        ["shotsOnTarget", "Tirs cadres"],
+        ["passesAttempted", "Passes tentees"],
+        ["passesSucceeded", "Passes reussies"],
+        ["saves", "Arrets"],
+        ["foulsCommitted", "Fautes"],
+        ["yellowCards", "Jaunes"],
+        ["redCards", "Rouges"],
+        ["substitutions", "Remplacements"],
+        ["playersUsed", "Joueurs utilises"]
+      ].forEach(([key, label]) => {
+        box.appendChild(statsRow(String(homeStats[key] ?? 0), label, String(awayStats[key] ?? 0)));
+      });
+      return box;
+    }
+
+    function teamStatsBars(homeStats, awayStats) {
+      const card = element("div", "chart-card");
+      const list = element("div", "bar-list");
+      [
+        ["shots", "Tirs"],
+        ["shotsOnTarget", "Cadrés"],
+        ["passesSucceeded", "Passes OK"],
+        ["saves", "Arrêts"],
+        ["foulsCommitted", "Fautes"]
+      ].forEach(([key, label]) => {
+        const left = Number(homeStats[key] || 0);
+        const right = Number(awayStats[key] || 0);
+        const max = Math.max(left, right, 1);
+        const row = element("div", "bar-row");
+        row.appendChild(element("div", "", String(left)));
+        const track = element("div", "bar-track");
+        const leftHalf = element("div", "bar-half left");
+        const rightHalf = element("div", "bar-half right");
+        const leftFill = element("div", "bar-fill");
+        const rightFill = element("div", "bar-fill");
+        leftFill.style.setProperty("--w", `${Math.max(6, (left / max) * 100)}%`);
+        rightFill.style.setProperty("--w", `${Math.max(6, (right / max) * 100)}%`);
+        leftHalf.appendChild(leftFill);
+        rightHalf.appendChild(rightFill);
+        track.appendChild(leftHalf);
+        track.appendChild(rightHalf);
+        row.appendChild(track);
+        row.appendChild(element("div", "", `${right} ${label}`));
+        list.appendChild(row);
+      });
+      card.appendChild(list);
+      return card;
+    }
+
+    function goalMomentumChart(summary) {
+      const card = element("div", "chart-card");
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("class", "goal-chart");
+      svg.setAttribute("viewBox", "0 0 760 180");
+      svg.setAttribute("role", "img");
+      svg.setAttribute("aria-label", "Evolution cumulative du score");
+
+      const goals = (summary.goals || [])
+        .filter((goal) => !goal.cancelled)
+        .slice()
+        .sort(compareEvents);
+      const finalHome = Number((summary.score || {}).home || 0);
+      const finalAway = Number((summary.score || {}).away || 0);
+      const maxScore = Math.max(finalHome, finalAway, 1);
+      const x = (minute) => 42 + (Math.min(40, Math.max(0, minute)) / 40) * 680;
+      const y = (score) => 145 - (score / maxScore) * 110;
+      const homePoints = [[x(0), y(0)]];
+      const awayPoints = [[x(0), y(0)]];
+      let home = 0;
+      let away = 0;
+
+      goals.forEach((goal) => {
+        const minute = Number((goal.matchTime || {}).minute || 0);
+        if (goal.scoringTeamId === summary.homeTeamId) home += 1;
+        if (goal.scoringTeamId === summary.awayTeamId) away += 1;
+        homePoints.push([x(minute), y(home)]);
+        awayPoints.push([x(minute), y(away)]);
+      });
+      homePoints.push([x(40), y(home)]);
+      awayPoints.push([x(40), y(away)]);
+
+      [0, 10, 20, 30, 40].forEach((minute) => {
+        svg.appendChild(svgLine(x(minute), 28, x(minute), 150, "chart-grid"));
+        svg.appendChild(svgText(x(minute), 168, `${minute}'`, "chart-label"));
+      });
+      svg.appendChild(svgLine(42, 150, 722, 150, "chart-axis"));
+      svg.appendChild(svgLine(42, 28, 42, 150, "chart-axis"));
+      svg.appendChild(svgPolyline(homePoints, "chart-home"));
+      svg.appendChild(svgPolyline(awayPoints, "chart-away"));
+
+      goals.forEach((goal) => {
+        const minute = Number((goal.matchTime || {}).minute || 0);
+        const scoreAtGoal = goals
+          .filter((item) => Number((item.matchTime || {}).minute || 0) <= minute)
+          .reduce((acc, item) => {
+            if (item.scoringTeamId === summary.homeTeamId) acc.home += 1;
+            if (item.scoringTeamId === summary.awayTeamId) acc.away += 1;
+            return acc;
+          }, { home: 0, away: 0 });
+        const isHome = goal.scoringTeamId === summary.homeTeamId;
+        svg.appendChild(svgCircle(x(minute), y(isHome ? scoreAtGoal.home : scoreAtGoal.away), isHome ? "chart-dot-home" : "chart-dot-away"));
+      });
+
+      const legend = element("div", "chart-legend");
+      legend.appendChild(legendItem(teamName(summary.homeTeamId, "Home"), ""));
+      legend.appendChild(legendItem(teamName(summary.awayTeamId, "Away"), "away"));
+      card.appendChild(svg);
+      card.appendChild(legend);
+      return card;
+    }
+
+    function playerAwards(rows) {
+      const grid = element("div", "award-grid");
+      grid.appendChild(awardCard("Meilleur joueur", bestBy(rows, playerRating), (row) => `${playerRating(row).toFixed(1)} pts`));
+      grid.appendChild(awardCard("Meilleur buteur", bestBy(rows, (row) => row.goals), (row) => `${row.goals || 0} buts`));
+      grid.appendChild(awardCard("Meilleur gardien", bestBy(rows, (row) => row.saves), (row) => `${row.saves || 0} arrets`));
+      grid.appendChild(awardCard("Meilleur passeur", bestBy(rows, (row) => (row.assists || 0) * 1000 + (row.passesSucceeded || 0)), (row) => `${row.assists || 0} assists / ${row.passesSucceeded || 0} passes`));
+      return grid;
+    }
+
+    function awardCard(label, stats, detail) {
+      const card = element("div", "award-card");
+      card.appendChild(element("div", "award-label", label));
+      card.appendChild(element("div", "award-name", stats ? playerName(stats.playerId) : "-"));
+      card.appendChild(element("div", "award-stat", stats ? detail(stats) : "-"));
+      if (stats) {
+        card.appendChild(element("div", "event-id-line", teamName(stats.teamId, "-")));
+      }
+      return card;
+    }
+
+    function bestBy(rows, scoreFn) {
+      return rows.reduce((best, row) => {
+        if (!best) return row;
+        return scoreFn(row) > scoreFn(best) ? row : best;
+      }, null);
+    }
+
+    function playerRating(row) {
+      return (
+        (row.goals || 0) * 4 +
+        (row.assists || 0) * 3 +
+        (row.saves || 0) * 1.5 +
+        (row.shotsOnTarget || 0) * 0.5 +
+        (row.passesSucceeded || 0) * 0.08 -
+        (row.foulsCommitted || 0) * 0.3 -
+        (row.yellowCards || 0) * 0.7 -
+        (row.redCards || 0) * 2
+      );
+    }
+
+    function teamSheet(teamId, goalsByPlayer) {
+      const roster = teamRosters[teamId] || { shape: [], bench: [], keeper: null };
+      const sheet = element("div", "team-sheet");
+      const title = element("div", "team-sheet-title");
+      title.appendChild(element("span", "", teamName(teamId, "Equipe")));
+      title.appendChild(element("span", "team-id", shortId(teamId)));
+      sheet.appendChild(title);
+
+      const court = element("div", "court");
+      roster.shape.forEach((line) => {
+        const courtLine = element("div", "court-line");
+        line.forEach((playerId) => courtLine.appendChild(playerChip(playerId, goalsByPlayer, playerId === roster.keeper)));
+        court.appendChild(courtLine);
+      });
+      sheet.appendChild(court);
+
+      const bench = element("div", "bench");
+      bench.appendChild(element("div", "bench-title", "Remplacants"));
+      const benchList = element("div", "bench-list");
+      roster.bench.forEach((playerId) => benchList.appendChild(playerChip(playerId, goalsByPlayer, false)));
+      bench.appendChild(benchList);
+      sheet.appendChild(bench);
+      return sheet;
+    }
+
+    function playerChip(playerId, goalsByPlayer, isKeeper) {
+      const chip = element("div", `player-chip${isKeeper ? " keeper" : ""}`);
+      chip.title = playerId;
+      chip.appendChild(element("span", "", playerName(playerId)));
+      const goals = goalsByPlayer[playerId] || 0;
+      if (goals > 0) {
+        chip.appendChild(element("div", "goal-badge", `B x${goals}`));
+      }
+      return chip;
+    }
+
+    function countGoalsByPlayer(summary) {
+      return (summary.goals || []).reduce((acc, goal) => {
+        if (!goal.cancelled && goal.scorerId) {
+          acc[goal.scorerId] = (acc[goal.scorerId] || 0) + 1;
+        }
+        return acc;
+      }, {});
+    }
+
+    function svgLine(x1, y1, x2, y2, className) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x1);
+      line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2);
+      line.setAttribute("y2", y2);
+      line.setAttribute("class", className);
+      return line;
+    }
+
+    function svgText(x, y, text, className) {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      node.setAttribute("x", x);
+      node.setAttribute("y", y);
+      node.setAttribute("text-anchor", "middle");
+      node.setAttribute("class", className);
+      node.textContent = text;
+      return node;
+    }
+
+    function svgPolyline(points, className) {
+      const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+      polyline.setAttribute("points", points.map(([x, y]) => `${x},${y}`).join(" "));
+      polyline.setAttribute("class", className);
+      return polyline;
+    }
+
+    function svgCircle(x, y, className) {
+      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("cx", x);
+      circle.setAttribute("cy", y);
+      circle.setAttribute("r", "4");
+      circle.setAttribute("class", className);
+      return circle;
+    }
+
+    function legendItem(label, extraClass) {
+      const item = element("span", "legend-item");
+      item.appendChild(element("span", `legend-swatch ${extraClass || ""}`));
+      item.appendChild(element("span", "", label));
+      return item;
+    }
+
+    function sectionTitle(title, subtitle) {
+      const node = element("div", "section-title");
+      node.appendChild(element("strong", "", title));
+      if (subtitle) {
+        node.appendChild(element("span", "", subtitle));
+      }
+      return node;
+    }
+
+    function statsRow(left, label, right) {
+      const row = element("div", "stats-row");
+      row.appendChild(element("div", "stats-value", left));
+      row.appendChild(element("div", "stats-label", label));
+      row.appendChild(element("div", "stats-value", right));
+      return row;
+    }
+
+    function playerStatsTable(rows) {
+      const table = element("table", "players-table");
+      const thead = document.createElement("thead");
+      const header = document.createElement("tr");
+      ["Joueur", "Equipe", "B", "A", "Tirs", "TC", "Passes", "OK", "Arr", "F", "J", "R", "In", "Out"].forEach((label) => {
+        header.appendChild(element("th", "", label));
+      });
+      thead.appendChild(header);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      rows
+        .sort((left, right) => playerName(left.playerId).localeCompare(playerName(right.playerId)))
+        .forEach((stats) => {
+          const tr = document.createElement("tr");
+          [
+            playerName(stats.playerId),
+            teamName(stats.teamId, "-"),
+            stats.goals,
+            stats.assists,
+            stats.shots,
+            stats.shotsOnTarget,
+            stats.passesAttempted,
+            stats.passesSucceeded,
+            stats.saves,
+            stats.foulsCommitted,
+            stats.yellowCards,
+            stats.redCards,
+            stats.substitutionsIn,
+            stats.substitutionsOut
+          ].forEach((value) => tr.appendChild(element("td", "", String(value ?? 0))));
+          tbody.appendChild(tr);
+        });
+      table.appendChild(tbody);
+      return table;
+    }
+
+    async function fetchJson(path) {
+      const baseUrl = baseUrlInput.value.trim().replace(/\/$/, "");
+      const response = await fetch(`${baseUrl}${path}`);
+      const text = await response.text();
+      const body = text ? JSON.parse(text) : null;
+      if (!response.ok) {
+        throw new Error(body && body.message ? body.message : `HTTP ${response.status}`);
+      }
+      return body;
     }
 
     function iconText(kind) {

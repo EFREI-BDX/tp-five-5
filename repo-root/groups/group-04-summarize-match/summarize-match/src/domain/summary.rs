@@ -71,3 +71,41 @@ pub struct MatchSummary {
     pub cards: Vec<CardEntry>,
     pub substitutions: Vec<SubstitutionEntry>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct TeamStats {
+    pub match_id: String,
+    pub team_id: TeamId,
+    pub goals: u32,
+    pub shots: u32,
+    pub shots_on_target: u32,
+    pub passes_attempted: u32,
+    pub passes_succeeded: u32,
+    pub saves: u32,
+    pub fouls_committed: u32,
+    pub yellow_cards: u32,
+    pub red_cards: u32,
+    pub substitutions: u32,
+    pub players_used: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerStats {
+    pub match_id: String,
+    pub player_id: PlayerId,
+    pub team_id: TeamId,
+    pub goals: u32,
+    pub assists: u32,
+    pub shots: u32,
+    pub shots_on_target: u32,
+    pub passes_attempted: u32,
+    pub passes_succeeded: u32,
+    pub saves: u32,
+    pub fouls_committed: u32,
+    pub yellow_cards: u32,
+    pub red_cards: u32,
+    pub substitutions_in: u32,
+    pub substitutions_out: u32,
+}

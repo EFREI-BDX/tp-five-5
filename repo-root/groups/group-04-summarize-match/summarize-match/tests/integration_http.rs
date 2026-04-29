@@ -224,3 +224,146 @@ async fn get_summary_reflects_goal_and_finished() {
     assert_eq!(json["score"]["away"], 0);
     assert_eq!(json["goals"].as_array().unwrap().len(), 1);
 }
+
+#[tokio::test]
+async fn get_team_stats_returns_200_after_events() {
+    clear_schema_cache();
+    let app = app();
+
+    for event in &["match-started.valid.json", "goal-scored.valid.json", "match-finished.valid.json"] {
+        let resp = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/events")
+                    .header("content-type", "application/json")
+                    .body(Body::from(fixture(event)))
+                    .expect("request should build"),
+            )
+            .await
+            .expect("post should be handled");
+        assert_eq!(resp.status(), StatusCode::ACCEPTED, "POST {} failed", event);
+    }
+
+    let get = app
+        .oneshot(
+            Request::builder()
+                .method("GET")
+                .uri(format!(
+                    "/matches/{}/teams/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/stats",
+                    MATCH_ID
+                ))
+                .body(Body::empty())
+                .expect("request should build"),
+        )
+        .await
+        .expect("get should be handled");
+
+    assert_eq!(get.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(get.into_body(), usize::MAX)
+        .await
+        .expect("body should be readable");
+    let json: serde_json::Value = serde_json::from_slice(&body).expect("body should be JSON");
+    assert_eq!(json["matchId"], MATCH_ID);
+    assert_eq!(json["goals"], 1);
+    assert_eq!(json["playersUsed"], 5);
+}
+
+#[tokio::test]
+async fn get_player_stats_returns_200_after_goal() {
+    clear_schema_cache();
+    let app = app();
+
+    for event in &["match-started.valid.json", "goal-scored.valid.json", "match-finished.valid.json"] {
+        let resp = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/events")
+                    .header("content-type", "application/json")
+                    .body(Body::from(fixture(event)))
+                    .expect("request should build"),
+            )
+            .await
+            .expect("post should be handled");
+        assert_eq!(resp.status(), StatusCode::ACCEPTED, "POST {} failed", event);
+    }
+
+    let get = app
+        .oneshot(
+            Request::builder()
+                .method("GET")
+                .uri(format!(
+                    "/matches/{}/players/00000000-0000-0000-0000-000000000002/stats",
+                    MATCH_ID
+                ))
+                .body(Body::empty())
+                .expect("request should build"),
+        )
+        .await
+        .expect("get should be handled");
+
+    assert_eq!(get.status(), StatusCode::OK);
+    let body = axum::body::to_bytes(get.into_body(), usize::MAX)
+        .await
+        .expect("body should be readable");
+    let json: serde_json::Value = serde_json::from_slice(&body).expect("body should be JSON");
+    assert_eq!(json["matchId"], MATCH_ID);
+    assert_eq!(json["goals"], 1);
+    assert_eq!(json["assists"], 0);
+}
+
+#[tokio::test]
+async fn get_stats_returns_400_for_invalid_uuid() {
+    clear_schema_cache();
+    let response = app()
+        .oneshot(
+            Request::builder()
+                .method("GET")
+                .uri(format!("/matches/{}/teams/not-a-uuid/stats", MATCH_ID))
+                .body(Body::empty())
+                .expect("request should build"),
+        )
+        .await
+        .expect("request should be handled");
+
+    assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn get_player_stats_returns_404_for_unknown_player() {
+    clear_schema_cache();
+    let app = app();
+
+    let post = app
+        .clone()
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/events")
+                .header("content-type", "application/json")
+                .body(Body::from(fixture("match-started.valid.json")))
+                .expect("request should build"),
+        )
+        .await
+        .expect("post should be handled");
+    assert_eq!(post.status(), StatusCode::ACCEPTED);
+
+    let get = app
+        .oneshot(
+            Request::builder()
+                .method("GET")
+                .uri(format!(
+                    "/matches/{}/players/99999999-0000-0000-0000-000000000000/stats",
+                    MATCH_ID
+                ))
+                .body(Body::empty())
+                .expect("request should build"),
+        )
+        .await
+        .expect("get should be handled");
+
+    assert_eq!(get.status(), StatusCode::NOT_FOUND);
+}

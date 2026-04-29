@@ -17,10 +17,12 @@ Service de resume de match dans une architecture DDD hexagonale.
 
 ## Endpoints HTTP
 
-- `POST /events` — reception et validation d'un event de match.
-- `GET /matches/{matchId}/summary` — lecture du resume calcule du match (score, buts, cartons, remplacements).
-- `GET /health` — controle technique.
+- `POST /events` - reception et validation d'un event de match.
+- `GET /matches/{matchId}/summary` - lecture du resume calcule du match (score, buts, cartons, remplacements).
+- `GET /matches/{matchId}/teams/{teamId}/stats` - lecture des statistiques calculees pour une equipe.
+- `GET /matches/{matchId}/players/{playerId}/stats` - lecture des statistiques calculees pour un joueur.
+- `GET /health` - controle technique.
 
 ## Ce que le service ne fait pas encore
 
-- Publication d'events sortants reels : le port `DomainEventPublisher` est câble, mais l'adapter est NoOp. Remplacer par un adapter Kafka/AMQP pour notifier les contextes `reporting`, `ranking`, `statistics`.
+- Publication d'events sortants reels : le port `DomainEventPublisher` est cable, mais l'adapter est NoOp. Remplacer par un adapter Kafka/AMQP pour notifier les contextes `reporting`, `ranking`, `statistics`.
