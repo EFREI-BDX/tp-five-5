@@ -17,6 +17,8 @@ Event de reprise du match apres une interruption.
 }
 ```
 
+on fais sauter l'enum 
+
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |

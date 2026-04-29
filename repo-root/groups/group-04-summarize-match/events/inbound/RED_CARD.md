@@ -22,6 +22,8 @@ Event d'expulsion d'un joueur.
 }
 ```
 
+isdoubleYellow a supprimé et relatedFoulEventId
+
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |

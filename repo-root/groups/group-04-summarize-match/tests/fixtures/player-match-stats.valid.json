@@ -1,0 +1,24 @@
+[
+  {
+    "playerId": "00000000-0000-0000-0000-000000000002",
+    "goals": 1,
+    "assists": 0,
+    "saves": 0,
+    "result": "Win",
+    "bestScorer": true,
+    "bestAssistsProvider": false,
+    "MVP": true,
+    "playTime": 2400
+  },
+  {
+    "playerId": "00000000-0000-0000-0000-000000000007",
+    "goals": 0,
+    "assists": 0,
+    "saves": 0,
+    "result": "Loss",
+    "bestScorer": false,
+    "bestAssistsProvider": false,
+    "MVP": false,
+    "playTime": 2400
+  }
+]

@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "match-summary.schema.json",
+  "title": "MatchSummary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "matchId",
+    "status",
+    "homeTeamId",
+    "awayTeamId",
+    "score",
+    "goals",
+    "cards",
+    "substitutions"
+  ],
+  "properties": {
+    "matchId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "NOT_STARTED",
+        "IN_PROGRESS",
+        "PAUSED",
+        "FINISHED",
+        "CANCELLED",
+        "FORFEITED"
+      ]
+    },
+    "homeTeamId": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "awayTeamId": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["home", "away"],
+      "properties": {
+        "home": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "away": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "goals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "eventId",
+          "scoringTeamId",
+          "scorerId",
+          "assistId",
+          "isOwnGoal",
+          "matchTime",
+          "cancelled"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "scoringTeamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scorerId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assistId": {
+            "type": ["string", "null"],
+            "format": "uuid"
+          },
+          "isOwnGoal": {
+            "type": "boolean"
+          },
+          "matchTime": {
+            "$ref": "#/$defs/matchTime"
+          },
+          "cancelled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["eventId", "playerId", "teamId", "matchTime", "type", "cardNumber"],
+            "properties": {
+              "eventId": { "type": "string" },
+              "playerId": { "type": "string", "format": "uuid" },
+              "teamId": { "type": "string", "format": "uuid" },
+              "matchTime": { "$ref": "#/$defs/matchTime" },
+              "type": { "const": "YELLOW" },
+              "cardNumber": { "type": "integer", "minimum": 1 }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["eventId", "playerId", "teamId", "matchTime", "type", "isDoubleYellow"],
+            "properties": {
+              "eventId": { "type": "string" },
+              "playerId": { "type": "string", "format": "uuid" },
+              "teamId": { "type": "string", "format": "uuid" },
+              "matchTime": { "$ref": "#/$defs/matchTime" },
+              "type": { "const": "RED" },
+              "isDoubleYellow": { "type": "boolean" }
+            }
+          }
+        ]
+      }
+    },
+    "substitutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["eventId", "teamId", "playerOut", "playerIn", "matchTime"],
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "teamId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "playerOut": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "playerIn": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "matchTime": {
+            "$ref": "#/$defs/matchTime"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "matchTime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minute", "second", "period"],
+      "properties": {
+        "minute": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "second": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 59
+        },
+        "period": {
+          "type": "string",
+          "enum": ["FIRST_HALF", "SECOND_HALF"]
+        }
+      }
+    }
+  }
+}

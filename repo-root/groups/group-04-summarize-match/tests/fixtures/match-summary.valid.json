@@ -1,0 +1,27 @@
+{
+  "matchId": "11111111-2222-3333-4444-555555555555",
+  "status": "FINISHED",
+  "homeTeamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+  "awayTeamId": "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb",
+  "score": {
+    "home": 1,
+    "away": 0
+  },
+  "goals": [
+    {
+      "eventId": "650e8400-e29b-41d4-a716-446655440001",
+      "scoringTeamId": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "scorerId": "00000000-0000-0000-0000-000000000002",
+      "assistId": "00000000-0000-0000-0000-000000000003",
+      "isOwnGoal": false,
+      "matchTime": {
+        "minute": 7,
+        "second": 43,
+        "period": "FIRST_HALF"
+      },
+      "cancelled": false
+    }
+  ],
+  "cards": [],
+  "substitutions": []
+}

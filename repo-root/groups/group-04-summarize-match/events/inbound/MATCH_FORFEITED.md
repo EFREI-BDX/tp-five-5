@@ -22,6 +22,8 @@ Event de forfait d'une equipe.
 }
 ```
 
+enleve le score et la reasean 
+
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |

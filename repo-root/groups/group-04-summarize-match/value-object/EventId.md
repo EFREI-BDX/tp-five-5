@@ -11,7 +11,7 @@
 **Invariants**
 
 - La valeur doit être un UUID valide.
-- La validation est appliquée à la désérialisation du VO dans `src/domain.rs`.
+- La validation est appliquée à la désérialisation du VO dans `summarize-match/src/domain/value_objects.rs`.
 
 **Format JSON attendu**
 
@@ -24,5 +24,5 @@
 
 **Références de code**
 
-- Définition: `summarize-match/src/domain.rs`
+- Définition: `summarize-match/src/domain/value_objects.rs`
 - Mapping: `summarize-match/src/infrastructure/inbound/mapper_registry.rs`

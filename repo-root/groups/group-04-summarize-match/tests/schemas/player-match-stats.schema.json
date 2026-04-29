@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "player-match-stats.schema.json",
+  "title": "PlayerMatchStats",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "playerId",
+      "goals",
+      "assists",
+      "saves",
+      "result",
+      "bestScorer",
+      "bestAssistsProvider",
+      "MVP",
+      "playTime"
+    ],
+    "properties": {
+      "playerId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "goals": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "assists": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "saves": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "result": {
+        "type": "string",
+        "enum": ["Win", "Loss", "Draw"]
+      },
+      "bestScorer": {
+        "type": "boolean"
+      },
+      "bestAssistsProvider": {
+        "type": "boolean"
+      },
+      "MVP": {
+        "type": "boolean"
+      },
+      "playTime": {
+        "type": "integer",
+        "minimum": 0
+      }
+    }
+  }
+}

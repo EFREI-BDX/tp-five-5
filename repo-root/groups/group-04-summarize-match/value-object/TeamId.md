@@ -11,7 +11,7 @@
 **Invariants**
 
 - La valeur doit être un UUID valide.
-- La validation est appliquée à la désérialisation du VO dans `src/domain.rs`.
+- La validation est appliquée à la désérialisation du VO dans `summarize-match/src/domain/value_objects.rs`.
 
 **Format JSON attendu**
 
@@ -32,5 +32,5 @@
 
 **Références de code**
 
-- Définition: [src/domain.rs](src/domain.rs#L1-L200)
-- Usage: `Team.team_id`, `MatchState.home_team_id` — voir [src/application.rs](src/application.rs)
+- Définition: `summarize-match/src/domain/value_objects.rs`
+- Usage: `Team.team_id`, `MatchState.home_team_id` — voir `summarize-match/src/application.rs`

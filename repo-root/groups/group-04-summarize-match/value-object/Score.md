@@ -29,5 +29,5 @@
 
 **Références de code**
 
-- Définition: [src/domain.rs](src/domain.rs)
-- Usage: [src/application.rs](src/application.rs)
+- Définition: `summarize-match/src/domain/value_objects.rs`
+- Usage: `summarize-match/src/application.rs`
