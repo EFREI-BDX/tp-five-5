@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>summarize-match live summary</title>
+  <style>
+    :root {
+      --page: #f3f4f6;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --line: #e5e7eb;
+      --line-strong: #d1d5db;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #f03;
+      --accent-dark: #c4002b;
+      --blue: #0f5bd7;
+      --green: #059669;
+      --yellow: #facc15;
+      --red: #dc2626;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      font-family: Inter, Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--page);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    .page {
+      width: min(920px, 100%);
+      margin: 0 auto;
+      background: var(--surface);
+      min-height: 100vh;
+      box-shadow: var(--shadow);
+    }
+
+    .crumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 34px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .crumbs span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .match-header {
+      padding: 22px 18px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .date-line {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: 18px;
+    }
+
+    .team {
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .badge {
+      display: grid;
+      place-items: center;
+      width: 78px;
+      height: 78px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #fff, #f8fafc);
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--blue);
+    }
+
+    .team.away .badge {
+      color: var(--red);
+    }
+
+    .team-name {
+      max-width: 100%;
+      overflow: hidden;
+      text-align: center;
+      text-overflow: ellipsis;
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .team-id {
+      max-width: 100%;
+      overflow: hidden;
+      color: var(--muted);
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 10px;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .score-block {
+      min-width: 150px;
+      text-align: center;
+    }
+
+    .score {
+      font-size: 52px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .match-state {
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .match-id {
+      margin-top: 8px;
+      color: var(--muted);
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(170px, 1fr) minmax(260px, 2fr) auto;
+      gap: 8px;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .toolbar input {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 0 10px;
+      outline: none;
+    }
+
+    .toolbar input:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(255, 0, 51, 0.12);
+    }
+
+    .btn {
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 0 13px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+      background: var(--surface);
+    }
+
+    .tab {
+      position: relative;
+      flex: 0 0 auto;
+      padding: 13px 14px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .tab.active {
+      color: var(--accent);
+    }
+
+    .tab.active::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .content {
+      padding: 12px;
+    }
+
+    .headline-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .headline {
+      display: grid;
+      grid-template-columns: 84px 1fr;
+      min-height: 72px;
+      overflow: hidden;
+      border-radius: 6px;
+      background: #eef2f7;
+    }
+
+    .thumb {
+      background:
+        linear-gradient(135deg, rgba(15, 91, 215, 0.9), rgba(255, 0, 51, 0.85)),
+        radial-gradient(circle at 30% 30%, #fff 0 7px, transparent 8px);
+    }
+
+    .headline-text {
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      padding: 8px 10px;
+      min-width: 0;
+    }
+
+    .headline-text strong {
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    .headline-text span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .timeline {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .period-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 28px;
+      padding: 0 10px;
+      background: #f0f1f3;
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .event-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 82px minmax(0, 1fr);
+      min-height: 48px;
+      padding: 8px 8px;
+      border-top: 1px solid #f1f3f5;
+      align-items: start;
+    }
+
+    .event-row:first-child {
+      border-top: 0;
+    }
+
+    .event-side {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .event-side.away {
+      text-align: right;
+      justify-items: end;
+    }
+
+    .event-center {
+      display: grid;
+      justify-items: center;
+      gap: 4px;
+      color: var(--muted);
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .minute {
+      color: var(--text);
+    }
+
+    .score-pill {
+      min-width: 46px;
+      padding: 3px 7px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .event-main {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .event-side.away .event-main {
+      flex-direction: row-reverse;
+    }
+
+    .event-icon {
+      display: inline-grid;
+      place-items: center;
+      flex: 0 0 auto;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      padding: 0 5px;
+      background: #e5e7eb;
+      color: #111827;
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .event-icon.goal {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .event-icon.yellow {
+      background: var(--yellow);
+      color: #4a3500;
+    }
+
+    .event-icon.red {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .event-icon.sub {
+      background: #dcfce7;
+      color: #047857;
+    }
+
+    .event-title {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-weight: 900;
+    }
+
+    .event-meta {
+      max-width: 100%;
+      color: var(--muted);
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 10px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .empty {
+      padding: 32px 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 6px;
+      background: var(--surface-soft);
+    }
+
+    details {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .json-tools {
+      display: grid;
+      gap: 8px;
+      padding: 0 12px 12px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.4;
+      outline: none;
+    }
+
+    .notice {
+      display: none;
+      margin: 0 12px 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      background: #fff1f2;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .notice.visible {
+      display: block;
+    }
+
+    @media (max-width: 700px) {
+      .page {
+        box-shadow: none;
+      }
+
+      .scoreboard {
+        grid-template-columns: 1fr;
+      }
+
+      .score-block {
+        order: -1;
+      }
+
+      .toolbar,
+      .headline-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .event-row {
+        grid-template-columns: minmax(0, 1fr) 66px minmax(0, 1fr);
+      }
+
+      .score {
+        font-size: 44px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="crumbs">
+      <span>Football</span>
+      <span>&gt;</span>
+      <span>Europe</span>
+      <span>&gt;</span>
+      <span>summarize-match demo</span>
+    </div>
+
+    <section class="match-header">
+      <div class="date-line" id="dateLine">Summary not loaded</div>
+      <div class="scoreboard">
+        <div class="team home">
+          <div class="badge">H</div>
+          <div class="team-name">Home</div>
+          <div class="team-id" id="homeTeamId">-</div>
+        </div>
+
+        <div class="score-block">
+          <div class="score" id="scoreLine">- - -</div>
+          <div class="match-state" id="matchState">waiting</div>
+          <div class="match-id" id="matchIdLine">-</div>
+        </div>
+
+        <div class="team away">
+          <div class="badge">A</div>
+          <div class="team-name">Away</div>
+          <div class="team-id" id="awayTeamId">-</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="toolbar" aria-label="Fetch controls">
+      <input id="baseUrlInput" type="url" value="http://localhost:3000" aria-label="Base URL">
+      <input id="matchIdInput" type="text" placeholder="match id" aria-label="Match ID">
+      <button id="fetchButton" class="btn primary" type="button">Fetch</button>
+    </section>
+
+    <nav class="tabs" aria-label="Summary sections">
+      <div class="tab active">Resume</div>
+      <div class="tab">Stats</div>
+      <div class="tab">Compos</div>
+      <div class="tab">Stats joueurs</div>
+      <div class="tab">Commentaires</div>
+    </nav>
+
+    <section class="content">
+      <div class="headline-strip">
+        <div class="headline">
+          <div class="thumb"></div>
+          <div class="headline-text">
+            <strong>Compte rendu</strong>
+            <span>Le resume calcule par le service.</span>
+          </div>
+        </div>
+        <div class="headline">
+          <div class="thumb"></div>
+          <div class="headline-text">
+            <strong>Timeline du match</strong>
+            <span>Buts, cartons et remplacements.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="notice" class="notice"></div>
+      <div id="timeline" class="timeline">
+        <div class="empty">Fetch a match summary or paste JSON below.</div>
+      </div>
+
+      <details>
+        <summary>JSON / fallback</summary>
+        <div class="json-tools">
+          <textarea id="jsonInput" spellcheck="false" placeholder="Paste the summary JSON here"></textarea>
+          <button id="renderJsonButton" class="btn" type="button">Render pasted JSON</button>
+          <button id="sampleButton" class="btn" type="button">Load example</button>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const sampleSummary = {
+      matchId: "721b3f59-9868-444d-9908-3262fd52ed1e",
+      status: "FINISHED",
+      homeTeamId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      awayTeamId: "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb",
+      score: { home: 1, away: 0 },
+      goals: [
+        {
+          eventId: "6af8f6b9-e05a-4abd-932a-f0994f5b98cc",
+          scoringTeamId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+          scorerId: "00000000-0000-0000-0000-000000000003",
+          assistId: "00000000-0000-0000-0000-000000000005",
+          isOwnGoal: false,
+          matchTime: { minute: 16, second: 55, period: "FIRST_HALF" },
+          cancelled: false
+        }
+      ],
+      cards: [
+        {
+          eventId: "5b0d6313-ea19-44c6-ad4a-224f36b8a9ea",
+          playerId: "00000000-0000-0000-0000-000000000008",
+          teamId: "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb",
+          matchTime: { minute: 9, second: 20, period: "FIRST_HALF" },
+          type: "YELLOW",
+          card_number: 1
+        }
+      ],
+      substitutions: [
+        {
+          eventId: "58242ddc-49d5-456b-92b1-23c53d1abba7",
+          teamId: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+          playerOut: "00000000-0000-0000-0000-000000000004",
+          playerIn: "00000000-0000-0000-0000-000000000011",
+          matchTime: { minute: 31, second: 10, period: "SECOND_HALF" }
+        }
+      ]
+    };
+
+    const baseUrlInput = document.querySelector("#baseUrlInput");
+    const matchIdInput = document.querySelector("#matchIdInput");
+    const fetchButton = document.querySelector("#fetchButton");
+    const renderJsonButton = document.querySelector("#renderJsonButton");
+    const sampleButton = document.querySelector("#sampleButton");
+    const jsonInput = document.querySelector("#jsonInput");
+    const notice = document.querySelector("#notice");
+    const timeline = document.querySelector("#timeline");
+    const dateLine = document.querySelector("#dateLine");
+    const scoreLine = document.querySelector("#scoreLine");
+    const matchState = document.querySelector("#matchState");
+    const matchIdLine = document.querySelector("#matchIdLine");
+    const homeTeamId = document.querySelector("#homeTeamId");
+    const awayTeamId = document.querySelector("#awayTeamId");
+
+    fetchButton.addEventListener("click", fetchSummary);
+    renderJsonButton.addEventListener("click", renderPastedJson);
+    sampleButton.addEventListener("click", () => renderSummary(sampleSummary));
+
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("baseUrl")) {
+      baseUrlInput.value = query.get("baseUrl");
+    }
+    if (query.get("matchId")) {
+      matchIdInput.value = query.get("matchId");
+      fetchSummary();
+    }
+
+    async function fetchSummary() {
+      const baseUrl = baseUrlInput.value.trim().replace(/\/$/, "");
+      const matchId = matchIdInput.value.trim();
+
+      if (!baseUrl || !matchId) {
+        showNotice("Base URL and match ID are required.");
+        return;
+      }
+
+      showNotice("");
+
+      try {
+        const response = await fetch(`${baseUrl}/matches/${encodeURIComponent(matchId)}/summary`);
+        const text = await response.text();
+        const body = text ? JSON.parse(text) : null;
+
+        if (!response.ok) {
+          throw new Error(body && body.message ? body.message : `HTTP ${response.status}`);
+        }
+
+        renderSummary(body);
+      } catch (error) {
+        showNotice(`${error.message}. If the browser blocks local API calls, paste the JSON in the fallback area.`);
+      }
+    }
+
+    function renderPastedJson() {
+      try {
+        renderSummary(JSON.parse(jsonInput.value));
+      } catch (error) {
+        showNotice(`Invalid JSON: ${error.message}`);
+      }
+    }
+
+    function renderSummary(summary) {
+      const score = summary.score || { home: 0, away: 0 };
+      dateLine.textContent = "Match summary";
+      scoreLine.textContent = `${score.home ?? 0} - ${score.away ?? 0}`;
+      matchState.textContent = summary.status || "-";
+      matchIdLine.textContent = summary.matchId || "-";
+      homeTeamId.textContent = summary.homeTeamId || "-";
+      awayTeamId.textContent = summary.awayTeamId || "-";
+      jsonInput.value = JSON.stringify(summary, null, 2);
+      renderTimeline(summary);
+      showNotice("");
+    }
+
+    function renderTimeline(summary) {
+      const events = buildTimelineEvents(summary);
+      timeline.innerHTML = "";
+
+      if (!events.length) {
+        timeline.appendChild(element("div", "empty", "No visible event in this summary."));
+        return;
+      }
+
+      const firstHalf = events.filter((event) => periodOf(event) === "FIRST_HALF");
+      const secondHalf = events.filter((event) => periodOf(event) !== "FIRST_HALF");
+
+      addPeriod("1. MI-TEMPS", firstHalf);
+      addPeriod("2. MI-TEMPS", secondHalf);
+    }
+
+    function addPeriod(title, events) {
+      const header = element("div", "period-header");
+      header.appendChild(element("span", "", title));
+      header.appendChild(element("span", "", periodScore(events)));
+      timeline.appendChild(header);
+
+      if (!events.length) {
+        timeline.appendChild(element("div", "empty", "No event"));
+        return;
+      }
+
+      events.forEach((event) => timeline.appendChild(renderEventRow(event)));
+    }
+
+    function buildTimelineEvents(summary) {
+      let homeScore = 0;
+      let awayScore = 0;
+      const home = summary.homeTeamId;
+      const away = summary.awayTeamId;
+      const events = [];
+
+      (summary.goals || []).forEach((goal) => {
+        events.push({
+          kind: "goal",
+          side: sideFor(goal.scoringTeamId, home, away),
+          matchTime: goal.matchTime,
+          eventId: goal.eventId,
+          title: goal.cancelled ? "Goal cancelled" : goal.scorerId,
+          meta: goal.assistId ? `Assist ${goal.assistId}` : "No assist",
+          scoringTeamId: goal.scoringTeamId,
+          cancelled: Boolean(goal.cancelled)
+        });
+      });
+
+      (summary.cards || []).forEach((card) => {
+        const type = card.type || (card.card_number ? "YELLOW" : "CARD");
+        events.push({
+          kind: type === "RED" ? "red" : "yellow",
+          side: sideFor(card.teamId, home, away),
+          matchTime: card.matchTime,
+          eventId: card.eventId,
+          title: card.playerId,
+          meta: `${type}${card.card_number ? ` ${card.card_number}` : ""}`,
+        });
+      });
+
+      (summary.substitutions || []).forEach((substitution) => {
+        events.push({
+          kind: "sub",
+          side: sideFor(substitution.teamId, home, away),
+          matchTime: substitution.matchTime,
+          eventId: substitution.eventId,
+          title: substitution.playerIn,
+          meta: `Out ${substitution.playerOut}`,
+        });
+      });
+
+      events.sort(compareEvents);
+
+      events.forEach((event) => {
+        if (event.kind === "goal" && !event.cancelled) {
+          if (event.side === "home") homeScore += 1;
+          if (event.side === "away") awayScore += 1;
+          event.score = `${homeScore} - ${awayScore}`;
+        }
+      });
+
+      return events;
+    }
+
+    function renderEventRow(event) {
+      const row = element("div", "event-row");
+      const home = element("div", "event-side home");
+      const center = element("div", "event-center");
+      const away = element("div", "event-side away");
+
+      center.appendChild(element("div", "minute", `${formatTime(event.matchTime)}'`));
+      if (event.score) {
+        center.appendChild(element("div", "score-pill", event.score));
+      }
+
+      const target = event.side === "away" ? away : home;
+      target.appendChild(eventContent(event));
+
+      row.appendChild(home);
+      row.appendChild(center);
+      row.appendChild(away);
+      return row;
+    }
+
+    function eventContent(event) {
+      const wrap = element("div", "");
+      const main = element("div", "event-main");
+      main.appendChild(element("span", `event-icon ${event.kind}`, iconText(event.kind)));
+      main.appendChild(element("span", "event-title", event.title || "-"));
+      wrap.appendChild(main);
+      wrap.appendChild(element("div", "event-meta", event.meta || ""));
+      wrap.appendChild(element("div", "event-meta", event.eventId || ""));
+      return wrap;
+    }
+
+    function iconText(kind) {
+      if (kind === "goal") return "GOAL";
+      if (kind === "yellow") return "YC";
+      if (kind === "red") return "RC";
+      if (kind === "sub") return "SUB";
+      return "EV";
+    }
+
+    function periodScore(events) {
+      let home = 0;
+      let away = 0;
+      events.forEach((event) => {
+        if (event.kind !== "goal" || event.cancelled) return;
+        if (event.side === "home") home += 1;
+        if (event.side === "away") away += 1;
+      });
+      return `${home} : ${away}`;
+    }
+
+    function sideFor(teamId, homeTeamId, awayTeamId) {
+      if (teamId === awayTeamId) return "away";
+      if (teamId === homeTeamId) return "home";
+      return "home";
+    }
+
+    function periodOf(event) {
+      return event.matchTime && event.matchTime.period ? event.matchTime.period : "FIRST_HALF";
+    }
+
+    function compareEvents(left, right) {
+      const leftTime = left.matchTime || {};
+      const rightTime = right.matchTime || {};
+      const leftMinute = Number(leftTime.minute || 0);
+      const rightMinute = Number(rightTime.minute || 0);
+      const leftSecond = Number(leftTime.second || 0);
+      const rightSecond = Number(rightTime.second || 0);
+
+      if (leftMinute !== rightMinute) return leftMinute - rightMinute;
+      if (leftSecond !== rightSecond) return leftSecond - rightSecond;
+      return orderOf(left.kind) - orderOf(right.kind);
+    }
+
+    function orderOf(kind) {
+      return { goal: 1, yellow: 2, red: 2, sub: 3 }[kind] || 9;
+    }
+
+    function formatTime(matchTime) {
+      if (!matchTime) return "--";
+      const minute = String(matchTime.minute ?? 0).padStart(2, "0");
+      return `${minute}`;
+    }
+
+    function showNotice(message) {
+      notice.textContent = message;
+      notice.classList.toggle("visible", Boolean(message));
+    }
+
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+  </script>
+</body>
+</html>
