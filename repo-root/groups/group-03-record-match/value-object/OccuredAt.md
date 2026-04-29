@@ -4,7 +4,7 @@
 
 Date d'occurrence de l'événement.
 
-Ce Value Object représente une date métier stockée en base dans la colonne SQL `occuredAt` (`date`).
+Ce Value Object représente une date/heure métier stockée en base dans la colonne SQL `occuredAt` (`date`).
 
 **Utilisé par**
 
@@ -17,13 +17,13 @@ Ce Value Object représente une date métier stockée en base dans la colonne SQ
 **Invariants**
 
 - doit être renseigné
-- doit être une date valide
-- doit représenter une date valide d'occurrence de l'événement
+- doit être une date/heure valide
+- doit représenter une date/heure valide d'occurrence de l'événement
 
 **Tests minimaux attendus**
 
-- **createValid** - création avec une date valide ne lève pas d'exception.
+- **createValid** - création avec une date/heure valide ne lève pas d'exception.
 - **createNullThrows** - valeur nulle lève une exception métier.
-- **createInvalidDateThrows** - date invalide lève une exception métier.
+- **createInvalidDateTimeThrows** - date/heure invalide lève une exception métier.
 - **toIsoStringReturnsValue** - conversion en chaîne ISO conserve la valeur.
 - **equalsSameDate** - deux OccuredAt représentant la même date sont égaux.

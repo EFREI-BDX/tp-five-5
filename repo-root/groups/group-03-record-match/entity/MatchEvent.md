@@ -26,7 +26,7 @@ Représentation d'un événement survenu pendant un match de five. Un MatchEvent
 - **matchEventId** doit être un UUID valide et non vide
 - **matchId** doit être un UUID valide et non vide
 - **eventId** doit être un UUID valide et non vide
-- **occuredAt** doit être une date valide et non vide
+- **occuredAt** doit être une date/heure valide et non vide
 - Si `Event.nbPlayers = 0`, alors `player1Id` et `player2Id` doivent être `NULL`
 - Si `Event.nbPlayers = 1`, alors `player1Id` est requis et `player2Id` doit être `NULL`
 - Si `Event.nbPlayers = 2`, alors `player1Id` et `player2Id` sont requis
