@@ -11,15 +11,6 @@ import java.util.UUID;
 @Repository
 public class JdbcMatchByTeamRepository implements IMatchByTeamRepository {
 
-    private static final String FIND_NOT_STARTED_BY_TEAM = """
-            SELECT m.uuid
-            FROM matches m
-            JOIN teams t ON (m.team_a_id = t.id OR m.team_b_id = t.id)
-            JOIN ref_status rs ON m.current_status = rs.id
-            WHERE t.uuid = ?
-              AND rs.code = 'NOT_STARTED'
-            """;
-
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcMatchByTeamRepository(JdbcTemplate jdbcTemplate) {
@@ -28,9 +19,10 @@ public class JdbcMatchByTeamRepository implements IMatchByTeamRepository {
 
     @Override
     public List<Id> findNotStartedMatchIdsByTeamId(Id teamId) {
-        return jdbcTemplate.queryForList(FIND_NOT_STARTED_BY_TEAM, UUID.class, teamId.value())
-                .stream()
-                .map(Id::new)
-                .toList();
+        return jdbcTemplate.query(
+                "SELECT * FROM fn_get_not_started_match_ids_by_team_uuid(?)",
+                (rs, rowNum) -> new Id((UUID) rs.getObject("match_uuid")),
+                teamId.value()
+        );
     }
 }

@@ -1,6 +1,7 @@
 DROP PROCEDURE IF EXISTS sp_insert_match CASCADE;
 DROP PROCEDURE IF EXISTS sp_update_match_status CASCADE;
 DROP FUNCTION IF EXISTS fn_get_match_details CASCADE;
+DROP FUNCTION IF EXISTS fn_get_not_started_match_ids_by_team_uuid CASCADE;
 DROP TABLE IF EXISTS match_status_history CASCADE;
 DROP TABLE IF EXISTS matches CASCADE;
 DROP TABLE IF EXISTS teams CASCADE;
@@ -184,6 +185,25 @@ BEGIN
                  JOIN teams ta ON m.team_a_id = ta.id
                  JOIN teams tb ON m.team_b_id = tb.id
         WHERE m.uuid = p_match_uuid;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION fn_get_not_started_match_ids_by_team_uuid(p_team_uuid UUID)
+    RETURNS TABLE
+            (
+                match_uuid UUID
+            )
+    LANGUAGE plpgsql
+AS
+$$
+BEGIN
+    RETURN QUERY
+        SELECT m.uuid
+        FROM matches m
+                 JOIN teams t ON m.team_a_id = t.id OR m.team_b_id = t.id
+                 JOIN ref_status rs ON m.current_status = rs.id
+        WHERE t.uuid = p_team_uuid
+          AND rs.code = 'NOT_STARTED';
 END;
 $$;
 
