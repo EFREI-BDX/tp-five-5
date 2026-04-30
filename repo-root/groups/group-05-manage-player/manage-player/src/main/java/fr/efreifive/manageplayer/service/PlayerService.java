@@ -9,78 +9,84 @@ import fr.efreifive.manageplayer.dto.UpdatePlayerRequest;
 import fr.efreifive.manageplayer.dto.UpdatePlayerResponse;
 import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsRequest;
 import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsResponse;
+import fr.efreifive.manageplayer.mapper.PlayerMapper;
+import fr.efreifive.manageplayer.repository.PlayerRepository;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class PlayerService {
+public class PlayerService implements IPlayerAdminService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9\\s\\-().]{7,20}$");
     private static final DateTimeFormatter BIRTH_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final String ACTIVE_STATUS = "actif";
     private static final String DELETED_STATUS = "supprimé";
 
-    private final ConcurrentHashMap<UUID, PlayerDto> players = new ConcurrentHashMap<>();
+    private final PlayerRepository playerRepository;
+    private final PlayerMapper playerMapper;
+
+    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper) {
+        this.playerRepository = playerRepository;
+        this.playerMapper = playerMapper;
+    }
+
+    public List<PlayerDto> findAll() {
+        return playerRepository.findAll();
+    }
 
     public PlayerDto findById(UUID id) {
-        PlayerDto player = players.get(id);
-        if (player == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Player with id " + id + " not found");
-        }
-        return player;
+        return playerRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Player with id " + id + " not found"));
     }
 
     public CreatePlayerResponse create(CreatePlayerRequest request) {
+        UUID id = UUID.randomUUID();
         String now = now();
-        PlayerDto player = new PlayerDto(
-            UUID.randomUUID(),
-            validateName(request.firstName(), "First name"),
-            validateName(request.lastName(), "Last name"),
-            validateEmail(request.email()),
-            validatePhone(request.phone()),
-            validateBirthDate(request.birthDate()),
-            validateGender(request.gender()),
-            validateHeight(request.height()),
-            ACTIVE_STATUS,
+        PlayerDto player = playerMapper.fromCreateRequest(
+            new CreatePlayerRequest(
+                validateName(request.firstName(), "First name"),
+                validateName(request.lastName(), "Last name"),
+                validateEmail(request.email()),
+                validatePhone(request.phone()),
+                validateBirthDate(request.birthDate()),
+                validateGender(request.gender()),
+                validateHeight(request.height())
+            ),
             zeroStatistics(),
-            List.of(),
-            now,
+            ACTIVE_STATUS,
             now
         );
-        players.put(player.id(), player);
-        return new CreatePlayerResponse(player.id(), player.status(), player.createdAt());
+        PlayerDto createdPlayer = playerRepository.create(id, player);
+        return new CreatePlayerResponse(createdPlayer.id(), createdPlayer.status(), createdPlayer.createdAt());
     }
 
     public UpdatePlayerResponse update(UUID id, UpdatePlayerRequest request) {
         PlayerDto existingPlayer = requireActivePlayer(id);
         String updatedAt = now();
 
-        PlayerDto player = new PlayerDto(
-            id,
-            request.firstName() != null ? validateName(request.firstName(), "First name") : existingPlayer.firstName(),
-            request.lastName() != null ? validateName(request.lastName(), "Last name") : existingPlayer.lastName(),
-            request.email() != null ? validateEmail(request.email()) : existingPlayer.email(),
-            request.phone() != null ? validatePhone(request.phone()) : existingPlayer.phone(),
-            request.birthDate() != null ? validateBirthDate(request.birthDate()) : existingPlayer.birthDate(),
-            request.gender() != null ? validateGender(request.gender()) : existingPlayer.gender(),
-            request.height() != null ? validateHeight(request.height()) : existingPlayer.height(),
-            existingPlayer.status(),
-            existingPlayer.statistics(),
-            existingPlayer.teamIds(),
-            existingPlayer.createdAt(),
+        PlayerDto player = playerMapper.merge(
+            existingPlayer,
+            new UpdatePlayerRequest(
+                request.firstName() != null ? validateName(request.firstName(), "First name") : null,
+                request.lastName() != null ? validateName(request.lastName(), "Last name") : null,
+                request.email() != null ? validateEmail(request.email()) : null,
+                request.phone() != null ? validatePhone(request.phone()) : null,
+                request.birthDate() != null ? validateBirthDate(request.birthDate()) : null,
+                request.gender() != null ? validateGender(request.gender()) : null,
+                request.height() != null ? validateHeight(request.height()) : null
+            ),
             updatedAt
         );
-        players.put(id, player);
-        return new UpdatePlayerResponse(player.id(), player.updatedAt());
+        PlayerDto updatedPlayer = playerRepository.update(player);
+        return new UpdatePlayerResponse(updatedPlayer.id(), updatedPlayer.updatedAt());
     }
 
     public DeletePlayerResponse delete(UUID id) {
@@ -89,22 +95,7 @@ public class PlayerService {
             return new DeletePlayerResponse(existingPlayer.id(), existingPlayer.status(), existingPlayer.updatedAt());
         }
 
-        PlayerDto deletedPlayer = new PlayerDto(
-            existingPlayer.id(),
-            existingPlayer.firstName(),
-            existingPlayer.lastName(),
-            existingPlayer.email(),
-            existingPlayer.phone(),
-            existingPlayer.birthDate(),
-            existingPlayer.gender(),
-            existingPlayer.height(),
-            DELETED_STATUS,
-            existingPlayer.statistics(),
-            existingPlayer.teamIds(),
-            existingPlayer.createdAt(),
-            now()
-        );
-        players.put(id, deletedPlayer);
+        PlayerDto deletedPlayer = playerRepository.delete(id);
         return new DeletePlayerResponse(deletedPlayer.id(), deletedPlayer.status(), deletedPlayer.updatedAt());
     }
 
@@ -117,23 +108,18 @@ public class PlayerService {
             request.wins()
         );
 
-        PlayerDto updatedPlayer = new PlayerDto(
-            existingPlayer.id(),
-            existingPlayer.firstName(),
-            existingPlayer.lastName(),
-            existingPlayer.email(),
-            existingPlayer.phone(),
-            existingPlayer.birthDate(),
-            existingPlayer.gender(),
-            existingPlayer.height(),
-            existingPlayer.status(),
-            statistics,
-            existingPlayer.teamIds(),
-            existingPlayer.createdAt(),
-            now()
-        );
-        players.put(id, updatedPlayer);
+        PlayerDto updatedPlayer = playerRepository.updateStatistics(existingPlayer.id(), statistics);
         return new UpdatePlayerStatisticsResponse(updatedPlayer.id(), updatedPlayer.statistics(), updatedPlayer.updatedAt());
+    }
+
+    @Override
+    public long count() {
+        return playerRepository.count();
+    }
+
+    @Override
+    public void reset() {
+        playerRepository.deleteAll();
     }
 
     private PlayerDto requireActivePlayer(UUID id) {
