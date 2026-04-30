@@ -2,6 +2,7 @@ package fr.efreifive.manageplayer.controller;
 
 import fr.efreifive.manageplayer.dto.ErrorDetail;
 import fr.efreifive.manageplayer.dto.ErrorResponse;
+import fr.efreifive.manageplayer.service.ServiceOperationException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,19 +14,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
-public class ApiExceptionHandler {
+public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException exception) {
         List<ErrorDetail> details = exception.getBindingResult().getFieldErrors().stream()
             .map(this::toErrorDetail)
             .toList();
 
-        return ResponseEntity.badRequest().body(new ErrorResponse("VALIDATION_ERROR", "Les donnees fournies sont invalides.", details));
+        return ResponseEntity.badRequest()
+            .body(new ErrorResponse("VALIDATION_ERROR", "Les donnees fournies sont invalides.", details));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleBadJson(HttpMessageNotReadableException exception) {
-        return ResponseEntity.badRequest().body(new ErrorResponse("VALIDATION_ERROR", "Les donnees fournies sont invalides.", List.of()));
+        return ResponseEntity.badRequest()
+            .body(new ErrorResponse("VALIDATION_ERROR", "Les donnees fournies sont invalides.", List.of()));
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -41,6 +44,13 @@ public class ApiExceptionHandler {
 
         return ResponseEntity.status(status)
             .body(new ErrorResponse(code, exception.getReason() != null ? exception.getReason() : status.getReasonPhrase(), List.of()));
+    }
+
+    @ExceptionHandler(ServiceOperationException.class)
+    public ResponseEntity<ErrorResponse> handleServiceOperation(ServiceOperationException exception) {
+        HttpStatus status = DomainErrorCodeHttpStatusMapper.fromDomainErrorCode(exception.domainErrorCode());
+        return ResponseEntity.status(status)
+            .body(new ErrorResponse(exception.domainErrorCode().name(), exception.getMessage(), List.of()));
     }
 
     @ExceptionHandler(Exception.class)
