@@ -1,0 +1,19 @@
+@host = http://localhost:8080
+
+###
+GET {{host}}/matches/4875eb30-8e94-44f0-9f11-981cbb2861af
+
+###
+POST {{host}}/matches/4875eb30-8e94-44f0-9f11-981cbb2861af/cancel
+
+###
+POST {{host}}/matches
+Content-Type: application/json
+
+{
+  "teamAUuid": "11111111-1111-1111-1111-111111111111",
+  "teamBUuid": "22222222-2222-2222-2222-222222222222",
+  "start": "2026-05-15T20:45:00",
+  "end": "2026-05-15T20:46:00",
+  "fieldUuid": "99999999-9999-9999-9999-999999999999"
+}
