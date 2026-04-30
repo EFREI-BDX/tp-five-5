@@ -1,0 +1,565 @@
+# Manage Field API - IntelliJ HTTP Client tests
+#
+# Run the application on http://localhost:8080, then run requests from top to bottom.
+# Scenario requests store values in IntelliJ global variables, especially:
+# - scenarioDate
+# - createdReservationId
+#
+# The sample IDs below come from V2 and V7 Flyway migrations.
+
+@host = http://localhost:8080
+@apiKey = epIdFODCVgUX1dHmiisCYCBpWTPZWl8x
+@json = application/json
+
+@fieldA = 22222222-2222-4222-8222-222222222221
+@fieldC = 22222222-2222-4222-8222-222222222223
+@inactiveFieldD = 22222222-2222-4222-8222-222222222224
+@maintenanceFieldE = 22222222-2222-4222-8222-222222222225
+@fieldF = 22222222-2222-4222-8222-222222222226
+@missingField = 22222222-2222-4222-8222-222222229999
+
+@fieldStatusActive = 11111111-1111-4111-8111-111111111111
+@fieldStatusInactive = 11111111-1111-4111-8111-111111111112
+@fieldStatusMaintenance = 11111111-1111-4111-8111-111111111113
+@missingFieldStatus = 11111111-1111-4111-8111-111111119999
+
+@reservationStatusPending = 33333333-3333-4333-8333-333333333331
+@reservationStatusConfirmed = 33333333-3333-4333-8333-333333333333
+@reservationStatusCancelled = 33333333-3333-4333-8333-333333333334
+@missingReservationStatus = 33333333-3333-4333-8333-333333339999
+@seedReservationAConfirmed = 44444444-4444-4444-8444-444444444441
+@missingReservation = 44444444-4444-4444-8444-444444449999
+
+### 00 - Health is public
+# @name health
+GET {{host}}/health
+Accept: {{json}}
+
+> {%
+client.test("health returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("health body is UP", function() {
+  client.assert(response.body.status === "UP", "Expected status UP");
+});
+%}
+
+### 01 - Protected endpoint rejects missing API key
+# @name unauthorizedWithoutApiKey
+GET {{host}}/v1/field-statuses
+Accept: {{json}}
+
+> {%
+client.test("missing API key returns 401", function() {
+  client.assert(response.status === 401, "Expected 401, got " + response.status);
+});
+
+client.test("missing API key returns Unauthorized error", function() {
+  client.assert(response.body.error === "Unauthorized", "Expected Unauthorized error");
+});
+%}
+
+### 02 - Protected endpoint rejects invalid API key
+# @name unauthorizedWithInvalidApiKey
+GET {{host}}/v1/field-statuses
+Accept: {{json}}
+X-API-KEY: invalid-api-key
+
+> {%
+client.test("invalid API key returns 401", function() {
+  client.assert(response.status === 401, "Expected 401, got " + response.status);
+});
+%}
+
+### 03 - List field statuses
+# @name listFieldStatuses
+GET {{host}}/v1/field-statuses
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("field statuses return 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("field statuses contain active, inactive and maintenance", function() {
+  const codes = response.body.map(status => status.code);
+  client.assert(codes.includes("active"), "Missing active field status");
+  client.assert(codes.includes("inactive"), "Missing inactive field status");
+  client.assert(codes.includes("maintenance"), "Missing maintenance field status");
+});
+%}
+
+### 04 - List reservation statuses
+# @name listReservationStatuses
+GET {{host}}/v1/reservation-statuses
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("reservation statuses return 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("reservation statuses contain pending, confirmed and cancelled", function() {
+  const codes = response.body.map(status => status.code);
+  client.assert(codes.includes("pending"), "Missing pending reservation status");
+  client.assert(codes.includes("confirmed"), "Missing confirmed reservation status");
+  client.assert(codes.includes("cancelled"), "Missing cancelled reservation status");
+});
+%}
+
+### 05 - Get seeded field detail with status and reservations
+# @name getSeededFieldDetail
+GET {{host}}/v1/fields/{{fieldA}}
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("field detail returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("field detail contains field status", function() {
+  client.assert(response.body.id === client.variables.file.get("fieldA"), "Unexpected field id");
+  client.assert(response.body.status_id === client.variables.file.get("fieldStatusActive"), "Expected active status id");
+  client.assert(response.body.status.code === "active", "Expected active status code");
+});
+
+client.test("field detail contains reservation statuses", function() {
+  client.assert(Array.isArray(response.body.reservations), "Expected reservations array");
+  client.assert(response.body.reservations.length >= 2, "Expected seeded reservations");
+  client.assert(response.body.reservations.every(reservation => reservation.status && reservation.status.code), "Missing reservation status");
+});
+%}
+
+### 06 - List seeded field reservations
+# @name listSeededFieldReservations
+GET {{host}}/v1/fields/{{fieldA}}/reservations
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("field reservations return 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("field reservations contain seeded confirmed reservation", function() {
+  const reservation = response.body.find(item => item.id === client.variables.file.get("seedReservationAConfirmed"));
+  client.assert(reservation !== undefined, "Seeded reservation was not found");
+  client.assert(reservation.status.code === "confirmed", "Expected confirmed reservation");
+});
+%}
+
+### 07 - Availability excludes a field blocked by a seeded reservation
+# @name seededAvailabilityWithConflict
+GET {{host}}/v1/fields/available?date=2026-05-02&start_time=10:00&end_time=11:30
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("availability returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("availability excludes Field A because it is already reserved", function() {
+  const ids = response.body.map(field => field.id);
+  client.assert(!ids.includes(client.variables.file.get("fieldA")), "Field A should not be available");
+});
+
+client.test("availability includes Field C because its seeded reservation is cancelled", function() {
+  const ids = response.body.map(field => field.id);
+  client.assert(ids.includes(client.variables.file.get("fieldC")), "Field C should be available");
+});
+%}
+
+### 08 - Availability rejects an invalid slot duration
+# @name invalidAvailabilityDuration
+GET {{host}}/v1/fields/available?date=2026-05-02&start_time=10:00&end_time=10:45
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("invalid slot duration returns 400", function() {
+  client.assert(response.status === 400, "Expected 400, got " + response.status);
+});
+
+client.test("invalid slot duration returns ValidationError", function() {
+  client.assert(response.body.error === "ValidationError", "Expected ValidationError");
+});
+%}
+
+### 09 - Field detail returns 404 for a valid UUID that does not exist
+# @name missingFieldDetail
+GET {{host}}/v1/fields/{{missingField}}
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("missing field returns 404", function() {
+  client.assert(response.status === 404, "Expected 404, got " + response.status);
+});
+
+client.test("missing field returns NotFound", function() {
+  client.assert(response.body.error === "NotFound", "Expected NotFound");
+});
+%}
+
+### 10 - Field detail rejects malformed field_id
+# @name malformedFieldId
+GET {{host}}/v1/fields/not-a-uuid
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("malformed field id returns 400", function() {
+  client.assert(response.status === 400, "Expected 400, got " + response.status);
+});
+%}
+
+### 11 - Change field status to maintenance
+# @name changeFieldStatusToMaintenance
+PATCH {{host}}/v1/fields/{{fieldF}}/status
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{fieldStatusMaintenance}}"
+}
+
+> {%
+client.test("field status change to maintenance returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("field status is maintenance", function() {
+  client.assert(response.body.id === client.variables.file.get("fieldF"), "Unexpected field id");
+  client.assert(response.body.status_id === client.variables.file.get("fieldStatusMaintenance"), "Expected maintenance status");
+});
+%}
+
+### 12 - Change field status back to active
+# @name changeFieldStatusBackToActive
+PATCH {{host}}/v1/fields/{{fieldF}}/status
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{fieldStatusActive}}"
+}
+
+> {%
+client.test("field status change back to active returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("field status is active again", function() {
+  client.assert(response.body.id === client.variables.file.get("fieldF"), "Unexpected field id");
+  client.assert(response.body.status_id === client.variables.file.get("fieldStatusActive"), "Expected active status");
+});
+%}
+
+### 13 - Change field status rejects unknown status
+# @name changeFieldStatusUnknownStatus
+PATCH {{host}}/v1/fields/{{fieldF}}/status
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{missingFieldStatus}}"
+}
+
+> {%
+client.test("unknown field status returns 404", function() {
+  client.assert(response.status === 404, "Expected 404, got " + response.status);
+});
+%}
+
+### 14 - Create a confirmed reservation on a random future date
+# @name createConfirmedReservation
+< {%
+const randomDayOffset = $random.integer(30, 3500);
+const scenarioDate = new Date(Date.UTC(2027, 0, 1 + randomDayOffset)).toISOString().substring(0, 10);
+request.variables.set("scenarioDate", scenarioDate);
+client.global.set("scenarioDate", scenarioDate);
+%}
+POST {{host}}/v1/fields/{{fieldC}}/reservations
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{reservationStatusConfirmed}}",
+  "date": "{{scenarioDate}}",
+  "start_time": "10:00",
+  "end_time": "11:00"
+}
+
+> {%
+client.test("reservation creation returns 201", function() {
+  client.assert(response.status === 201, "Expected 201, got " + response.status);
+});
+
+client.test("created reservation matches request", function() {
+  client.assert(response.body.field_id === client.variables.file.get("fieldC"), "Unexpected field id");
+  client.assert(response.body.status_id === client.variables.file.get("reservationStatusConfirmed"), "Unexpected status id");
+  client.assert(response.body.date === client.global.get("scenarioDate"), "Unexpected reservation date");
+  client.assert(response.body.start_time === "10:00", "Unexpected start time");
+  client.assert(response.body.end_time === "11:00", "Unexpected end time");
+});
+
+client.global.set("createdReservationId", response.body.id);
+%}
+
+### 15 - Created reservation appears in field reservations
+# @name listAfterCreate
+GET {{host}}/v1/fields/{{fieldC}}/reservations
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("list after create returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("list contains the created reservation", function() {
+  const createdReservationId = client.global.get("createdReservationId");
+  const reservation = response.body.find(item => item.id === createdReservationId);
+  client.assert(reservation !== undefined, "Created reservation was not found");
+  client.assert(reservation.status.code === "confirmed", "Expected confirmed reservation");
+});
+%}
+
+### 16 - Overlapping reservation is rejected
+# @name createOverlappingReservation
+POST {{host}}/v1/fields/{{fieldC}}/reservations
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{reservationStatusPending}}",
+  "date": "{{scenarioDate}}",
+  "start_time": "10:30",
+  "end_time": "11:30"
+}
+
+> {%
+client.test("overlapping reservation returns 409", function() {
+  client.assert(response.status === 409, "Expected 409, got " + response.status);
+});
+
+client.test("overlap returns Conflict", function() {
+  client.assert(response.body.error === "Conflict", "Expected Conflict");
+  client.assert(response.body.message === "reservation overlaps an active reservation", "Unexpected conflict message");
+});
+%}
+
+### 17 - Availability excludes the field while the reservation is confirmed
+# @name availabilityAfterCreate
+GET {{host}}/v1/fields/available?date={{scenarioDate}}&start_time=10:00&end_time=11:00
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("availability after create returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("created reservation blocks Field C", function() {
+  const ids = response.body.map(field => field.id);
+  client.assert(!ids.includes(client.variables.file.get("fieldC")), "Field C should be blocked");
+});
+%}
+
+### 18 - Cancel the created reservation
+# @name cancelCreatedReservation
+PATCH {{host}}/v1/fields/{{fieldC}}/reservations/{{createdReservationId}}/status
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{reservationStatusCancelled}}"
+}
+
+> {%
+client.test("reservation cancellation returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("reservation status is cancelled", function() {
+  client.assert(response.body.id === client.global.get("createdReservationId"), "Unexpected reservation id");
+  client.assert(response.body.status_id === client.variables.file.get("reservationStatusCancelled"), "Expected cancelled status");
+  client.assert(response.body.status.code === "cancelled", "Expected cancelled status code");
+});
+%}
+
+### 19 - Availability includes the field after cancellation
+# @name availabilityAfterCancellation
+GET {{host}}/v1/fields/available?date={{scenarioDate}}&start_time=10:00&end_time=11:00
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("availability after cancellation returns 200", function() {
+  client.assert(response.status === 200, "Expected 200, got " + response.status);
+});
+
+client.test("cancelled reservation no longer blocks Field C", function() {
+  const ids = response.body.map(field => field.id);
+  client.assert(ids.includes(client.variables.file.get("fieldC")), "Field C should be available again");
+});
+%}
+
+### 20 - Reservation creation rejects inactive field
+# @name createReservationOnInactiveField
+POST {{host}}/v1/fields/{{inactiveFieldD}}/reservations
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{reservationStatusConfirmed}}",
+  "date": "2027-01-15",
+  "start_time": "18:00",
+  "end_time": "19:00"
+}
+
+> {%
+client.test("reservation on inactive field returns 409", function() {
+  client.assert(response.status === 409, "Expected 409, got " + response.status);
+});
+
+client.test("inactive field reservation returns Conflict", function() {
+  client.assert(response.body.error === "Conflict", "Expected Conflict");
+  client.assert(response.body.message === "field is not active", "Unexpected conflict message");
+});
+%}
+
+### 21 - Reservation creation rejects maintenance field
+# @name createReservationOnMaintenanceField
+POST {{host}}/v1/fields/{{maintenanceFieldE}}/reservations
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{reservationStatusConfirmed}}",
+  "date": "2027-01-15",
+  "start_time": "18:00",
+  "end_time": "19:00"
+}
+
+> {%
+client.test("reservation on maintenance field returns 409", function() {
+  client.assert(response.status === 409, "Expected 409, got " + response.status);
+});
+
+client.test("maintenance field reservation returns Conflict", function() {
+  client.assert(response.body.error === "Conflict", "Expected Conflict");
+  client.assert(response.body.message === "field is not active", "Unexpected conflict message");
+});
+%}
+
+### 22 - Reservation creation rejects unknown reservation status
+# @name createReservationUnknownStatus
+POST {{host}}/v1/fields/{{fieldC}}/reservations
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{missingReservationStatus}}",
+  "date": "2027-01-16",
+  "start_time": "18:00",
+  "end_time": "19:00"
+}
+
+> {%
+client.test("unknown reservation status returns 404", function() {
+  client.assert(response.status === 404, "Expected 404, got " + response.status);
+});
+
+client.test("unknown reservation status returns NotFound", function() {
+  client.assert(response.body.error === "NotFound", "Expected NotFound");
+});
+%}
+
+### 23 - Reservation creation rejects invalid duration
+# @name createReservationInvalidDuration
+POST {{host}}/v1/fields/{{fieldC}}/reservations
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{reservationStatusConfirmed}}",
+  "date": "2027-01-17",
+  "start_time": "18:00",
+  "end_time": "18:45"
+}
+
+> {%
+client.test("invalid reservation duration returns 400", function() {
+  client.assert(response.status === 400, "Expected 400, got " + response.status);
+});
+
+client.test("invalid reservation duration returns ValidationError", function() {
+  client.assert(response.body.error === "ValidationError", "Expected ValidationError");
+});
+%}
+
+### 24 - List reservations rejects missing field
+# @name listReservationsMissingField
+GET {{host}}/v1/fields/{{missingField}}/reservations
+Accept: {{json}}
+X-API-KEY: {{apiKey}}
+
+> {%
+client.test("list reservations for missing field returns 404", function() {
+  client.assert(response.status === 404, "Expected 404, got " + response.status);
+});
+%}
+
+### 25 - Change reservation status rejects missing reservation
+# @name changeMissingReservationStatus
+PATCH {{host}}/v1/fields/{{fieldA}}/reservations/{{missingReservation}}/status
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{reservationStatusCancelled}}"
+}
+
+> {%
+client.test("missing reservation status change returns 404", function() {
+  client.assert(response.status === 404, "Expected 404, got " + response.status);
+});
+
+client.test("missing reservation status change returns NotFound", function() {
+  client.assert(response.body.error === "NotFound", "Expected NotFound");
+});
+%}
+
+### 26 - Change reservation status rejects unknown status
+# @name changeReservationUnknownStatus
+PATCH {{host}}/v1/fields/{{fieldA}}/reservations/{{seedReservationAConfirmed}}/status
+Accept: {{json}}
+Content-Type: {{json}}
+X-API-KEY: {{apiKey}}
+
+{
+  "status_id": "{{missingReservationStatus}}"
+}
+
+> {%
+client.test("unknown reservation status change returns 404", function() {
+  client.assert(response.status === 404, "Expected 404, got " + response.status);
+});
+%}
