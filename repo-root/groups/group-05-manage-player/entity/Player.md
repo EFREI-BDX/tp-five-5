@@ -57,6 +57,6 @@ Permettre la gestion des joueurs dans le système ERP du centre de foot à 5.
 - Vérifier qu’une height <= 0 est rejetée
 - Vérifier que teamIds sans doublons est accepté
 - Vérifier que teamIds avec doublons est rejeté
-- Vérifier que wins > matchesPlayed est rejeté
+- Vérifier que wins + losses + draws > matchesPlayed est rejeté
 - Vérifier qu’un status hors enum est rejeté
 - Vérifier que updatedAt < createdAt est rejeté

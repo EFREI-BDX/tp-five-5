@@ -1,5 +1,5 @@
 {
-  "id": "",
+  "id": "not-a-uuid",
   "firstName": "Jean",
   "lastName": "Dupont",
   "email": "invalid.email",
@@ -13,6 +13,7 @@
     "goalsScored": 15,
     "assists": 8,
     "wins": 28,
+    "losses": 8,
     "draws": 6,
     "mvps": 5
   },

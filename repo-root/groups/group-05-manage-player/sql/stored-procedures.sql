@@ -1,4 +1,5 @@
 DROP PROCEDURE IF EXISTS fiveplayer.idCheck;
+DROP PROCEDURE IF EXISTS fiveplayer.playerIdCheck;
 DROP PROCEDURE IF EXISTS fiveplayer.teamNameCheck;
 DROP PROCEDURE IF EXISTS fiveplayer.playerFirstNameCheck;
 DROP PROCEDURE IF EXISTS fiveplayer.playerLastNameCheck;
@@ -41,6 +42,19 @@ BEGIN
 
     IF CHAR_LENGTH(_id) > 255 THEN
         SET errorMessage_ = 'Id must not exceed 255 characters';
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = errorMessage_;
+    END IF;
+END //
+
+CREATE PROCEDURE fiveplayer.playerIdCheck(IN _id VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+BEGIN
+    SET errorMessage_ = '';
+
+    CALL fiveplayer.idCheck(_id, errorMessage_);
+
+    IF _id NOT REGEXP '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' THEN
+        SET errorMessage_ = 'Player id must be a valid UUID';
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
@@ -199,6 +213,7 @@ CREATE PROCEDURE fiveplayer.playerStatisticsCheck(
     IN _goalsScored INT,
     IN _assists INT,
     IN _wins INT,
+    IN _losses INT,
     IN _draws INT,
     IN _mvps INT,
     OUT errorMessage_ VARCHAR(500)
@@ -206,26 +221,20 @@ CREATE PROCEDURE fiveplayer.playerStatisticsCheck(
 BEGIN
     SET errorMessage_ = '';
 
-    IF _matchesPlayed IS NULL OR _goalsScored IS NULL OR _assists IS NULL OR _wins IS NULL OR _draws IS NULL OR _mvps IS NULL THEN
+    IF _matchesPlayed IS NULL OR _goalsScored IS NULL OR _assists IS NULL OR _wins IS NULL OR _losses IS NULL OR _draws IS NULL OR _mvps IS NULL THEN
         SET errorMessage_ = 'Player statistics values must not be null';
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
 
-    IF _matchesPlayed < 0 OR _goalsScored < 0 OR _assists < 0 OR _wins < 0 OR _draws < 0 OR _mvps < 0 THEN
+    IF _matchesPlayed < 0 OR _goalsScored < 0 OR _assists < 0 OR _wins < 0 OR _losses < 0 OR _draws < 0 OR _mvps < 0 THEN
         SET errorMessage_ = 'Player statistics values must be greater than or equal to 0';
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
 
-    IF _wins > _matchesPlayed THEN
-        SET errorMessage_ = 'Wins cannot be greater than MatchesPlayed';
-        SIGNAL SQLSTATE '45000'
-            SET MESSAGE_TEXT = errorMessage_;
-    END IF;
-
-    IF _draws > _matchesPlayed THEN
-        SET errorMessage_ = 'Draws cannot be greater than MatchesPlayed';
+    IF _wins + _losses + _draws > _matchesPlayed THEN
+        SET errorMessage_ = 'Wins, losses and draws total cannot be greater than MatchesPlayed';
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
@@ -347,7 +356,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_id, errorMessage_);
+    CALL fiveplayer.playerIdCheck(_id, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _id) > 0 THEN
         SET errorMessage_ = CONCAT('A player with id ', _id, ' already exists');
@@ -363,11 +372,17 @@ BEGIN
     CALL fiveplayer.playerBirthDateCheck(_birthDate, errorMessage_);
     CALL fiveplayer.playerHeightCheck(_height, errorMessage_);
 
+    IF (SELECT COUNT(*) FROM fiveplayer.player WHERE email = _email) > 0 THEN
+        SET errorMessage_ = CONCAT('A player with email ', _email, ' already exists');
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = errorMessage_;
+    END IF;
+
     INSERT INTO fiveplayer.player (id, firstName, lastName, email, phone, gender, birthDate, height, status, createdAt, updatedAt)
     VALUES (_id, _firstName, _lastName, _email, _phone, _gender, _birthDate, _height, 'actif', UTC_TIMESTAMP(), UTC_TIMESTAMP());
 
-    INSERT INTO fiveplayer.player_statistics (idPlayer, matchesPlayed, goalsScored, assists, wins, draws, mvps)
-    VALUES (_id, 0, 0, 0, 0, 0, 0);
+    INSERT INTO fiveplayer.player_statistics (idPlayer, matchesPlayed, goalsScored, assists, wins, losses, draws, mvps)
+    VALUES (_id, 0, 0, 0, 0, 0, 0, 0);
 
     COMMIT;
 END //
@@ -393,7 +408,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_id, errorMessage_);
+    CALL fiveplayer.playerIdCheck(_id, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _id) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _id, ' exists');
@@ -441,6 +456,12 @@ BEGIN
         CALL fiveplayer.playerHeightCheck(_height, errorMessage_);
     END IF;
 
+    IF _email IS NOT NULL AND (SELECT COUNT(*) FROM fiveplayer.player WHERE email = _email AND id <> _id) > 0 THEN
+        SET errorMessage_ = CONCAT('A player with email ', _email, ' already exists');
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = errorMessage_;
+    END IF;
+
     UPDATE fiveplayer.player
     SET firstName = COALESCE(_firstName, firstName),
         lastName  = COALESCE(_lastName, lastName),
@@ -469,7 +490,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_id, errorMessage_);
+    CALL fiveplayer.playerIdCheck(_id, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _id) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _id, ' exists');
@@ -497,6 +518,7 @@ CREATE PROCEDURE fiveplayer.playerStatisticsUpdate(
     IN _goalsScored INT,
     IN _assists INT,
     IN _wins INT,
+    IN _losses INT,
     IN _draws INT,
     IN _mvps INT,
     OUT errorMessage_ VARCHAR(500)
@@ -511,7 +533,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_id, errorMessage_);
+    CALL fiveplayer.playerIdCheck(_id, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _id) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _id, ' exists');
@@ -525,15 +547,16 @@ BEGIN
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
 
-    CALL fiveplayer.playerStatisticsCheck(_matchesPlayed, _goalsScored, _assists, _wins, _draws, _mvps, errorMessage_);
+    CALL fiveplayer.playerStatisticsCheck(_matchesPlayed, _goalsScored, _assists, _wins, _losses, _draws, _mvps, errorMessage_);
 
-    INSERT INTO fiveplayer.player_statistics (idPlayer, matchesPlayed, goalsScored, assists, wins, draws, mvps)
-    VALUES (_id, _matchesPlayed, _goalsScored, _assists, _wins, _draws, _mvps)
+    INSERT INTO fiveplayer.player_statistics (idPlayer, matchesPlayed, goalsScored, assists, wins, losses, draws, mvps)
+    VALUES (_id, _matchesPlayed, _goalsScored, _assists, _wins, _losses, _draws, _mvps)
     ON DUPLICATE KEY UPDATE
         matchesPlayed = VALUES(matchesPlayed),
         goalsScored = VALUES(goalsScored),
         assists = VALUES(assists),
         wins = VALUES(wins),
+        losses = VALUES(losses),
         draws = VALUES(draws),
         mvps = VALUES(mvps);
 
@@ -559,7 +582,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_playerId, errorMessage_);
+    CALL fiveplayer.playerIdCheck(_playerId, errorMessage_);
     CALL fiveplayer.idCheck(_teamId, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _playerId) = 0 THEN
@@ -611,7 +634,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_playerId, errorMessage_);
+    CALL fiveplayer.playerIdCheck(_playerId, errorMessage_);
     CALL fiveplayer.idCheck(_teamId, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _playerId) = 0 THEN
@@ -647,7 +670,7 @@ CREATE PROCEDURE fiveplayer.teamGetAll()
 BEGIN
     SELECT id,
            name
-    FROM fiveplayer.team
+    FROM fiveplayer.TeamView
     ORDER BY name;
 END //
 
@@ -657,7 +680,7 @@ CREATE PROCEDURE fiveplayer.teamGetById(
 BEGIN
     SELECT id,
            name
-    FROM fiveplayer.team
+    FROM fiveplayer.TeamView
     WHERE id = _id
     LIMIT 1;
 END //
@@ -677,6 +700,9 @@ BEGIN
            COALESCE(ps.goalsScored, 0) AS goalsScored,
            COALESCE(ps.assists, 0) AS assists,
            COALESCE(ps.wins, 0) AS wins,
+           COALESCE(ps.losses, 0) AS losses,
+           COALESCE(ps.draws, 0) AS draws,
+           COALESCE(ps.mvps, 0) AS mvps,
            p.status AS status,
            p.createdAt AS createdAt,
            p.updatedAt AS updatedAt
@@ -684,7 +710,8 @@ BEGIN
              LEFT JOIN fiveplayer.PlayerStatisticsView ps ON ps.idPlayer = p.id
              LEFT JOIN fiveplayer.PlayerTeamView pt ON pt.idPlayer = p.id
     GROUP BY p.id, p.firstName, p.lastName, p.email, p.phone, p.gender, p.birthDate, p.height,
-             ps.matchesPlayed, ps.goalsScored, ps.assists, ps.wins, p.status, p.createdAt, p.updatedAt
+             ps.matchesPlayed, ps.goalsScored, ps.assists, ps.wins, ps.losses, ps.draws, ps.mvps,
+             p.status, p.createdAt, p.updatedAt
     ORDER BY p.lastName, p.firstName;
 END //
 
@@ -692,6 +719,10 @@ CREATE PROCEDURE fiveplayer.playerGetById(
     IN _id VARCHAR(255)
 )
 BEGIN
+    DECLARE errorMessage VARCHAR(500);
+
+    CALL fiveplayer.playerIdCheck(_id, errorMessage);
+
     SELECT p.id AS id,
            p.firstName AS firstName,
            p.lastName AS lastName,
@@ -705,6 +736,9 @@ BEGIN
            COALESCE(ps.goalsScored, 0) AS goalsScored,
            COALESCE(ps.assists, 0) AS assists,
            COALESCE(ps.wins, 0) AS wins,
+           COALESCE(ps.losses, 0) AS losses,
+           COALESCE(ps.draws, 0) AS draws,
+           COALESCE(ps.mvps, 0) AS mvps,
            p.status AS status,
            p.createdAt AS createdAt,
            p.updatedAt AS updatedAt
@@ -713,7 +747,8 @@ BEGIN
              LEFT JOIN fiveplayer.PlayerTeamView pt ON pt.idPlayer = p.id
     WHERE p.id = _id
     GROUP BY p.id, p.firstName, p.lastName, p.email, p.phone, p.gender, p.birthDate, p.height,
-             ps.matchesPlayed, ps.goalsScored, ps.assists, ps.wins, p.status, p.createdAt, p.updatedAt
+             ps.matchesPlayed, ps.goalsScored, ps.assists, ps.wins, ps.losses, ps.draws, ps.mvps,
+             p.status, p.createdAt, p.updatedAt
     LIMIT 1;
 END //
 

@@ -163,15 +163,16 @@ public class PlayerRepository {
     private void callPlayerStatisticsUpdate(UUID id, PlayerStatisticsDto statistics) {
         try {
             jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
-                try (CallableStatement statement = connection.prepareCall("{CALL fiveplayer.playerStatisticsUpdate(?, ?, ?, ?, ?, ?, ?, ?)}")) {
+                try (CallableStatement statement = connection.prepareCall("{CALL fiveplayer.playerStatisticsUpdate(?, ?, ?, ?, ?, ?, ?, ?, ?)}")) {
                     statement.setString(1, id.toString());
                     statement.setInt(2, statistics.matchesPlayed());
                     statement.setInt(3, statistics.goalsScored());
                     statement.setInt(4, statistics.assists());
                     statement.setInt(5, statistics.wins());
-                    statement.setInt(6, 0);
-                    statement.setInt(7, 0);
-                    statement.registerOutParameter(8, Types.VARCHAR);
+                    statement.setInt(6, statistics.losses());
+                    statement.setInt(7, statistics.draws());
+                    statement.setInt(8, statistics.mvps());
+                    statement.registerOutParameter(9, Types.VARCHAR);
                     statement.execute();
                 }
                 return null;
@@ -212,7 +213,10 @@ public class PlayerRepository {
                 resultSet.getInt("matchesPlayed"),
                 resultSet.getInt("goalsScored"),
                 resultSet.getInt("assists"),
-                resultSet.getInt("wins")
+                resultSet.getInt("wins"),
+                resultSet.getInt("losses"),
+                resultSet.getInt("draws"),
+                resultSet.getInt("mvps")
             ),
             toTeamIds(resultSet.getString("teamIds")),
             resultSet.getString("createdAt"),

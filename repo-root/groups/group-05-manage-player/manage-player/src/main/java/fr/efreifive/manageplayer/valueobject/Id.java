@@ -1,7 +1,5 @@
 package fr.player.valueobject;
 
-import java.util.Objects;
-
 /**
  * Représente l'identifiant unique d'un joueur dans le système ERP.
  */

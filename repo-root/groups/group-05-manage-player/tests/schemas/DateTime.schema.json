@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "When used as updatedAt, value must be greater than or equal to the related createdAt; enforce with domain validation or tests.",
   "type": "object",
   "properties": {
     "value": {

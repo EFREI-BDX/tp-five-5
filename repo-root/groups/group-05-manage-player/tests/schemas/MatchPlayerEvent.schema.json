@@ -1,10 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$comment": "Business rules not expressible in standard draft-07: wins + losses + draws must be less than or equal to matchesPlayed; mvps must be less than or equal to matchesPlayed.",
   "type": "object",
   "properties": {
     "playerId": {
       "type": "string",
-      "minLength": 1
+      "format": "uuid"
     },
     "matchesPlayed": {
       "type": "integer",
@@ -22,6 +23,10 @@
       "type": "integer",
       "minimum": 0
     },
+    "losses": {
+      "type": "integer",
+      "minimum": 0
+    },
     "draws": {
       "type": "integer",
       "minimum": 0
@@ -31,6 +36,6 @@
       "minimum": 0
     }
   },
-  "required": ["playerId", "matchesPlayed", "goalsScored", "assists", "wins", "draws", "mvps"],
+  "required": ["playerId", "matchesPlayed", "goalsScored", "assists", "wins", "losses", "draws", "mvps"],
   "additionalProperties": false
 }
