@@ -1,0 +1,5 @@
+{
+  "name": "record-match",
+  "basePath": "",
+  "description": "Records match progress and events, validates them and pushes result onto the communication bus."
+}

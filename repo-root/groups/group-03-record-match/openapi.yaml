@@ -1,0 +1,309 @@
+openapi: 3.0.3
+info:
+  title: Record Match Service
+  description: Microservice to record matches, players, events and match events (during the game).
+  version: 0.0.1
+servers:
+  - url: http://localhost:8082
+    description: Local development server
+paths:
+  /match:
+    get:
+      summary: List all matches
+      operationId: listMatches
+      responses:
+        '200':
+          description: A list of matches
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+    post:
+      summary: Create a match
+      operationId: createMatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Match'
+      responses:
+        '201':
+          description: Match created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+  /match/{id}:
+    get:
+      summary: Get a match by ID
+      operationId: getMatchById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A match
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+        '404':
+          description: Match not found
+
+  /event:
+    get:
+      summary: List all available events types
+      operationId: listEvents
+      responses:
+        '200':
+          description: A list of events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+    post:
+      summary: Create an event type
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+  /event/{id}:
+    get:
+      summary: Get an event by ID
+      operationId: getEventById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: An event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Event not found
+
+  /player:
+    get:
+      summary: List players by team
+      operationId: listPlayers
+      parameters:
+        - name: teamId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A list of players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+    post:
+      summary: Register a player
+      operationId: createPlayer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Player'
+      responses:
+        '201':
+          description: Player created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+  /player/{id}:
+    get:
+      summary: Get a player by ID
+      operationId: getPlayerById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A player
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Player'
+        '404':
+          description: Player not found
+
+  /match-event:
+    post:
+      summary: Record an event in a match
+      operationId: recordMatchEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchEvent'
+      responses:
+        '201':
+          description: Match Event recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+        '404':
+          description: Domain entity not found (Match, Event, etc.)
+  /match-event/{id}:
+    get:
+      summary: Get a recorded match event by ID
+      operationId: getMatchEventById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A match event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MatchEvent'
+        '404':
+          description: Match Event not found
+  /match-event/by-match/{matchId}:
+    get:
+      summary: List all match events for a given match
+      operationId: listMatchEvents
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A list of match events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MatchEvent'
+
+components:
+  schemas:
+    Match:
+      type: object
+      required:
+        - team1Id
+        - team2Id
+        - startedAt
+        - scheduledDurationMinutes
+      properties:
+        matchId:
+          type: string
+          format: uuid
+        team1Id:
+          type: string
+          format: uuid
+        team2Id:
+          type: string
+          format: uuid
+        startedAt:
+          type: string
+          format: date-time
+        scheduledDurationMinutes:
+          type: integer
+    Event:
+      type: object
+      required:
+        - name
+        - nbPlayers
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        nbPlayers:
+          type: integer
+    Player:
+      type: object
+      required:
+        - playerId
+        - teamId
+      properties:
+        playerId:
+          type: string
+          format: uuid
+        teamId:
+          type: string
+          format: uuid
+    MatchEvent:
+      type: object
+      required:
+        - matchId
+        - eventId
+        - occuredAt
+        - succeeded
+      properties:
+        matchEventId:
+          type: string
+          format: uuid
+        matchId:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        player1Id:
+          type: string
+          format: uuid
+        player2Id:
+          type: string
+          format: uuid
+        occuredAt:
+          type: string
+          format: date-time
+        succeeded:
+          type: boolean
+        teamId:
+          type: string
+          format: uuid
+        referenceEventId:
+          type: string
+          format: uuid
