@@ -1,8 +1,24 @@
 # Manage Player API
 
+Service Spring Boot responsable de la gestion des joueurs : profils, statut, statistiques et association avec les équipes.
+
+La documentation complète est disponible dans [`doc/README.md`](./doc/README.md).
+
+Entrées principales :
+
+- [`doc/project-and-architecture.md`](./doc/project-and-architecture.md) : projet, architecture et grands choix techniques.
+- [`doc/database.md`](./doc/database.md) : tables, relations, vues et procédures stockées.
+- [`doc/routes-and-events.md`](./doc/routes-and-events.md) : routes HTTP, code appelé et événements.
+
 ## Lancement
 
-Lancer l'application Spring Boot depuis `manage-player` :
+Démarrer MariaDB depuis `manage-player` :
+
+```bash
+docker compose up -d
+```
+
+Lancer ensuite l'application Spring Boot :
 
 ```bash
 mvn spring-boot:run
@@ -40,11 +56,24 @@ curl http://localhost:8080/health
 
 ### Players
 
+- `GET /players`
 - `POST /players`
 - `GET /players/{id}`
 - `PUT /players/{id}`
 - `DELETE /players/{id}`
 - `POST /players/{id}/statistics`
+
+### Events entrants
+
+- `POST /events/teams/player-joined`
+- `POST /events/teams/player-left`
+
+### Admin
+
+- `GET /admin/players/count`
+- `DELETE /admin/players`
+
+Les routes admin sont désactivées par défaut avec `app.admin.enabled=false`.
 
 Exemple creation :
 

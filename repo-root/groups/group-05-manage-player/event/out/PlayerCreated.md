@@ -24,13 +24,13 @@ Il permet d'indiquer qu'un joueur identifié par son id a été ajouté au syst�
 - playerId doit être non vide
 - playerId doit être un UUID valide
 - firstName doit être non vide
-- firstName doit respecter le format défini (entre 2 et 50 caractères)
+- firstName doit respecter le format défini (1 à 100 caractères)
 - lastName doit être non vide
-- lastName doit respecter le format défini (entre 2 et 50 caractères)
+- lastName doit respecter le format défini (1 à 100 caractères)
 - email doit être non vide
 - email doit respecter le format d'email valide
 - status doit être non vide
-- status doit être un des statuts valides (ACTIF, INACTIF, SUPPRIME)
+- status doit être un des statuts valides (`actif`, `inactif`, `supprimé`)
 
 **Format JSON attendu**
 
@@ -40,7 +40,7 @@ Il permet d'indiquer qu'un joueur identifié par son id a été ajouté au syst�
   "firstName": "Jean",
   "lastName": "Dupont",
   "email": "jean.dupont@example.com",
-  "status": "ACTIF"
+  "status": "actif"
 }
 ```
 

@@ -2,7 +2,7 @@
   "serviceId": "group-05-manage-player",
   "name": "Player Management",
   "version": "1.0.0",
-  "description": "Service responsable de la création et gestion des joueurs ainsi que de la publication des events liés aux profils joueurs et à leurs statistiques.",
+  "description": "Service responsable de la création, consultation, mise à jour, suppression logique et synchronisation des joueurs.",
   "owner": {
     "team": "group-05-manage-player",
     "contact": "todo@example.org"
@@ -13,6 +13,14 @@
     "path": "groups/group-05-manage-player"
   },
   "endpoints": [
+    {
+      "path": "/players",
+      "method": "GET",
+      "operationId": "getPlayers",
+      "description": "Lister les joueurs",
+      "responseSchema": "./openapi.yaml#/components/schemas/Player",
+      "auth": "ApiKeyAuth"
+    },
     {
       "path": "/players",
       "method": "POST",
@@ -55,35 +63,54 @@
       "requestSchema": "./openapi.yaml#/components/schemas/UpdatePlayerStatisticsRequest",
       "responseSchema": "./openapi.yaml#/components/schemas/UpdatePlayerStatisticsResponse",
       "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/events/teams/player-joined",
+      "method": "POST",
+      "operationId": "playerJoinedTeam",
+      "description": "Consommer l'événement PlayerJoinedTeam et associer un joueur à une équipe",
+      "auth": "ApiKeyAuth"
+    },
+    {
+      "path": "/events/teams/player-left",
+      "method": "POST",
+      "operationId": "playerLeftTeam",
+      "description": "Consommer l'événement PlayerLeftTeam et retirer un joueur d'une équipe",
+      "auth": "ApiKeyAuth"
     }
   ],
   "eventsProduced": [
     {
       "name": "PlayerCreated",
-      "schema": "./tests/schemas/player-created.schema.json",
-      "description": "Publié après création d’un joueur ; contient id, firstName, lastName, email, status, timestamp, traceId"
+      "schema": "./event/out/PlayerCreated.md",
+      "description": "Contrat documenté pour une future publication après création d’un joueur"
     },
     {
-      "name": "PlayerUpdated",
-      "schema": "./tests/schemas/player-updated.schema.json",
-      "description": "Publié après mise à jour du profil d’un joueur"
+      "name": "PlayerNameUpdated",
+      "schema": "./event/out/PlayerNameUpdated.md",
+      "description": "Contrat documenté pour une future publication après modification du prénom ou du nom"
     },
     {
       "name": "PlayerDeleted",
-      "schema": "./tests/schemas/player-deleted.schema.json",
-      "description": "Publié après suppression logique d’un joueur"
-    },
-    {
-      "name": "PlayerStatisticsUpdated",
-      "schema": "./tests/schemas/player-statistics-updated.schema.json",
-      "description": "Publié après mise à jour des statistiques d’un joueur"
+      "schema": "./event/out/PlayerDeleted.md",
+      "description": "Contrat documenté pour une future publication après suppression logique d’un joueur"
     }
   ],
   "eventsConsumed": [
     {
-      "name": "MatchFinished",
-      "schema": "./tests/schemas/match-finished.schema.json",
-      "description": "Event consommé pour mettre à jour automatiquement les statistiques des joueurs après un match"
+      "name": "PlayerJoinedTeam",
+      "schema": "./event/in/team/PlayerJoinedTeam.md",
+      "description": "Event consommé via POST /events/teams/player-joined"
+    },
+    {
+      "name": "PlayerLeftTeam",
+      "schema": "./event/in/team/PlayerLeftTeam.md",
+      "description": "Event consommé via POST /events/teams/player-left"
+    },
+    {
+      "name": "MatchPlayerEvent",
+      "schema": "./event/in/match/MatchPlayerEvent.md",
+      "description": "Contrat documenté ; l'application utilise aujourd'hui POST /players/{id}/statistics pour le comportement équivalent"
     }
   ],
   "schemas": [
@@ -105,7 +132,7 @@
     "name": "X-API-KEY"
   },
   "deployment": {
-    "image": "registry.example.org/group-xx-player-management:1.0.0",
+    "image": "registry.example.org/group-05-manage-player:1.0.0",
     "replicas": 2,
     "resources": {
       "cpu": "500m",
@@ -113,7 +140,7 @@
     }
   },
   "ci": {
-    "validateCommand": "cd groups/group-xx-player-management && mvn -DskipTests=false test",
+    "validateCommand": "cd groups/group-05-manage-player/manage-player && mvn -DskipTests=false test",
     "lintOpenApi": "spectral lint openapi.yaml"
   },
   "contacts": [

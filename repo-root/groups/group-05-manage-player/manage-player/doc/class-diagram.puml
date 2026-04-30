@@ -1,0 +1,266 @@
+@startuml
+title Manage Player - Diagramme de classes
+
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+package "controller" {
+  class PlayerController {
+    - playerService: PlayerService
+    + findAll(): ResponseEntity<List<PlayerDto>>
+    + findById(id: UUID): ResponseEntity<PlayerDto>
+    + create(request: CreatePlayerRequest): ResponseEntity<CreatePlayerResponse>
+    + update(id: UUID, request: UpdatePlayerRequest): ResponseEntity<UpdatePlayerResponse>
+    + delete(id: UUID): ResponseEntity<DeletePlayerResponse>
+    + updateStatistics(id: UUID, request: UpdatePlayerStatisticsRequest): ResponseEntity<UpdatePlayerStatisticsResponse>
+  }
+
+  class HealthController {
+    + health(): ResponseEntity<Map<String, String>>
+  }
+
+  class GlobalExceptionHandler {
+    + handleValidation(exception: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>
+    + handleBadJson(exception: HttpMessageNotReadableException): ResponseEntity<ErrorResponse>
+    + handleResponseStatus(exception: ResponseStatusException): ResponseEntity<ErrorResponse>
+    + handleServiceOperation(exception: ServiceOperationException): ResponseEntity<ErrorResponse>
+    + handleUnexpected(exception: Exception): ResponseEntity<ErrorResponse>
+  }
+
+  class DomainErrorCodeHttpStatusMapper {
+    + fromDomainErrorCode(domainErrorCode: DomainErrorCode): HttpStatus
+  }
+}
+
+package "admin" {
+  class PlayerAdminController {
+    - playerAdminService: IPlayerAdminService
+    - adminProperties: AdminProperties
+    + count(): ResponseEntity<Long>
+    + reset(): ResponseEntity<Void>
+  }
+}
+
+package "inbound" {
+  class TeamEventsInboundController {
+    - playerSyncService: IPlayerSyncService
+    + playerJoinedTeam(event: TeamPlayerEvent): ResponseEntity<Void>
+    + playerLeftTeam(event: TeamPlayerEvent): ResponseEntity<Void>
+  }
+
+  class TeamPlayerEvent <<record>> {
+    + playerId: UUID
+    + teamId: UUID
+  }
+}
+
+package "service" {
+  interface IPlayerService {
+    + findAll(): List<PlayerDto>
+    + findById(id: UUID): PlayerDto
+    + executeCommand(command: PlayerCommand): PlayerCommandResult
+  }
+
+  interface IPlayerAdminService {
+    + count(): long
+    + reset(): void
+  }
+
+  interface IPlayerSyncService {
+    + playerJoinedTeam(playerId: UUID, teamId: UUID): void
+    + playerLeftTeam(playerId: UUID, teamId: UUID): void
+  }
+
+  class PlayerService {
+    - playerRepository: PlayerRepository
+    - playerMapper: PlayerMapper
+    + findAll(): List<PlayerDto>
+    + findById(id: UUID): PlayerDto
+    + create(request: CreatePlayerRequest): CreatePlayerResponse
+    + update(id: UUID, request: UpdatePlayerRequest): UpdatePlayerResponse
+    + delete(id: UUID): DeletePlayerResponse
+    + updateStatistics(id: UUID, request: UpdatePlayerStatisticsRequest): UpdatePlayerStatisticsResponse
+    + count(): long
+    + reset(): void
+  }
+
+  class PlayerSyncService {
+    - playerRepository: PlayerRepository
+    + playerJoinedTeam(playerId: UUID, teamId: UUID): void
+    + playerLeftTeam(playerId: UUID, teamId: UUID): void
+  }
+
+  class ServiceOperationException {
+    - domainErrorCode: DomainErrorCode
+    + domainErrorCode(): DomainErrorCode
+  }
+
+  class PlayerNotFoundException
+
+  enum DomainErrorCode {
+    VALIDATION_ERROR
+    PLAYER_NOT_FOUND
+    PLAYER_ALREADY_EXISTS
+    PLAYER_DELETED
+    UNAUTHORIZED
+    INTERNAL_SERVER_ERROR
+  }
+}
+
+package "controller.command" {
+  interface PlayerCommand <<sealed>>
+  class CreatePlayerCommand <<record>>
+  class UpdatePlayerCommand <<record>>
+  class DeletePlayerCommand <<record>>
+  class UpdatePlayerStatisticsCommand <<record>>
+
+  interface PlayerCommandResult <<sealed>>
+  class Created <<record>>
+  class Updated <<record>>
+  class Deleted <<record>>
+  class StatisticsUpdated <<record>>
+  class Failure <<record>>
+}
+
+package "repository" {
+  class PlayerRepository {
+    - jdbcTemplate: JdbcTemplate
+    - playerRowMapper: RowMapper<PlayerDto>
+    + findAll(): List<PlayerDto>
+    + findById(id: UUID): Optional<PlayerDto>
+    + create(id: UUID, player: PlayerDto): PlayerDto
+    + update(player: PlayerDto): PlayerDto
+    + delete(id: UUID): PlayerDto
+    + updateStatistics(id: UUID, statistics: PlayerStatisticsDto): PlayerDto
+    + addTeam(playerId: UUID, teamId: UUID): void
+    + removeTeam(playerId: UUID, teamId: UUID): void
+    + deleteAll(): PersistenceOperationResult
+    + count(): long
+  }
+
+  class PersistenceOperationResult <<record>> {
+    + success: boolean
+    + message: String
+    + ok(): PersistenceOperationResult
+    + failure(message: String): PersistenceOperationResult
+  }
+}
+
+package "mapper" {
+  class PlayerMapper {
+    + fromCreateRequest(request: CreatePlayerRequest, statistics: PlayerStatisticsDto, status: String, createdAt: String): PlayerDto
+    + merge(existingPlayer: PlayerDto, request: UpdatePlayerRequest, updatedAt: String): PlayerDto
+    + withStatus(existingPlayer: PlayerDto, status: String, updatedAt: String): PlayerDto
+    + withStatistics(existingPlayer: PlayerDto, statistics: PlayerStatisticsDto, updatedAt: String): PlayerDto
+    + withTeamIds(existingPlayer: PlayerDto, teamIds: List<String>, updatedAt: String): PlayerDto
+  }
+}
+
+package "dto" {
+  class PlayerDto <<record>> {
+    + id: UUID
+    + firstName: String
+    + lastName: String
+    + email: String
+    + phone: String
+    + birthDate: String
+    + gender: String
+    + height: double
+    + status: String
+    + statistics: PlayerStatisticsDto
+    + teamIds: List<String>
+    + createdAt: String
+    + updatedAt: String
+  }
+
+  class PlayerStatisticsDto <<record>> {
+    + matchesPlayed: int
+    + goalsScored: int
+    + assists: int
+    + wins: int
+    + losses: int
+    + draws: int
+    + mvps: int
+  }
+
+  class CreatePlayerRequest <<record>>
+  class CreatePlayerResponse <<record>>
+  class UpdatePlayerRequest <<record>>
+  class UpdatePlayerResponse <<record>>
+  class DeletePlayerResponse <<record>>
+  class UpdatePlayerStatisticsRequest <<record>>
+  class UpdatePlayerStatisticsResponse <<record>>
+  class TeamDto <<record>>
+  class ErrorResponse <<record>>
+  class ErrorDetail <<record>>
+}
+
+package "security" {
+  class ApiKeyFilter {
+    - objectMapper: ObjectMapper
+    - expectedApiKey: String
+    + shouldNotFilter(request: HttpServletRequest): boolean
+    + doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain): void
+  }
+}
+
+package "config" {
+  class AdminProperties <<record>> {
+    + enabled: boolean
+  }
+
+  class DataSourceConfig {
+    + dataSourceProperties(): DataSourceProperties
+    + dataSource(dataSourceProperties: DataSourceProperties): DataSource
+    + jdbcTemplate(dataSource: DataSource): JdbcTemplate
+  }
+
+  class WebClientConfig {
+    + restClientBuilder(): RestClient.Builder
+  }
+}
+
+PlayerController --> PlayerService
+PlayerAdminController --> IPlayerAdminService
+PlayerAdminController --> AdminProperties
+TeamEventsInboundController --> IPlayerSyncService
+
+PlayerService ..|> IPlayerAdminService
+PlayerService --> PlayerRepository
+PlayerService --> PlayerMapper
+
+PlayerSyncService ..|> IPlayerSyncService
+PlayerSyncService --> PlayerRepository
+PlayerSyncService ..> PlayerNotFoundException
+
+PlayerRepository --> PlayerDto
+PlayerRepository --> PlayerStatisticsDto
+PlayerRepository --> PersistenceOperationResult
+PlayerMapper --> PlayerDto
+PlayerMapper --> PlayerStatisticsDto
+
+PlayerDto *-- PlayerStatisticsDto
+PlayerDto o-- TeamDto
+
+GlobalExceptionHandler --> ErrorResponse
+GlobalExceptionHandler --> ServiceOperationException
+ServiceOperationException --> DomainErrorCode
+PlayerNotFoundException --|> ServiceOperationException
+DomainErrorCodeHttpStatusMapper --> DomainErrorCode
+ApiKeyFilter --> ErrorResponse
+
+IPlayerService --> PlayerCommand
+IPlayerService --> PlayerCommandResult
+PlayerCommand <|.. CreatePlayerCommand
+PlayerCommand <|.. UpdatePlayerCommand
+PlayerCommand <|.. DeletePlayerCommand
+PlayerCommand <|.. UpdatePlayerStatisticsCommand
+
+PlayerCommandResult <|.. Created
+PlayerCommandResult <|.. Updated
+PlayerCommandResult <|.. Deleted
+PlayerCommandResult <|.. StatisticsUpdated
+PlayerCommandResult <|.. Failure
+@enduml

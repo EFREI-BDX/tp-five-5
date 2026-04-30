@@ -11,7 +11,7 @@ Permettre la gestion des joueurs dans le système : la création, la modificatio
 - **Player ID** : identifiant unique permettant de distinguer chaque joueur.
 - **Registration** : processus de création d’un nouveau joueur dans le système.
 - **Player Status** : état du joueur dans le système (`actif`, `inactif`, `supprimé`).
-- **Player Statistics** : ensemble des données mesurant les performances d’un joueur (nombre de matchs joués, buts marqués, passes décisives, victoires).
+- **Player Statistics** : ensemble des données mesurant les performances d’un joueur (matchs joués, buts, passes décisives, victoires, défaites, matchs nuls, MVP).
 - **Gender** : genre déclaré du joueur (`homme`, `femme`, `non binaire`, `non spécifié`).
 - **BirthDate** : date de naissance du joueur au format `JJ/MM/AAAA`.
 - **Height** : taille du joueur exprimée en centimètres.

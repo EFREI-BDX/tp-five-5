@@ -22,9 +22,9 @@ Il permet d'indiquer qu'un joueur identifié par son id a changé son prénom et
 - playerId doit être non vide
 - playerId doit être un UUID valide
 - firstName doit être non vide
-- firstName doit respecter le format défini (entre 2 et 50 caractères)
+- firstName doit respecter le format défini (1 à 100 caractères)
 - lastName doit être non vide
-- lastName doit respecter le format défini (entre 2 et 50 caractères)
+- lastName doit respecter le format défini (1 à 100 caractères)
 
 **Format JSON attendu**
 

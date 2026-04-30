@@ -46,7 +46,7 @@ paths:
       tags: [Players]
       operationId: createPlayer
       summary: Créer un joueur
-      description: Crée un nouveau joueur dans le système et publie un événement PlayerCreated.
+      description: Crée un nouveau joueur dans le système. Le contrat PlayerCreated existe, mais la publication événementielle n'est pas encore branchée dans l'application.
       requestBody:
         $ref: '#/components/requestBodies/CreatePlayerRequest'
       responses:
@@ -84,7 +84,7 @@ paths:
       tags: [Players]
       operationId: updatePlayer
       summary: Mettre à jour un joueur
-      description: Met à jour les informations du profil d'un joueur et publie un événement PlayerUpdated.
+      description: Met à jour les informations du profil d'un joueur. Les champs absents ou null conservent leur valeur actuelle.
       requestBody:
         $ref: '#/components/requestBodies/UpdatePlayerRequest'
       responses:
@@ -106,7 +106,7 @@ paths:
       description: >
         Passe le statut du joueur à `supprimé` (suppression logique).
         Le joueur n'est pas physiquement retiré de la base.
-        Publie un événement PlayerDeleted.
+        Le contrat PlayerDeleted existe, mais la publication événementielle n'est pas encore branchée dans l'application.
       responses:
         '200':
           $ref: '#/components/responses/DeletePlayerResponse'
@@ -126,8 +126,7 @@ paths:
       operationId: updatePlayerStatistics
       summary: Mettre à jour les statistiques d'un joueur
       description: >
-        Met à jour les statistiques de performance d'un joueur (matchs joués, buts, passes, victoires).
-        Publie un événement PlayerStatisticsUpdated.
+        Met à jour les statistiques de performance d'un joueur (matchs joués, buts, passes, victoires, défaites, nuls, MVP).
       requestBody:
         $ref: '#/components/requestBodies/UpdatePlayerStatisticsRequest'
       responses:

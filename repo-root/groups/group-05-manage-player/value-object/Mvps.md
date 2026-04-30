@@ -2,7 +2,7 @@
 
 **Résumé métier**
 
-Représente le nombre de victoires d’un joueur.
+Représente le nombre de fois où un joueur a été désigné MVP.
 
 **Attributs**
 
