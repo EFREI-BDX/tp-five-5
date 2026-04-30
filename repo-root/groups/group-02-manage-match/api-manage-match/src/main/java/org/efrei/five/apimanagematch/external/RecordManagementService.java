@@ -1,16 +1,16 @@
 package org.efrei.five.apimanagematch.external;
 
-import org.efrei.five.apimanagematch.domain.service.IRecordManagmentService;
+import org.efrei.five.apimanagematch.domain.service.IRecordManagementService;
 import org.efrei.five.apimanagematch.domain.valueobjects.Id;
 import org.efrei.five.apimanagematch.domain.valueobjects.Period;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RecordManagmentService implements IRecordManagmentService {
+public class RecordManagementService implements IRecordManagementService {
 
-    private final RecordManagmentClient client;
+    private final RecordManagementClient client;
 
-    public RecordManagmentService(RecordManagmentClient client) {
+    public RecordManagementService(RecordManagementClient client) {
         this.client = client;
     }
 

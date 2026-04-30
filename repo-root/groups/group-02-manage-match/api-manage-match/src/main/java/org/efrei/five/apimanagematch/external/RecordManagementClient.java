@@ -11,12 +11,12 @@ import org.springframework.web.client.RestTemplate;
 import java.time.Duration;
 
 @Component
-public class RecordManagmentClient {
+public class RecordManagementClient {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
-    public RecordManagmentClient(
+    public RecordManagementClient(
             RestTemplate restTemplate,
             @Value("${service.record.url}") String baseUrl
     ) {

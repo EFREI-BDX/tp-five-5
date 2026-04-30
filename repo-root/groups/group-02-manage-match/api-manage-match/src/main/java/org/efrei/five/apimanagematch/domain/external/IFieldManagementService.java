@@ -6,7 +6,7 @@ import org.efrei.five.apimanagematch.domain.valueobjects.Period;
 
 import java.util.Optional;
 
-public interface IFieldManagmentService {
+public interface IFieldManagementService {
     Optional<Field> getField(Id fieldId);
 
     Boolean createReservation(Id fieldId, Period period);

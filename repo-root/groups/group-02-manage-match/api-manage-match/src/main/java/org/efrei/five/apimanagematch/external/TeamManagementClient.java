@@ -15,12 +15,12 @@ import java.util.Optional;
 
 
 @Component
-public class TeamManagmentClient {
+public class TeamManagementClient {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
-    public TeamManagmentClient(
+    public TeamManagementClient(
             RestTemplate restTemplate,
             @Value("${service.team.url}") String baseUrl
     ) {

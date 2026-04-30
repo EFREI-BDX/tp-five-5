@@ -16,12 +16,12 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Optional;
 
 @Component
-public class FieldManagmentClient {
+public class FieldManagementClient {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
-    public FieldManagmentClient(
+    public FieldManagementClient(
             RestTemplate restTemplate,
             @Value("${service.field.url}") String baseUrl
     ) {

@@ -5,6 +5,6 @@ import org.efrei.five.apimanagematch.domain.valueobjects.Id;
 
 import java.util.Optional;
 
-public interface ITeamManagmentService {
+public interface ITeamManagementService {
     Optional<Team> getTeam(Id teamId);
 }
