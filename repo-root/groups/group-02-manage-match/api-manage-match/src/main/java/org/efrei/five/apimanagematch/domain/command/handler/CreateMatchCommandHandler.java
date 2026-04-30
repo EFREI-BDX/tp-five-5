@@ -6,6 +6,7 @@ import org.efrei.five.apimanagematch.domain.command.creatematch.CreateMatchRespo
 import org.efrei.five.apimanagematch.domain.entities.Match;
 import org.efrei.five.apimanagematch.domain.mapper.MatchMapper;
 import org.efrei.five.apimanagematch.domain.service.IMatchDomainService;
+import org.efrei.five.apimanagematch.domain.service.IMatchTimerService;
 import org.efrei.five.apimanagematch.domain.valueobjects.Id;
 import org.efrei.five.apimanagematch.domain.valueobjects.Period;
 import org.springframework.stereotype.Component;
@@ -14,23 +15,24 @@ import org.springframework.stereotype.Component;
 public class CreateMatchCommandHandler
         implements QueryHandler<CreateMatchQuery, CreateMatchResponse> {
 
-
     private final IMatchDomainService service;
+    private final IMatchTimerService matchTimerService;
 
-    public CreateMatchCommandHandler(IMatchDomainService service) {
+    public CreateMatchCommandHandler(IMatchDomainService service, IMatchTimerService matchTimerService) {
         this.service = service;
+        this.matchTimerService = matchTimerService;
     }
-
 
     @Override
     public CreateMatchResponse handle(CreateMatchQuery command) {
-
         Match match = service.createMatch(
                 new Id(command.teamAUuid()),
                 new Id(command.teamBUuid()),
                 new Id(command.fieldUuid()),
                 new Period(command.start(), command.end())
         );
+
+        matchTimerService.scheduleMatchTimers(match);
 
         return new CreateMatchResponse(MatchMapper.toDto(match));
     }
