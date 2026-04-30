@@ -1,14 +1,21 @@
 spring:
   datasource:
-    url: jdbc:mariadb://jeanaymeric.hd.free.fr:8601/fiverecordmatch-test
-    username: fiverecordmatch
-    password: ${RECORD_MATCH_DB_PASSWORD}
+    url: jdbc:h2:mem:testdb;INIT=CREATE SCHEMA IF NOT EXISTS fiverecordmatch;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
     hikari:
       initialization-fail-timeout: 0
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+server:
+  port: 8082
 
 app:
   console:
-    enabled: false
+    enabled: true
 
 logging:
   config: classpath:log4j2-test.xml

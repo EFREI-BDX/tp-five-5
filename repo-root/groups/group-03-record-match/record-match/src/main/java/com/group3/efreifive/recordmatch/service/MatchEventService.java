@@ -65,17 +65,18 @@ public class MatchEventService implements IMatchEventService {
 
     @Override
     public MatchEventDto recordEvent(final MatchEventDto dto) {
+        final MatchDto matchDto = this.matchService.findById(dto.matchId());
+        final EventDto eventDto = this.eventService.findById(dto.eventId());
+
         final MatchEventEntity e = this.mapper.dtoToEntity(dto);
         this.repository.save(e);
         final MatchEventDto saved = this.mapper.entityToDto(e);
-        this.notifyOutbound(saved);
+        this.notifyOutbound(saved, matchDto, eventDto);
         return saved;
     }
 
-    private void notifyOutbound(final MatchEventDto matchEventDto) {
+    private void notifyOutbound(final MatchEventDto matchEventDto, final MatchDto matchDto, final EventDto eventDto) {
         try {
-            final MatchDto matchDto = this.matchService.findById(matchEventDto.matchId());
-            final EventDto eventDto = this.eventService.findById(matchEventDto.eventId());
             final String eventType = toOutboundType(eventDto.name());
             this.outboundService.notifyMatchEvent(matchEventDto, matchDto, eventType);
         } catch (Exception ex) {
