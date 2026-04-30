@@ -1,20 +1,22 @@
 package fr.efrei.managefield.service.implementation
 
+import fr.efrei.managefield.domain.entity.Field
+import fr.efrei.managefield.domain.entity.Reservation
+import fr.efrei.managefield.domain.enums.ReservationStatusCode
+import fr.efrei.managefield.domain.service.ReservationPolicy
 import fr.efrei.managefield.domain.valueobject.DomainId
 import fr.efrei.managefield.domain.valueobject.TimeSlot
-import fr.efrei.managefield.entity.ReservationEntity
 import fr.efrei.managefield.mapper.ReservationServiceMapper
-import fr.efrei.managefield.repository.FieldRepository
-import fr.efrei.managefield.repository.ReservationRepository
 import fr.efrei.managefield.service.ReservationService
 import fr.efrei.managefield.service.dto.request.ChangeReservationStatusCommandDto
 import fr.efrei.managefield.service.dto.request.CreateReservationCommandDto
 import fr.efrei.managefield.service.dto.response.ReservationViewResultDto
-import fr.efrei.managefield.service.exception.ApplicationInternalException
+import fr.efrei.managefield.service.exception.ApplicationConflictException
 import fr.efrei.managefield.service.exception.ApplicationNotFoundException
 import fr.efrei.managefield.service.exception.ApplicationValidationException
-import fr.efrei.managefield.service.requireSuccess
-import org.springframework.data.repository.findByIdOrNull
+import fr.efrei.managefield.service.port.FieldReadPort
+import fr.efrei.managefield.service.port.ReservationReadPort
+import fr.efrei.managefield.service.port.ReservationWritePort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
@@ -29,66 +31,60 @@ import java.util.UUID
 @Service
 @Validated
 class ReservationServiceImpl(
-    private val fieldRepository: FieldRepository,
-    private val reservationRepository: ReservationRepository,
+    private val fieldReadPort: FieldReadPort,
+    private val reservationReadPort: ReservationReadPort,
+    private val reservationWritePort: ReservationWritePort,
     private val reservationServiceMapper: ReservationServiceMapper
 ) : ReservationService {
+    private val reservationPolicy = ReservationPolicy()
+
     @Transactional(readOnly = true)
     override fun listByFieldId(fieldId: String): List<ReservationViewResultDto> {
         val id = parseId(fieldId, "field_id")
-        if (!fieldRepository.existsById(id.value)) {
-            throw ApplicationNotFoundException("field not found")
-        }
+        findFieldOrThrow(id)
 
         return reservationServiceMapper.toReservationViews(
-            reservationRepository.findAllByFieldIdOrderByDateAscStartTimeAsc(id.value)
+            reservationReadPort.listByFieldId(id)
         )
     }
 
     @Transactional
     override fun create(command: CreateReservationCommandDto): ReservationViewResultDto {
         val fieldId = parseId(command.fieldId, "field_id")
-        val statusId = parseId(command.statusId, "status_id")
+        val status = parseReservationStatus(command.statusId)
         val slot = parseSlot(command.date, command.startTime, command.endTime)
         val reservationId = UUID.randomUUID().toString()
-        val response = reservationRepository
-            .createReservation(
-                reservationId = reservationId,
-                fieldId = fieldId.value,
-                statusId = statusId.value,
-                date = slot.date,
-                startTime = slot.startTime,
-                endTime = slot.endTime
-            )
-            .requireSuccess()
+        val field = findFieldOrThrow(fieldId)
+        val existingReservations = reservationReadPort.listByFieldId(fieldId)
+        requireCreationAllowed(field, status, slot, existingReservations)
+        val createdReservationId = reservationWritePort.createReservation(
+            reservationId = DomainId.from(reservationId),
+            fieldId = fieldId,
+            status = status,
+            slot = slot
+        )
 
-        val createdReservationId = response.getReservationId()
-            ?: throw ApplicationInternalException("create reservation procedure did not return a reservation_id")
-
-        return reservationServiceMapper.toReservationView(findReservationForFieldOrThrow(createdReservationId, fieldId.value))
+        return reservationServiceMapper.toReservationView(findReservationForFieldOrThrow(createdReservationId, fieldId))
     }
 
     @Transactional
     override fun changeStatus(command: ChangeReservationStatusCommandDto): ReservationViewResultDto {
         val fieldId = parseId(command.fieldId, "field_id")
         val reservationId = parseId(command.reservationId, "reservation_id")
-        val statusId = parseId(command.statusId, "status_id")
-        reservationRepository
-            .changeReservationStatus(fieldId.value, reservationId.value, statusId.value)
-            .requireSuccess()
+        val status = parseReservationStatus(command.statusId)
+        reservationWritePort.changeReservationStatus(fieldId, reservationId, status)
 
-        return reservationServiceMapper.toReservationView(findReservationForFieldOrThrow(reservationId.value, fieldId.value))
+        return reservationServiceMapper.toReservationView(findReservationForFieldOrThrow(reservationId, fieldId))
     }
 
-    private fun findReservationForFieldOrThrow(reservationId: String, fieldId: String): ReservationEntity {
-        val reservation = reservationRepository.findByIdOrNull(reservationId)
+    private fun findReservationForFieldOrThrow(reservationId: DomainId, fieldId: DomainId): Reservation {
+        return reservationReadPort.findByIdForField(reservationId, fieldId)
             ?: throw ApplicationNotFoundException("reservation not found")
+    }
 
-        if (reservation.fieldId != fieldId) {
-            throw ApplicationNotFoundException("reservation not found")
-        }
-
-        return reservation
+    private fun findFieldOrThrow(fieldId: DomainId): Field {
+        return fieldReadPort.findById(fieldId)
+            ?: throw ApplicationNotFoundException("field not found")
     }
 
     private fun parseId(raw: String, field: String): DomainId {
@@ -104,6 +100,25 @@ class ReservationServiceImpl(
             TimeSlot.from(date, startTime, endTime)
         } catch (exception: IllegalArgumentException) {
             throw ApplicationValidationException(exception.message ?: "slot is invalid")
+        }
+    }
+
+    private fun parseReservationStatus(raw: String): ReservationStatusCode {
+        val id = parseId(raw, "status_id")
+        return ReservationStatusCode.fromId(id.value)
+            ?: throw ApplicationNotFoundException("reservation status not found")
+    }
+
+    private fun requireCreationAllowed(
+        field: Field,
+        status: ReservationStatusCode,
+        slot: TimeSlot,
+        existingReservations: Collection<Reservation>
+    ) {
+        try {
+            reservationPolicy.requireCreationAllowed(field, status, slot, existingReservations)
+        } catch (exception: IllegalArgumentException) {
+            throw ApplicationConflictException(exception.message ?: "reservation cannot be created")
         }
     }
 }

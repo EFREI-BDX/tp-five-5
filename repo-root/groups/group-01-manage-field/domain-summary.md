@@ -26,6 +26,20 @@ groups.
 - A `cancelled` reservation no longer blocks the slot.
 - A reservation in this context only represents field occupancy, not player or team assignment.
 
+**Domain Model**
+
+- `Field` is a pure domain aggregate, independent from JPA.
+- `Reservation` is a pure domain aggregate, independent from JPA.
+- `DomainId`, `FieldName`, and `TimeSlot` are pure value objects.
+- `FieldAvailabilityDomainService` computes available fields from field aggregates, reservation aggregates, and a requested slot.
+- `ReservationPolicy` protects reservation creation invariants before persistence.
+
+**Application Architecture**
+
+- Application services depend on ports, not directly on Spring Data repositories.
+- Persistence adapters implement these ports with JPA read views and stored procedures.
+- SQL procedure return codes are translated in the procedural persistence package, not in the domain model.
+
 **Persistence and Read Models**
 
 - The application user reads only views and executes procedures for writes.

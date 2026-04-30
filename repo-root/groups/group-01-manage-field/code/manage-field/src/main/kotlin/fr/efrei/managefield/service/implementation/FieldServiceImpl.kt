@@ -1,26 +1,24 @@
 package fr.efrei.managefield.service.implementation
 
+import fr.efrei.managefield.domain.entity.Field
+import fr.efrei.managefield.domain.enums.FieldStatusCode
+import fr.efrei.managefield.domain.service.FieldAvailabilityDomainService
 import fr.efrei.managefield.domain.valueobject.DomainId
 import fr.efrei.managefield.domain.valueobject.FieldName
 import fr.efrei.managefield.domain.valueobject.TimeSlot
-import fr.efrei.managefield.entity.FieldEntity
 import fr.efrei.managefield.mapper.FieldServiceMapper
 import fr.efrei.managefield.mapper.ReservationServiceMapper
-import fr.efrei.managefield.repository.ActiveFieldRepository
-import fr.efrei.managefield.repository.BlockingReservationRepository
-import fr.efrei.managefield.repository.FieldRepository
-import fr.efrei.managefield.repository.ReservationRepository
 import fr.efrei.managefield.service.FieldService
 import fr.efrei.managefield.service.dto.request.ChangeFieldStatusCommandDto
 import fr.efrei.managefield.service.dto.request.CreateFieldCommandDto
+import fr.efrei.managefield.service.dto.request.ListAvailableFieldsCommandDto
 import fr.efrei.managefield.service.dto.response.FieldDetailsViewResultDto
 import fr.efrei.managefield.service.dto.response.FieldViewResultDto
-import fr.efrei.managefield.service.dto.request.ListAvailableFieldsCommandDto
-import fr.efrei.managefield.service.exception.ApplicationInternalException
 import fr.efrei.managefield.service.exception.ApplicationNotFoundException
 import fr.efrei.managefield.service.exception.ApplicationValidationException
-import fr.efrei.managefield.service.requireSuccess
-import org.springframework.data.repository.findByIdOrNull
+import fr.efrei.managefield.service.port.FieldReadPort
+import fr.efrei.managefield.service.port.FieldWritePort
+import fr.efrei.managefield.service.port.ReservationReadPort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
@@ -34,33 +32,22 @@ import org.springframework.validation.annotation.Validated
 @Service
 @Validated
 class FieldServiceImpl(
-    private val fieldRepository: FieldRepository,
-    private val activeFieldRepository: ActiveFieldRepository,
-    private val blockingReservationRepository: BlockingReservationRepository,
-    private val reservationRepository: ReservationRepository,
+    private val fieldReadPort: FieldReadPort,
+    private val fieldWritePort: FieldWritePort,
+    private val reservationReadPort: ReservationReadPort,
     private val fieldServiceMapper: FieldServiceMapper,
     private val reservationServiceMapper: ReservationServiceMapper
 ) : FieldService {
+    private val availabilityDomainService = FieldAvailabilityDomainService()
+
     @Transactional(readOnly = true)
     override fun listAvailableFields(command: ListAvailableFieldsCommandDto): List<FieldViewResultDto> {
         val slot = parseSlot(command.date, command.startTime, command.endTime)
-        val activeFields = activeFieldRepository.findAllByOrderByNameAsc()
+        val activeFields = fieldReadPort.listActiveFields()
+        val blockingReservations = reservationReadPort.listBlockingByDate(slot.date)
+        val availableFields = availabilityDomainService.listAvailableFields(activeFields, blockingReservations, slot)
 
-        if (activeFields.isEmpty()) {
-            return fieldServiceMapper.toActiveFieldViews(activeFields)
-        }
-
-        val blockedFieldIds = blockingReservationRepository
-            .findAllByDate(slot.date)
-            .filter { reservation ->
-                val start = reservation.startTime ?: throw ApplicationInternalException("reservation start_time is missing")
-                val end = reservation.endTime ?: throw ApplicationInternalException("reservation end_time is missing")
-                slot.overlaps(start, end)
-            }
-            .map { it.fieldId }
-            .toSet()
-
-        return fieldServiceMapper.toActiveFieldViews(activeFields.filterNot { it.id in blockedFieldIds })
+        return fieldServiceMapper.toFieldViews(availableFields)
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +55,7 @@ class FieldServiceImpl(
         val id = parseId(fieldId, "field_id")
         val field = findFieldOrThrow(id.value)
         val reservations = reservationServiceMapper.toReservationViews(
-            reservationRepository.findAllByFieldIdOrderByDateAscStartTimeAsc(id.value)
+            reservationReadPort.listByFieldId(id)
         )
 
         return fieldServiceMapper.toFieldDetails(field, reservations)
@@ -78,25 +65,28 @@ class FieldServiceImpl(
     override fun create(command: CreateFieldCommandDto): FieldViewResultDto {
         val fieldId = command.fieldId?.let { parseId(it, "field_id").value }
         val name = parseFieldName(command.name).value
-        val statusId = parseId(command.statusId, "status_id").value
-        val response = fieldRepository.createField(fieldId, name, statusId).requireSuccess()
-        val createdFieldId = response.getFieldId() ?: fieldId
-            ?: throw ApplicationInternalException("create field procedure did not return a field_id")
+        val status = parseFieldStatus(command.statusId)
+        val createdFieldId = fieldWritePort.createField(
+            fieldId = fieldId?.let { DomainId.from(it) },
+            name = FieldName.from(name),
+            status = status
+        )
 
-        return fieldServiceMapper.toFieldView(findFieldOrThrow(createdFieldId))
+        return fieldServiceMapper.toFieldView(findFieldOrThrow(createdFieldId.value))
     }
 
     @Transactional
     override fun changeStatus(command: ChangeFieldStatusCommandDto): FieldViewResultDto {
         val fieldId = parseId(command.fieldId, "field_id")
-        val statusId = parseId(command.statusId, "status_id")
-        fieldRepository.changeFieldStatus(fieldId.value, statusId.value).requireSuccess()
+        val status = parseFieldStatus(command.statusId)
+        fieldWritePort.changeFieldStatus(fieldId, status)
 
         return fieldServiceMapper.toFieldView(findFieldOrThrow(fieldId.value))
     }
 
-    private fun findFieldOrThrow(fieldId: String): FieldEntity {
-        return fieldRepository.findByIdOrNull(fieldId)
+    private fun findFieldOrThrow(fieldId: String): Field {
+        val id = DomainId.from(fieldId)
+        return fieldReadPort.findById(id)
             ?: throw ApplicationNotFoundException("field not found")
     }
 
@@ -114,6 +104,12 @@ class FieldServiceImpl(
         } catch (exception: IllegalArgumentException) {
             throw ApplicationValidationException(exception.message ?: "field name is invalid")
         }
+    }
+
+    private fun parseFieldStatus(raw: String): FieldStatusCode {
+        val id = parseId(raw, "status_id")
+        return FieldStatusCode.fromId(id.value)
+            ?: throw ApplicationNotFoundException("field status not found")
     }
 
     private fun parseSlot(date: String, startTime: String, endTime: String): TimeSlot {

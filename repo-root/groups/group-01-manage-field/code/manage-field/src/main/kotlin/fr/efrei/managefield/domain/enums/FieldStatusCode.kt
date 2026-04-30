@@ -3,10 +3,10 @@ package fr.efrei.managefield.domain.enums
 /**
  * Enumerates fixed field statuses stored as reference data in MariaDB.
  */
-enum class FieldStatusCode(val id: String, val code: String) {
-    ACTIVE("11111111-1111-4111-8111-111111111111", "active"),
-    INACTIVE("11111111-1111-4111-8111-111111111112", "inactive"),
-    MAINTENANCE("11111111-1111-4111-8111-111111111113", "maintenance");
+enum class FieldStatusCode(val id: String, val code: String, val label: String) {
+    ACTIVE("11111111-1111-4111-8111-111111111111", "active", "Active"),
+    INACTIVE("11111111-1111-4111-8111-111111111112", "inactive", "Inactive"),
+    MAINTENANCE("11111111-1111-4111-8111-111111111113", "maintenance", "Maintenance");
 
     companion object {
         /**

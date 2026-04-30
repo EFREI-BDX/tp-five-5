@@ -1,8 +1,8 @@
-package fr.efrei.managefield.domain.enums
+package fr.efrei.managefield.repository.procedural
 
 /**
  * Stable SQL procedure return codes. They are deliberately distinct from HTTP
- * status codes and are translated by the application layer.
+ * status codes and are translated by the persistence adapter layer.
  */
 enum class ApplicationSqlErrorCode(val sqlCode: Int) {
     SUCCESS(0),
