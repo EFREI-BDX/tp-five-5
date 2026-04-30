@@ -1,23 +1,18 @@
 package com.group3.efreifive.recordmatch.dto;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * DTO pour représenter un événement de match à notifier à des systèmes externes
  */
 public record MatchOutboundEvent(
-        UUID notificationId,
+        UUID eventId,
         UUID matchId,
         String type,
         LocalDateTime occurredAt,
-        int matchTimeMinute,
-        int matchTimeSecond,
-        String matchTimePeriod,
-        UUID player1Id,
-        UUID player2Id,
-        UUID teamId,
-        UUID referenceEventId,
-        Boolean succeeded
+        MatchTimeDto matchTime,
+        Map<String, Object> payload
 ) {
 }

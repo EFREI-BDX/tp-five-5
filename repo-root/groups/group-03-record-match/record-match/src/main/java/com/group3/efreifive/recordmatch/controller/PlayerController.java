@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/players")
+@RequestMapping("/player")
 public class PlayerController {
 
     private final IPlayerService service;

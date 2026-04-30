@@ -43,7 +43,18 @@ public class MatchService implements IMatchService {
 
     @Override
     public MatchDto create(MatchDto dto) {
+        if (dto.team1Id() != null && dto.team1Id().equals(dto.team2Id())) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_MATCH,
+                    "team1 and team2 must be different");
+        }
+        if (dto.scheduledDurationMinutes() == null || dto.scheduledDurationMinutes() <= 0) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_MATCH,
+                    "scheduledDurationMinutes must be positive");
+        }
         final MatchEntity e = mapper.dtoToEntity(dto);
+        if (e.getMatchId() == null) {
+            e.setMatchId(UUID.randomUUID());
+        }
         repository.save(e);
         return mapper.entityToDto(e);
     }

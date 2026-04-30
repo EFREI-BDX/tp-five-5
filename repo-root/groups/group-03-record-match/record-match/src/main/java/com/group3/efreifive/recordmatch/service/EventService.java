@@ -43,7 +43,18 @@ public class EventService implements IEventService {
 
     @Override
     public EventDto create(EventDto dto) {
+        if (dto.name() == null || dto.name().isBlank()) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_EVENT,
+                    "Event name must not be blank");
+        }
+        if (dto.nbPlayers() == null || dto.nbPlayers() < 0 || dto.nbPlayers() > 2) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_EVENT,
+                    "nbPlayers must be 0, 1 or 2");
+        }
         final EventEntity e = mapper.dtoToEntity(dto);
+        if (e.getEventId() == null) {
+            e.setEventId(UUID.randomUUID());
+        }
         repository.save(e);
         return mapper.entityToDto(e);
     }

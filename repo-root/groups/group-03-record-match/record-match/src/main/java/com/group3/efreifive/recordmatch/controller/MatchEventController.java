@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/match-events")
+@RequestMapping("/match-event")
 public class MatchEventController {
 
     private final IMatchEventService service;

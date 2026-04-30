@@ -68,7 +68,33 @@ public class MatchEventService implements IMatchEventService {
         final MatchDto matchDto = this.matchService.findById(dto.matchId());
         final EventDto eventDto = this.eventService.findById(dto.eventId());
 
+        if (dto.occuredAt() != null && dto.occuredAt().isBefore(matchDto.startedAt())) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_MATCH_EVENT,
+                    "occuredAt must be >= match startedAt (" + matchDto.startedAt() + ")");
+        }
+        final boolean hasP1 = dto.player1Id() != null;
+        final boolean hasP2 = dto.player2Id() != null;
+        if (eventDto.nbPlayers() == 0 && (hasP1 || hasP2)) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_MATCH_EVENT,
+                    "Event '" + eventDto.name() + "' requires no players");
+        }
+        if (eventDto.nbPlayers() >= 1 && !hasP1) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_MATCH_EVENT,
+                    "Event '" + eventDto.name() + "' requires at least 1 player");
+        }
+        if (eventDto.nbPlayers() == 2 && !hasP2) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_MATCH_EVENT,
+                    "Event '" + eventDto.name() + "' requires 2 players");
+        }
+        if (hasP1 && hasP2 && dto.player1Id().equals(dto.player2Id())) {
+            throw new RecordMatchServiceException(DomainErrorCode.INVALID_MATCH_EVENT,
+                    "player1 and player2 must be different");
+        }
+
         final MatchEventEntity e = this.mapper.dtoToEntity(dto);
+        if (e.getMatchEventId() == null) {
+            e.setMatchEventId(UUID.randomUUID());
+        }
         this.repository.save(e);
         final MatchEventDto saved = this.mapper.entityToDto(e);
         this.notifyOutbound(saved, matchDto, eventDto);

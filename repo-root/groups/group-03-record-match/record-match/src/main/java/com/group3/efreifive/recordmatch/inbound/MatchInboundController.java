@@ -1,15 +1,13 @@
 package com.group3.efreifive.recordmatch.inbound;
 
+import com.group3.efreifive.recordmatch.dto.EndMatchDto;
 import com.group3.efreifive.recordmatch.dto.MatchDto;
 import com.group3.efreifive.recordmatch.service.IMatchSyncService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 /**
  * Controlleur pour les événements entrants liés aux matchs, tels que le début et la fin d'un match.
@@ -32,9 +30,9 @@ public class MatchInboundController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{matchId}/end")
-    public ResponseEntity<Void> matchEnded(@PathVariable UUID matchId) {
-        this.matchSyncService.handleMatchEnded(matchId);
+    @PostMapping("/end")
+    public ResponseEntity<Void> matchEnded(@RequestBody EndMatchDto dto) {
+        this.matchSyncService.handleMatchEnded(dto.matchId(), dto.endedAt());
         return ResponseEntity.ok().build();
     }
 }

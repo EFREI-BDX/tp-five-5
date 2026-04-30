@@ -7,6 +7,7 @@ import com.group3.efreifive.recordmatch.service.MatchEventOutboundService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -34,9 +35,9 @@ class MatchSyncService implements IMatchSyncService {
     }
 
     @Override
-    public void handleMatchEnded(final UUID matchId) {
+    public void handleMatchEnded(final UUID matchId, final LocalDateTime endedAt) {
         final MatchDto matchDto = this.matchService.findById(matchId);
-        this.outboundService.notifyMatchFinished(matchDto);
-        MatchSyncService.log.info("Match {} ended", matchId);
+        this.outboundService.notifyMatchFinished(matchDto, endedAt);
+        MatchSyncService.log.info("Match {} ended at {}", matchId, endedAt);
     }
 }

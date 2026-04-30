@@ -5,7 +5,10 @@ public enum DomainErrorCode {
 	EVENT_NOT_FOUND("ENFND", "No event with this id exists"),
 	MATCH_NOT_FOUND("MNFND", "No match with this id exists"),
 	MATCH_EVENT_NOT_FOUND("MENFD", "No match event with this id exists"),
-	PLAYER_NOT_FOUND("PNFND", "No player with this id exists");
+	PLAYER_NOT_FOUND("PNFND", "No player with this id exists"),
+	INVALID_MATCH("INVMAT", "Match data is invalid"),
+	INVALID_EVENT("INVEVT", "Event data is invalid"),
+	INVALID_MATCH_EVENT("INVME", "MatchEvent data is invalid");
 
 	private final String code;
 	private final String message;
