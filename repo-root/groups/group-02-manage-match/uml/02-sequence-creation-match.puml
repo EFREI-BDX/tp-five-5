@@ -1,0 +1,59 @@
+@startuml
+' Diag de séquence pour POST /matches
+' Jacobson, PlantUML v2
+actor Client
+boundary MatchController
+control MatchApplicationService
+control CreateMatchCommandHandler
+control MatchDomainService
+control TeamDomainService
+entity JdbcTeamRepository
+control TeamManagementService
+control FieldDomaineService
+entity JdbcFieldRepository
+control FieldManagementService
+entity JdbcMatchRepository
+control MatchTimerService
+
+Client -> MatchController : create(MatchRequest)
+MatchController -> MatchApplicationService : create(MatchRequest)
+MatchApplicationService -> CreateMatchCommandHandler : handle(CreateMatchQuery)
+CreateMatchCommandHandler -> MatchDomainService : createMatch(teamAId, teamBId, fieldId, period)
+
+MatchDomainService -> TeamDomainService : getTeamById(teamAId)
+TeamDomainService -> TeamManagementService : getTeam(teamAId)
+TeamManagementService --> TeamDomainService : Optional<Team>
+TeamDomainService -> JdbcTeamRepository : upsert(Team)
+TeamDomainService -> JdbcTeamRepository : findById(teamAId)
+JdbcTeamRepository --> TeamDomainService : Optional<Team>
+TeamDomainService --> MatchDomainService : Team
+
+MatchDomainService -> TeamDomainService : getTeamById(teamBId)
+TeamDomainService -> TeamManagementService : getTeam(teamBId)
+TeamManagementService --> TeamDomainService : Optional<Team>
+TeamDomainService -> JdbcTeamRepository : upsert(Team)
+TeamDomainService -> JdbcTeamRepository : findById(teamBId)
+JdbcTeamRepository --> TeamDomainService : Optional<Team>
+TeamDomainService --> MatchDomainService : Team
+
+MatchDomainService -> FieldDomaineService : getFieldById(fieldId)
+FieldDomaineService -> FieldManagementService : getField(fieldId)
+FieldManagementService --> FieldDomaineService : Optional<Field>
+FieldDomaineService -> JdbcFieldRepository : upsert(Field)
+FieldDomaineService -> JdbcFieldRepository : findById(fieldId)
+JdbcFieldRepository --> FieldDomaineService : Optional<Field>
+FieldDomaineService --> MatchDomainService : Field
+
+MatchDomainService -> FieldDomaineService : createReservation(fieldId, period)
+FieldDomaineService -> FieldManagementService : createReservation(fieldId, period)
+FieldManagementService --> FieldDomaineService : Boolean
+
+MatchDomainService -> JdbcMatchRepository : save(Match)
+JdbcMatchRepository --> MatchDomainService : UUID
+MatchDomainService --> CreateMatchCommandHandler : Match
+
+CreateMatchCommandHandler -> MatchTimerService : scheduleMatchTimers(Match)
+CreateMatchCommandHandler --> MatchApplicationService : CreateMatchResponse
+MatchApplicationService --> MatchController : MatchResponseDto
+MatchController --> Client : ResponseEntity<MatchResponseDto>
+@enduml

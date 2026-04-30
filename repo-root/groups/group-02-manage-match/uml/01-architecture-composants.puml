@@ -1,0 +1,109 @@
+@startuml manage-match-main-diagram
+!pragma layout smetana
+top to bottom direction
+' Diagramme principal du microservice manage-match
+' Vue d'ensemble simple, dans l'esprit des exemples UML fournis
+
+package "controller" {
+  class MatchController <<Controller>>
+  class TeamEventsInboundController <<Controller>>
+}
+
+package "application" {
+  class MatchApplicationService <<Service>>
+  class TeamEventApplicationService <<Service>>
+}
+
+package "command" {
+  interface MatchQuery <<Query>> {
+    .. Sous-types ..
+    -- CreateMatchQuery
+    -- GetMatchQuery
+  }
+
+  interface MatchCommand <<Command>> {
+    .. Sous-types ..
+    -- CancelMatchCommand
+    -- SyncTeamCommand
+    -- DissolveTeamCommand
+  }
+
+  interface MatchHandler <<Handler>> {
+    .. Sous-types ..
+    -- CreateMatchCommandHandler
+    -- GetMatchCommandHandler
+    -- CancelMatchCommandHandler
+    -- SyncTeamCommandHandler
+    -- DissolveTeamCommandHandler
+  }
+}
+
+package "service" {
+  class MatchDomainService <<Service>>
+  class TeamDomainService <<Service>>
+  class FieldDomaineService <<Service>>
+  class TeamSyncDomainService <<Service>>
+  class MatchCancellationDomainService <<Service>>
+  class MatchTimerService <<Scheduler>>
+  class TeamManagementService <<Service>>
+  class FieldManagementService <<Service>>
+  class MatchEventOutboundService <<Service>>
+}
+
+package "repository" {
+  class JdbcMatchRepository <<Repository>>
+  class JdbcMatchByTeamRepository <<Repository>>
+  class JdbcTeamRepository <<Repository>>
+  class JdbcFieldRepository <<Repository>>
+}
+
+package "external" {
+  class TeamManagementClient <<Client>>
+  class FieldManagementClient <<Client>>
+  class MatchOutboundProperties <<Configuration>>
+}
+
+package "entity" {
+  class Match <<Entity>>
+  class Team <<Entity>>
+  class Field <<Entity>>
+}
+
+MatchController --> MatchApplicationService
+TeamEventsInboundController --> TeamEventApplicationService
+
+MatchApplicationService --> MatchHandler
+TeamEventApplicationService --> MatchHandler
+
+MatchHandler ..> MatchDomainService
+MatchHandler ..> TeamSyncDomainService
+MatchHandler ..> MatchCancellationDomainService
+MatchHandler ..> MatchTimerService
+
+MatchDomainService --> TeamDomainService
+MatchDomainService --> FieldDomaineService
+MatchDomainService --> JdbcMatchRepository
+
+TeamDomainService --> TeamManagementService
+TeamDomainService --> JdbcTeamRepository
+
+FieldDomaineService --> FieldManagementService
+FieldDomaineService --> JdbcFieldRepository
+
+TeamSyncDomainService --> JdbcTeamRepository
+
+MatchCancellationDomainService --> JdbcMatchByTeamRepository
+MatchCancellationDomainService --> JdbcMatchRepository
+MatchCancellationDomainService --> MatchTimerService
+
+MatchTimerService --> MatchEventOutboundService
+MatchTimerService --> JdbcMatchRepository
+
+TeamManagementService --> TeamManagementClient
+FieldManagementService --> FieldManagementClient
+MatchEventOutboundService --> MatchOutboundProperties
+
+Match "1" o-- "2" Team : teams
+Match "1" o-- "1" Field : field
+
+@enduml

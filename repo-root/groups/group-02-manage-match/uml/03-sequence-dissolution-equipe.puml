@@ -1,0 +1,26 @@
+@startuml
+' Diag de séquence pour POST /api/inbounds/teams/dissolved
+' Jacobson, PlantUML v2
+actor ManageTeam
+boundary TeamEventsInboundController
+control TeamEventApplicationService
+control DissolveTeamCommandHandler
+control MatchCancellationDomainService
+entity JdbcMatchByTeamRepository
+control MatchTimerService
+entity JdbcMatchRepository
+
+ManageTeam -> TeamEventsInboundController : teamDissolved(TeamInboundDto)
+TeamEventsInboundController -> TeamEventApplicationService : onTeamDissolved(TeamInboundDto)
+TeamEventApplicationService -> DissolveTeamCommandHandler : handle(DissolveTeamCommand)
+DissolveTeamCommandHandler -> MatchCancellationDomainService : cancelMatchesForTeam(teamId)
+MatchCancellationDomainService -> JdbcMatchByTeamRepository : findNotStartedMatchIdsByTeamId(teamId)
+JdbcMatchByTeamRepository --> MatchCancellationDomainService : List<Id>
+MatchCancellationDomainService -> MatchTimerService : cancelMatchTimers(matchId)
+MatchCancellationDomainService -> JdbcMatchRepository : updateMatchStatus(matchId, CANCELLED)
+JdbcMatchRepository --> MatchCancellationDomainService : void
+MatchCancellationDomainService --> DissolveTeamCommandHandler : void
+DissolveTeamCommandHandler --> TeamEventApplicationService : void
+TeamEventApplicationService --> TeamEventsInboundController : void
+TeamEventsInboundController --> ManageTeam : ResponseEntity<Void>
+@enduml

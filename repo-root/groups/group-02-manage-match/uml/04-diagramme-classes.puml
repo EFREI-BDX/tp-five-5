@@ -1,0 +1,231 @@
+@startuml manage-match-class-diagram
+!pragma layout smetana
+top to bottom direction
+' Diagramme de classes principal du microservice manage-match
+' Version compacte basée sur le style du dossier examples-uml
+
+package "entity" {
+  class Match <<Entity>> {
+    + id: Id
+    + teamA: Team
+    + teamB: Team
+    + field: Field
+    + period: Period
+    + status: MatchState
+  }
+
+  class Team <<Entity>> {
+    + id: Id
+    + tag: Tag
+    + label: Label
+  }
+
+  class Field <<Entity>> {
+    + id: Id
+    + label: Label
+  }
+}
+
+package "dto" {
+  class MatchRequest <<DTO>> {
+    + teamAUuid: UUID
+    + teamBUuid: UUID
+    + fieldUuid: UUID
+    + start: LocalDateTime
+    + end: LocalDateTime
+  }
+
+  class TeamInboundDto <<DTO>> {
+    + id: UUID
+    + label: String
+    + tag: String
+    + creationDate: LocalDate
+    + dissolutionDate: LocalDate
+    + idTeamLeader: UUID
+    + state: String
+  }
+
+  class MatchResponseDto <<DTO>> {
+    + id: UUID
+    + teamA: MatchResponseTeamDto
+    + teamB: MatchResponseTeamDto
+    + field: MatchResponseFieldDto
+    + period: MatchResponsePeriodDto
+    + status: String
+  }
+
+  class "MatchResponseDto.TeamResponse" as MatchResponseTeamDto <<DTO>> {
+    + id: UUID
+    + tag: String
+    + label: String
+  }
+
+  class "MatchResponseDto.FieldResponse" as MatchResponseFieldDto <<DTO>> {
+    + id: UUID
+    + label: String
+  }
+
+  class "MatchResponseDto.PeriodResponse" as MatchResponsePeriodDto <<DTO>> {
+    + start: LocalDateTime
+    + end: LocalDateTime
+  }
+
+  class MatchRawResult <<DTO>> {
+    + matchUuid: UUID
+    + teamAUuid: UUID
+    + teamATag: String
+    + teamALabel: String
+    + teamBUuid: UUID
+    + teamBTag: String
+    + teamBLabel: String
+    + fieldUuid: UUID
+    + fieldLabel: String
+    + startTime: LocalDateTime
+    + endTime: LocalDateTime
+    + status: String
+  }
+}
+
+package "mapper" {
+  class MatchMapper <<Mapper>>
+  class RepositoryMatchMapper <<Mapper>>
+  class MatchRawResultRowMapper <<Mapper>>
+}
+
+package "service" {
+  class MatchApplicationService <<Service>>
+  class TeamEventApplicationService <<Service>>
+  class MatchDomainService <<Service>>
+  class TeamDomainService <<Service>>
+  class FieldDomaineService <<Service>>
+  class TeamSyncDomainService <<Service>>
+  class MatchCancellationDomainService <<Service>>
+  class MatchTimerService <<Scheduler>>
+  class MatchEventOutboundService <<Service>>
+  class TeamManagementService <<Service>>
+  class FieldManagementService <<Service>>
+}
+
+package "controller" {
+  class MatchController <<Controller>>
+  class TeamEventsInboundController <<Controller>>
+  class GlobalExceptionHandler <<ControllerAdvice>>
+}
+
+package "command" {
+  interface MatchQuery <<Query>> {
+    .. Sous-types ..
+    -- CreateMatchQuery
+    -- GetMatchQuery
+  }
+
+  interface MatchCommand <<Command>> {
+    .. Sous-types ..
+    -- CancelMatchCommand
+    -- SyncTeamCommand
+    -- DissolveTeamCommand
+  }
+
+  interface MatchHandler <<Handler>> {
+    .. Sous-types ..
+    -- CreateMatchCommandHandler
+    -- GetMatchCommandHandler
+    -- CancelMatchCommandHandler
+    -- SyncTeamCommandHandler
+    -- DissolveTeamCommandHandler
+  }
+}
+
+package "repository" {
+  class JdbcMatchRepository <<Repository>>
+  class JdbcMatchByTeamRepository <<Repository>>
+  class JdbcTeamRepository <<Repository>>
+  class JdbcFieldRepository <<Repository>>
+}
+
+package "external" {
+  class TeamManagementClient <<Client>>
+  class FieldManagementClient <<Client>>
+  class MatchOutboundProperties <<Configuration>>
+}
+
+package "valueobject" {
+  class Id <<ValueObject>> {
+    + value: UUID
+  }
+
+  class Label <<ValueObject>> {
+    + value: String
+  }
+
+  class Tag <<ValueObject>> {
+    + value: String
+  }
+
+  class Period <<ValueObject>> {
+    + start: LocalDateTime
+    + end: LocalDateTime
+  }
+
+  enum MatchState <<ValueObject>>
+}
+
+package "exception" {
+  class NotFoundException <<Exception>>
+  class ImpossibleReservationException <<Exception>>
+}
+
+Match "1" *-- "2" Team : teams
+Match "1" *-- "1" Field : field
+Match "1" *-- "1" Period : period
+Match "1" *-- "1" MatchState : status
+Team "1" *-- "1" Id
+Team "1" *-- "1" Tag
+Team "1" *-- "1" Label
+Field "1" *-- "1" Id
+Field "1" *-- "1" Label
+
+MatchResponseDto *-- MatchResponseTeamDto
+MatchResponseDto *-- MatchResponseFieldDto
+MatchResponseDto *-- MatchResponsePeriodDto
+
+MatchController --> MatchApplicationService
+TeamEventsInboundController --> TeamEventApplicationService
+MatchController ..> MatchRequest
+MatchController ..> MatchResponseDto
+TeamEventsInboundController ..> TeamInboundDto
+GlobalExceptionHandler ..> NotFoundException
+
+MatchApplicationService --> MatchHandler
+TeamEventApplicationService --> MatchHandler
+MatchQuery ..> MatchResponseDto
+
+MatchDomainService --> TeamDomainService
+MatchDomainService --> FieldDomaineService
+MatchDomainService --> JdbcMatchRepository
+MatchDomainService ..> ImpossibleReservationException
+MatchDomainService ..> NotFoundException
+
+TeamDomainService --> TeamManagementService
+TeamDomainService --> JdbcTeamRepository
+FieldDomaineService --> FieldManagementService
+FieldDomaineService --> JdbcFieldRepository
+TeamSyncDomainService --> JdbcTeamRepository
+MatchCancellationDomainService --> JdbcMatchByTeamRepository
+MatchCancellationDomainService --> MatchTimerService
+MatchCancellationDomainService --> JdbcMatchRepository
+MatchTimerService --> MatchEventOutboundService
+MatchTimerService --> JdbcMatchRepository
+TeamManagementService --> TeamManagementClient
+FieldManagementService --> FieldManagementClient
+MatchEventOutboundService --> MatchOutboundProperties
+
+MatchMapper --> Match
+MatchMapper --> MatchResponseDto
+RepositoryMatchMapper --> MatchRawResult
+RepositoryMatchMapper --> Match
+MatchRawResultRowMapper --> MatchRawResult
+JdbcMatchRepository --> MatchRawResultRowMapper
+JdbcMatchRepository --> RepositoryMatchMapper
+
+@enduml
