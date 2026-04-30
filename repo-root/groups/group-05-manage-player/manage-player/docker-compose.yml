@@ -1,0 +1,12 @@
+services:
+  fiveplayer-db:
+    image: mariadb:11
+    container_name: fiveplayer-db
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../sql/player-create.sql:/docker-entrypoint-initdb.d/01-player-create.sql:ro
+      - ../sql/views.sql:/docker-entrypoint-initdb.d/02-views.sql:ro
+      - ../sql/stored-procedures.sql:/docker-entrypoint-initdb.d/03-stored-procedures.sql:ro

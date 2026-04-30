@@ -1,6 +1,7 @@
 START TRANSACTION;
 DROP DATABASE IF EXISTS fiveplayer;
 CREATE DATABASE fiveplayer CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'jad_efrei_five_2526'@'%' IDENTIFIED BY 'jad_efrei_five_2526';
 USE fiveplayer;
 
 CREATE TABLE fiveplayer.team

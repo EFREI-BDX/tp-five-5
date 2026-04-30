@@ -24,6 +24,8 @@ DROP PROCEDURE IF EXISTS fiveplayer.teamGetAll;
 DROP PROCEDURE IF EXISTS fiveplayer.teamGetById;
 DROP PROCEDURE IF EXISTS fiveplayer.playerGetAll;
 DROP PROCEDURE IF EXISTS fiveplayer.playerGetById;
+DROP PROCEDURE IF EXISTS fiveplayer.playerCount;
+DROP PROCEDURE IF EXISTS fiveplayer.playerReset;
 
 DELIMITER //
 
@@ -668,24 +670,21 @@ BEGIN
            p.email AS email,
            p.phone AS phone,
            p.gender AS gender,
-           DATE_FORMAT(p.birthDate, '%d/%m/%Y') AS birthDate,
+           p.birthDate AS birthDate,
            p.height AS height,
-           COALESCE((SELECT JSON_ARRAYAGG(pt.idTeam)
-                     FROM fiveplayer.player_team pt
-                     WHERE pt.idPlayer = p.id), JSON_ARRAY()) AS teamIds,
-           JSON_OBJECT(
-               'matchesPlayed', COALESCE(ps.matchesPlayed, 0),
-               'goalsScored', COALESCE(ps.goalsScored, 0),
-               'assists', COALESCE(ps.assists, 0),
-               'wins', COALESCE(ps.wins, 0),
-               'draws', COALESCE(ps.draws, 0),
-               'mvps', COALESCE(ps.mvps, 0)
-           ) AS statistics,
+           COALESCE(GROUP_CONCAT(pt.idTeam ORDER BY pt.idTeam SEPARATOR ','), '') AS teamIds,
+           COALESCE(ps.matchesPlayed, 0) AS matchesPlayed,
+           COALESCE(ps.goalsScored, 0) AS goalsScored,
+           COALESCE(ps.assists, 0) AS assists,
+           COALESCE(ps.wins, 0) AS wins,
            p.status AS status,
-           DATE_FORMAT(p.createdAt, '%Y-%m-%dT%H:%i:%sZ') AS createdAt,
-           DATE_FORMAT(p.updatedAt, '%Y-%m-%dT%H:%i:%sZ') AS updatedAt
-    FROM fiveplayer.player p
-             LEFT JOIN fiveplayer.player_statistics ps ON ps.idPlayer = p.id
+           p.createdAt AS createdAt,
+           p.updatedAt AS updatedAt
+    FROM fiveplayer.PlayerView p
+             LEFT JOIN fiveplayer.PlayerStatisticsView ps ON ps.idPlayer = p.id
+             LEFT JOIN fiveplayer.PlayerTeamView pt ON pt.idPlayer = p.id
+    GROUP BY p.id, p.firstName, p.lastName, p.email, p.phone, p.gender, p.birthDate, p.height,
+             ps.matchesPlayed, ps.goalsScored, ps.assists, ps.wins, p.status, p.createdAt, p.updatedAt
     ORDER BY p.lastName, p.firstName;
 END //
 
@@ -699,26 +698,49 @@ BEGIN
            p.email AS email,
            p.phone AS phone,
            p.gender AS gender,
-           DATE_FORMAT(p.birthDate, '%d/%m/%Y') AS birthDate,
+           p.birthDate AS birthDate,
            p.height AS height,
-           COALESCE((SELECT JSON_ARRAYAGG(pt.idTeam)
-                     FROM fiveplayer.player_team pt
-                     WHERE pt.idPlayer = p.id), JSON_ARRAY()) AS teamIds,
-           JSON_OBJECT(
-               'matchesPlayed', COALESCE(ps.matchesPlayed, 0),
-               'goalsScored', COALESCE(ps.goalsScored, 0),
-               'assists', COALESCE(ps.assists, 0),
-               'wins', COALESCE(ps.wins, 0),
-               'draws', COALESCE(ps.draws, 0),
-               'mvps', COALESCE(ps.mvps, 0)
-           ) AS statistics,
+           COALESCE(GROUP_CONCAT(pt.idTeam ORDER BY pt.idTeam SEPARATOR ','), '') AS teamIds,
+           COALESCE(ps.matchesPlayed, 0) AS matchesPlayed,
+           COALESCE(ps.goalsScored, 0) AS goalsScored,
+           COALESCE(ps.assists, 0) AS assists,
+           COALESCE(ps.wins, 0) AS wins,
            p.status AS status,
-           DATE_FORMAT(p.createdAt, '%Y-%m-%dT%H:%i:%sZ') AS createdAt,
-           DATE_FORMAT(p.updatedAt, '%Y-%m-%dT%H:%i:%sZ') AS updatedAt
-    FROM fiveplayer.player p
-             LEFT JOIN fiveplayer.player_statistics ps ON ps.idPlayer = p.id
+           p.createdAt AS createdAt,
+           p.updatedAt AS updatedAt
+    FROM fiveplayer.PlayerView p
+             LEFT JOIN fiveplayer.PlayerStatisticsView ps ON ps.idPlayer = p.id
+             LEFT JOIN fiveplayer.PlayerTeamView pt ON pt.idPlayer = p.id
     WHERE p.id = _id
+    GROUP BY p.id, p.firstName, p.lastName, p.email, p.phone, p.gender, p.birthDate, p.height,
+             ps.matchesPlayed, ps.goalsScored, ps.assists, ps.wins, p.status, p.createdAt, p.updatedAt
     LIMIT 1;
+END //
+
+CREATE PROCEDURE fiveplayer.playerCount()
+BEGIN
+    SELECT COUNT(*) AS total
+    FROM fiveplayer.PlayerView;
+END //
+
+CREATE PROCEDURE fiveplayer.playerReset(
+    OUT errorMessage_ VARCHAR(500)
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+        BEGIN
+            ROLLBACK;
+            RESIGNAL;
+        END;
+
+    START TRANSACTION;
+    SET errorMessage_ = '';
+
+    DELETE FROM fiveplayer.player_team;
+    DELETE FROM fiveplayer.player_statistics;
+    DELETE FROM fiveplayer.player;
+
+    COMMIT;
 END //
 
 DELIMITER ;
@@ -736,5 +758,7 @@ GRANT EXECUTE ON PROCEDURE fiveplayer.teamGetAll TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.teamGetById TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.playerGetAll TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.playerGetById TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveplayer.playerCount TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveplayer.playerReset TO 'jad_efrei_five_2526'@'%';
 
 FLUSH PRIVILEGES;
