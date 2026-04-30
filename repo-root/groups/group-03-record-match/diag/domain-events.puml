@@ -1,0 +1,63 @@
+@startuml domain-events
+
+skinparam backgroundColor white
+skinparam defaultTextAlignment left
+skinparam sequence {
+    ArrowColor #2c3e50
+    ParticipantBorderColor #2980b9
+    ParticipantBackgroundColor #d6eaf8
+    NoteBackgroundColor #fff9c4
+    NoteBorderColor #f9a825
+}
+
+title Événements de domaine publiés — record-match
+
+participant "MatchEvent\nService" as SVC
+participant "MatchEventOutbound\nService" as OUT
+participant "Service Externe\n:8081" as EXT
+
+== Enregistrement d'un événement ==
+
+SVC -> OUT : notifyMatchEvent(dto, match, eventType)
+note right of SVC
+  eventType = EventEntity.name.toUpperCase()
+  ex: "but" → "BUT"
+      "carton jaune" → "CARTON_JAUNE"
+end note
+
+OUT -> OUT : MatchTime.compute(\n  startedAt, duration, occuredAt)
+
+OUT -> EXT : POST <URL configurée>\nMatchOutboundEvent {
+note right
+  {
+    notificationId  : UUID
+    matchId         : UUID
+    type            : "BUT"
+    occurredAt      : LocalDateTime
+    matchTimeMinute : 23
+    matchTimeSecond : 14
+    matchTimePeriod : "FIRST_HALF"
+    player1Id       : UUID (optionnel)
+    player2Id       : UUID (optionnel)
+    teamId          : UUID (optionnel)
+    succeeded       : Boolean (optionnel)
+  }
+end note
+
+EXT --> OUT : 200 OK (ou erreur ignorée)
+
+== Types d'événements supportés ==
+
+note over OUT
+  match_started  → :8081/api/inbounds/matches/started   [dev]
+  match_finished → :8081/api/inbounds/matches/finished  [dev]
+  match_cancelled  → URL configurable
+  match_forfeited  → URL configurable
+  <event_type>     → URL configurable
+      (but, carton_jaune, carton_rouge, coup_d_envoi...)
+
+  Configuration : application.yml
+  prefix: match.outbound.notify-urls
+end note
+
+@enduml

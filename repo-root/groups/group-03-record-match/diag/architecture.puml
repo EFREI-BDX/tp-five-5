@@ -1,0 +1,51 @@
+@startuml architecture
+
+skinparam defaultTextAlignment center
+skinparam backgroundColor white
+skinparam package {
+    BorderColor #2c3e50
+    BackgroundColor #ecf0f1
+    FontStyle bold
+}
+skinparam component {
+    BorderColor #2980b9
+    BackgroundColor #d6eaf8
+    FontSize 12
+}
+skinparam database {
+    BorderColor #27ae60
+    BackgroundColor #d5f5e3
+}
+
+title Microservice record-match — Architecture globale
+
+actor "Client\n(HTTP/REST)" as client
+
+package "Bounded Context : Record Match" {
+    package "record-match :8082" as rm {
+        component "Controllers\nMatchController · MatchEventController\nEventController · PlayerController" as ctrl
+        component "Services\nMatchService · MatchEventService\nEventService · PlayerService" as svc
+        component "Repositories\n(Spring Data JPA)" as repo
+        component "MatchEventOutboundService" as outbound
+    }
+    database "MariaDB\nschema: fiverecordmatch" as db
+}
+
+component "Service Externe\n:8081" as ext <<external>>
+
+client -right-> ctrl : REST / JSON
+ctrl -down-> svc : DTO
+svc -down-> repo
+svc -right-> outbound
+repo -down-> db : JDBC MariaDB
+
+outbound -right-> ext : POST MatchOutboundEvent\n(match_started, match_finished,\ngoal_scored, yellow_card…)
+
+note bottom of outbound
+  URLs configurables par profil
+  application-dev.yml:
+    match_started → :8081/api/inbounds/matches/started
+    match_finished → :8081/api/inbounds/matches/finished
+end note
+
+@enduml

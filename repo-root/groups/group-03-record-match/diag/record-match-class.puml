@@ -1,0 +1,123 @@
+@startuml record-match-class
+
+skinparam backgroundColor white
+skinparam class {
+    BorderColor #2c3e50
+    BackgroundColor #d6eaf8
+    ArrowColor #2c3e50
+    FontSize 13
+    AttributeFontSize 12
+}
+skinparam package {
+    BorderColor #2980b9
+    BackgroundColor #eaf4fd
+    FontSize 14
+    FontStyle bold
+}
+skinparam note {
+    BackgroundColor #fff9c4
+    BorderColor #f9a825
+    FontSize 11
+}
+
+title Modèle de domaine — record-match
+
+' ===== ENTITIES =====
+package "Entités JPA (persistance)" {
+    class MatchEntity {
+        matchId : UUID <<PK>>
+        team1Id : UUID
+        team2Id : UUID
+        startedAt : LocalDateTime
+        scheduledDurationMinutes : int
+    }
+
+    class EventEntity {
+        eventId : UUID <<PK>>
+        name : String
+        nbPlayers : int
+    }
+
+    class MatchEventEntity {
+        matchEventId : UUID <<PK>>
+        matchId : UUID
+        eventId : UUID
+        player1Id : UUID [0..1]
+        player2Id : UUID [0..1]
+        teamId : UUID [0..1]
+        occuredAt : LocalDateTime
+        succeeded : Boolean
+    }
+
+    class PlayerEntity {
+        playerId : UUID <<PK>>
+        teamId : UUID
+    }
+}
+
+' ===== VALUE OBJECTS =====
+package "Value Objects (Java Records — validation à la construction)" {
+    class MatchTeams <<record>> {
+        team1 : TeamId
+        team2 : TeamId
+        --
+        containsTeam(TeamId) : boolean
+        .. invariant ..
+        team1 ≠ team2
+    }
+
+    class EventParticipants <<record>> {
+        player1 : PlayerId [0..1]
+        player2 : PlayerId [0..1]
+        --
+        {static} none()
+        {static} ofOne(PlayerId)
+        {static} ofTwo(PlayerId, PlayerId)
+        .. invariants ..
+        player2 requires player1
+        player1 ≠ player2
+    }
+
+    class PlayerCount <<record>> {
+        value : int  «0 | 1 | 2»
+        --
+        requiresNoPlayer() : boolean
+        requiresOnePlayer() : boolean
+        requiresTwoPlayers() : boolean
+    }
+
+    class MatchTime <<record>> {
+        minute : int
+        second : int  «0–59»
+        period : String  «FIRST_HALF | SECOND_HALF»
+        --
+        {static} compute(startedAt, duration, occuredAt)
+    }
+}
+
+note as VONote
+  Chaque identifiant (MatchId, TeamId, PlayerId…)
+  est un Java Record wrappant un UUID.
+  Validation systématique dans le constructeur.
+end note
+
+' ===== DTO =====
+package "DTO Sortant (événement publié vers :8081)" {
+    class MatchOutboundEvent <<record>> {
+        notificationId : UUID
+        matchId : UUID
+        type : String
+        matchTimeMinute : int
+        matchTimePeriod : FIRST_HALF | SECOND_HALF
+        player1Id, player2Id : UUID
+        teamId : UUID
+        succeeded : Boolean
+    }
+}
+
+' Relations entités
+MatchEventEntity "n" --o "1" MatchEntity : matchId
+MatchEventEntity "n" --o "1" EventEntity : eventId
+MatchEventEntity "n" --o "0..1" PlayerEntity : player1Id
+
+@enduml

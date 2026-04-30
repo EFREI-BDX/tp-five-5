@@ -1,0 +1,77 @@
+@startuml sequence-record-goal
+
+skinparam backgroundColor white
+skinparam sequence {
+    ArrowColor #2c3e50
+    LifeLineBorderColor #2980b9
+    ParticipantBorderColor #2980b9
+    ParticipantBackgroundColor #d6eaf8
+}
+
+title Enregistrement d'un but — POST /api/match-events
+
+actor "Client" as client
+participant "MatchEvent\nController" as ctrl
+participant "MatchEvent\nService" as svc
+participant "Match\nService" as matchSvc
+participant "Event\nService" as eventSvc
+participant "MatchEvent\nRepository" as repo
+participant "MatchEvent\nOutboundService" as outbound
+database "MariaDB\nfiverecordmatch" as db
+participant "Service\nExterne :8081" as ext
+
+client -> ctrl : POST /api/match-events\n{ matchId, eventId, player1Id,\n  teamId, occuredAt, succeeded }
+activate ctrl
+
+ctrl -> svc : recordEvent(dto)
+activate svc
+
+svc -> matchSvc : findById(dto.matchId)
+activate matchSvc
+matchSvc -> db : SELECT * FROM match\nWHERE matchId = ?
+db --> matchSvc : MatchEntity
+matchSvc --> svc : MatchDto\n{ startedAt, scheduledDurationMinutes, ... }
+deactivate matchSvc
+
+svc -> eventSvc : findById(dto.eventId)
+activate eventSvc
+eventSvc -> db : SELECT * FROM event\nWHERE eventId = ?
+db --> eventSvc : EventEntity
+eventSvc --> svc : EventDto\n{ name: "but", nbPlayers: 1 }
+deactivate eventSvc
+
+note over svc
+  eventType = "but"
+    .toUpperCase()
+    .replace(" ", "_")
+  → "BUT"
+end note
+
+svc -> repo : save(MatchEventEntity)
+activate repo
+repo -> db : INSERT INTO matchEvent\n(matchEventId, matchId, eventId,\n player1Id, teamId, occuredAt, succeeded)
+db --> repo : ok
+repo --> svc : MatchEventEntity
+deactivate repo
+
+svc -> outbound : notifyMatchEvent(\n  matchEventDto, matchDto, "BUT")
+activate outbound
+
+note over outbound
+  MatchTime.compute(
+    startedAt, scheduledDurationMinutes, occuredAt
+  ) → { minute: 23, second: 14, period: FIRST_HALF }
+end note
+
+outbound -> ext : POST /api/inbounds/...\n{\n  notificationId: UUID,\n  matchId: UUID,\n  type: "BUT",\n  matchTimeMinute: 23,\n  matchTimePeriod: "FIRST_HALF",\n  player1Id: UUID,\n  teamId: UUID,\n  succeeded: true\n}
+ext --> outbound : 200 OK
+outbound --> svc : (void)
+deactivate outbound
+
+svc --> ctrl : MatchEventDto
+deactivate svc
+
+ctrl --> client : 201 Created\n{ matchEventId, matchId, eventId,\n  player1Id, teamId, occuredAt, succeeded }
+deactivate ctrl
+
+@enduml

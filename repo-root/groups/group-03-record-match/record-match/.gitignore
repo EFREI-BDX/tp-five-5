@@ -29,3 +29,5 @@ target/
 # Windows
 Thumbs.db
 /doc/
+
+record-match.log
