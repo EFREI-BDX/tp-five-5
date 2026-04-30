@@ -1,0 +1,110 @@
+@startuml
+hide empty members
+skinparam classAttributeIconSize 0
+
+title group-05-manage-player - Class Diagram
+
+package "controller" {
+  class PlayerController
+  class PlayerEventsInboundController
+  class ApiExceptionHandler
+  class HealthController
+}
+
+package "service" {
+  class PlayerService
+  interface IPlayerInboundEventService
+  class PlayerInboundEventService
+  class PlayerEventOutboundService
+  class PlayerOutboundProperties
+}
+
+package "repository" {
+  class PlayerRepository
+}
+
+package "dto" {
+  class CreatePlayerRequest
+  class CreatePlayerResponse
+  class UpdatePlayerRequest
+  class UpdatePlayerResponse
+  class UpdatePlayerStatisticsRequest
+  class UpdatePlayerStatisticsResponse
+  class DeletePlayerResponse
+  class PlayerDto
+  class PlayerStatisticsDto
+  class TeamDto
+  class ErrorResponse
+  class ErrorDetail
+}
+
+package "dto.event.inbound" {
+  class MatchPlayerEvent
+  class PlayerJoinedTeamEvent
+  class PlayerLeftTeamEvent
+  class TeamDeletedEvent
+  class TeamNameUpdatedEvent
+}
+
+package "dto.event.outbound" {
+  class PlayerCreatedEvent
+  class PlayerDeletedEvent
+  class PlayerNameUpdatedEvent
+}
+
+package "entity" {
+  class Player
+  class PlayerStatistics
+  class Team
+}
+
+' Controllers -> Services
+PlayerController --> PlayerService
+PlayerEventsInboundController --> IPlayerInboundEventService
+PlayerInboundEventService ..|> IPlayerInboundEventService
+PlayerInboundEventService --> PlayerService
+ApiExceptionHandler ..> ErrorResponse
+
+' Service layer dependencies
+PlayerService --> PlayerRepository
+PlayerService --> PlayerEventOutboundService
+PlayerEventOutboundService --> PlayerOutboundProperties
+
+' Controller <-> DTO usage
+PlayerController ..> CreatePlayerRequest
+PlayerController ..> CreatePlayerResponse
+PlayerController ..> UpdatePlayerRequest
+PlayerController ..> UpdatePlayerResponse
+PlayerController ..> UpdatePlayerStatisticsRequest
+PlayerController ..> UpdatePlayerStatisticsResponse
+PlayerController ..> DeletePlayerResponse
+PlayerController ..> PlayerDto
+
+PlayerEventsInboundController ..> MatchPlayerEvent
+PlayerEventsInboundController ..> PlayerJoinedTeamEvent
+PlayerEventsInboundController ..> PlayerLeftTeamEvent
+PlayerEventsInboundController ..> TeamDeletedEvent
+PlayerEventsInboundController ..> TeamNameUpdatedEvent
+
+' Repository / DTO mapping
+PlayerRepository ..> PlayerDto
+PlayerDto *-- PlayerStatisticsDto
+PlayerDto o-- TeamDto
+
+' Outbound events
+PlayerEventOutboundService ..> PlayerCreatedEvent
+PlayerEventOutboundService ..> PlayerDeletedEvent
+PlayerEventOutboundService ..> PlayerNameUpdatedEvent
+
+' Inbound service event handling
+PlayerInboundEventService ..> MatchPlayerEvent
+PlayerInboundEventService ..> PlayerJoinedTeamEvent
+PlayerInboundEventService ..> PlayerLeftTeamEvent
+PlayerInboundEventService ..> TeamDeletedEvent
+PlayerInboundEventService ..> TeamNameUpdatedEvent
+
+' Domain model composition
+Player *-- PlayerStatistics
+Player o-- Team
+
+@enduml
