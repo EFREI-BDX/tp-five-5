@@ -1,4 +1,4 @@
-use super::{ApplicationResult, MatchRepository};
+use super::{ApplicationResult, MatchStatsRepository};
 use crate::domain::{MatchSummary, PlayerId, PlayerStats, TeamId, TeamStats};
 use async_trait::async_trait;
 
@@ -17,18 +17,18 @@ pub trait MatchQueryService: Send + Sync + 'static {
     ) -> ApplicationResult<Option<PlayerStats>>;
 }
 
-pub struct MatchReadService<R: MatchRepository> {
+pub struct MatchReadService<R: MatchStatsRepository> {
     repository: R,
 }
 
-impl<R: MatchRepository> MatchReadService<R> {
+impl<R: MatchStatsRepository> MatchReadService<R> {
     pub fn new(repository: R) -> Self {
         Self { repository }
     }
 }
 
 #[async_trait]
-impl<R: MatchRepository> MatchQueryService for MatchReadService<R> {
+impl<R: MatchStatsRepository> MatchQueryService for MatchReadService<R> {
     async fn get_summary(&self, match_id: &str) -> ApplicationResult<Option<MatchSummary>> {
         self.repository.read_summary(match_id).await
     }

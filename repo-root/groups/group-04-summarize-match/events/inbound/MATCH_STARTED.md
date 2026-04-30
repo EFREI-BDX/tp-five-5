@@ -39,9 +39,6 @@ Premier event de la timeline. Il fixe les equipes de depart et la duree theoriqu
 }
 ```
 
-
-faire sauter le isGoalKeeper 
-
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |

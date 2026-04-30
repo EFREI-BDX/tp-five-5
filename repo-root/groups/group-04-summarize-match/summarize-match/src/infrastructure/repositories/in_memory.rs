@@ -1,4 +1,6 @@
-use crate::application::{ApplicationError, ApplicationResult, MatchRepository};
+use crate::application::{
+    ApplicationError, ApplicationResult, MatchRepository, MatchStatsRepository,
+};
 use crate::domain::{DomainEvent, MatchAggregate, PlayerId, PlayerStats, TeamId, TeamStats};
 use async_trait::async_trait;
 use std::collections::HashMap;
@@ -43,7 +45,10 @@ impl MatchRepository for InMemoryMatchRepository {
         guard.entry(match_id).or_default().push(event);
         Ok(())
     }
+}
 
+#[async_trait]
+impl MatchStatsRepository for InMemoryMatchRepository {
     async fn read_summary(
         &self,
         match_id: &str,

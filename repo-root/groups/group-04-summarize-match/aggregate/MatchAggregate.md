@@ -42,6 +42,9 @@ Toutes les regles de coherence du match passent par cette racine avant qu'un eve
 - **goals** — *Vec<GoalEntry>* — buts exposes dans le read model.
 - **cards** — *Vec<CardEntry>* — cartons exposes dans le read model.
 - **substitutions** — *Vec<SubstitutionEntry>* — remplacements exposes dans le read model.
+- **team_stats** — *HashMap<TeamId, TeamStatsAccumulator>* — statistiques agregees par equipe.
+- **player_stats** — *HashMap<PlayerId, PlayerStatsAccumulator>* — statistiques agregees par joueur.
+- **player_teams** — *HashMap<PlayerId, TeamId>* — equipe connue pour chaque joueur rencontre dans la timeline.
 - **match_end_second** — *u32* — instant de fin conserve pour le statut terminal.
 
 **Invariants**
@@ -63,6 +66,8 @@ Toutes les regles de coherence du match passent par cette racine avant qu'un eve
 ```rust
 MatchAggregate::handle_event(event: DomainEvent) -> anyhow::Result<()>
 MatchAggregate::to_summary(match_id: &str) -> MatchSummary
+MatchAggregate::to_team_stats(match_id: &str, team_id: &TeamId) -> Option<TeamStats>
+MatchAggregate::to_player_stats(match_id: &str, player_id: &PlayerId) -> Option<PlayerStats>
 MatchAggregate::is_known() -> bool
 ```
 
@@ -87,12 +92,15 @@ MatchAggregate::is_known() -> bool
 **Sorties produites**
 
 - `MatchSummary` pour la route HTTP `GET /matches/{matchId}/summary`.
+- `TeamStats` pour la route HTTP `GET /matches/{matchId}/teams/{teamId}/stats`.
+- `PlayerStats` pour la route HTTP `GET /matches/{matchId}/players/{playerId}/stats`.
 - Aucun event metier outbound n'est produit aujourd'hui.
 
 **Place dans l'architecture hexagonale**
 
-- Le port applicatif `ApplicationService` appelle l'agregat via `MatchSummaryService`.
+- Le service applicatif `MatchSummaryService` appelle l'agregat pour valider et rejouer les events.
 - Le port sortant `MatchRepository` recharge les events puis reconstruit l'agregat.
+- Le port sortant `MatchStatsRepository` expose la lecture des stats sans melanger commande et query.
 - Les adapters `Consumer`, HTTP et SeaORM ne doivent pas dupliquer les regles de `MatchAggregate`.
 
 **References de code**

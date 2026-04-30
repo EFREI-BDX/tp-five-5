@@ -50,7 +50,7 @@ mod tests {
     };
     use crate::domain::{
         DomainEvent, GoalScored, MatchAggregate, MatchFinished, MatchStarted, MatchTime, Player,
-        PlayerId, PlayerStats, Score, Team, TeamId, TeamStats,
+        PlayerId, Score, Team, TeamId,
     };
     use async_trait::async_trait;
     use std::collections::HashMap;
@@ -84,44 +84,6 @@ mod tests {
             let mut guard = self.events.lock().expect("repository lock should not fail");
             guard.entry(match_id).or_default().push(event);
             Ok(())
-        }
-
-        async fn read_summary(
-            &self,
-            match_id: &str,
-        ) -> ApplicationResult<Option<crate::domain::MatchSummary>> {
-            let aggregate = self.load(match_id).await?;
-            if aggregate.is_known() {
-                Ok(Some(aggregate.to_summary(match_id)))
-            } else {
-                Ok(None)
-            }
-        }
-
-        async fn read_team_stats(
-            &self,
-            match_id: &str,
-            team_id: &TeamId,
-        ) -> ApplicationResult<Option<TeamStats>> {
-            let aggregate = self.load(match_id).await?;
-            if aggregate.is_known() {
-                Ok(aggregate.to_team_stats(match_id, team_id))
-            } else {
-                Ok(None)
-            }
-        }
-
-        async fn read_player_stats(
-            &self,
-            match_id: &str,
-            player_id: &PlayerId,
-        ) -> ApplicationResult<Option<PlayerStats>> {
-            let aggregate = self.load(match_id).await?;
-            if aggregate.is_known() {
-                Ok(aggregate.to_player_stats(match_id, player_id))
-            } else {
-                Ok(None)
-            }
         }
     }
 

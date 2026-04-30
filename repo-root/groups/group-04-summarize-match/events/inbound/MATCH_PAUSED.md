@@ -17,9 +17,6 @@ Event d'interruption temporaire du match.
 }
 ```
 
-
-faire sauter l'enum sur la reasean 
-
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |

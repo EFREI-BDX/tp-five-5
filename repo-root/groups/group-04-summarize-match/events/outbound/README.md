@@ -1,6 +1,6 @@
 # Outbound events
 
-Ce dossier est reserve aux events produits par `resume-match`.
+Ce dossier est reserve aux events produits par `summarize-match`.
 
 Aucun event metier sortant n'est produit aujourd'hui.
 

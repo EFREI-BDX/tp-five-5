@@ -22,8 +22,6 @@ Event de tentative de tir, cadre ou non.
 }
 ```
 
-teamId a enlevé 
-
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |

@@ -22,8 +22,6 @@ Event d'expulsion d'un joueur.
 }
 ```
 
-isdoubleYellow a supprimé et relatedFoulEventId
-
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |
@@ -35,5 +33,5 @@ isdoubleYellow a supprimé et relatedFoulEventId
 
 ## Regles metier
 
-- A partir de cet event, les actions de jeu de ce joueur deviennent invalides pour le contexte `resume-match`.
+- A partir de cet event, les actions de jeu de ce joueur deviennent invalides pour le contexte `summarize-match`.
 - C'est un point de rupture de la timeline metier pour le joueur concerne.

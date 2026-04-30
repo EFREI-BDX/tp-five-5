@@ -1,0 +1,82 @@
+@startuml
+title summarize-match - Application Class Diagram
+
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+package "Application Ports" {
+  interface ApplicationService {
+    +handle(event)
+  }
+
+  interface MatchRepository {
+    +load(match_id)
+    +append(event)
+  }
+
+  interface MatchStatsRepository {
+    +read_summary(match_id)
+    +read_team_stats(match_id, team_id)
+    +read_player_stats(match_id, player_id)
+  }
+
+  interface MatchQueryService {
+    +get_summary(match_id)
+    +get_team_stats(match_id, team_id)
+    +get_player_stats(match_id, player_id)
+  }
+
+  interface DomainEventPublisher {
+    +publish(event)
+  }
+
+  interface RecordMatchProvider
+  interface MatchReadModelRepository
+}
+
+package "Application Services" {
+  class MatchSummaryService {
+    -repository
+    -publisher
+    +handle(event)
+  }
+
+  class MatchReadService {
+    -repository
+    +get_summary(match_id)
+    +get_team_stats(match_id, team_id)
+    +get_player_stats(match_id, player_id)
+  }
+
+  enum ApplicationError
+}
+
+package "Domain Dependencies" {
+  class DomainEvent
+  class MatchAggregate
+  class MatchSummary
+  class TeamStats
+  class PlayerStats
+}
+
+MatchSummaryService ..|> ApplicationService
+MatchSummaryService --> MatchRepository
+MatchSummaryService --> DomainEventPublisher
+MatchSummaryService --> MatchAggregate
+MatchSummaryService --> DomainEvent
+
+MatchReadService ..|> MatchQueryService
+MatchReadService --> MatchStatsRepository
+MatchReadService --> MatchSummary
+MatchReadService --> TeamStats
+MatchReadService --> PlayerStats
+
+MatchRepository --> MatchAggregate
+MatchRepository --> DomainEvent
+MatchStatsRepository --> MatchSummary
+MatchStatsRepository --> TeamStats
+MatchStatsRepository --> PlayerStats
+
+@enduml

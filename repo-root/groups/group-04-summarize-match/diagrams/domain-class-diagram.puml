@@ -1,0 +1,114 @@
+@startuml
+title summarize-match - Domain Class Diagram
+
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+package "Value Objects" {
+  class MatchTime
+  class PlayerId
+  class TeamId
+  class EventId
+  class MatchId
+  class Score
+}
+
+package "Entities" {
+  class Player
+  class Team
+}
+
+package "Events" {
+  abstract class MatchEvent
+
+  class MatchStarted
+  class GoalScored
+  class GoalCancelled
+  class MatchFinished
+  class RedCard
+  class PassAttempted
+  class ShotAttempted
+  class FoulCommitted
+  class YellowCard
+  class SaveMade
+  class Substitution
+  class MatchPaused
+  class MatchResumed
+  class MatchCancelled
+  class MatchForfeited
+
+  enum DomainEvent
+}
+
+package "Read Models" {
+  enum MatchStatus
+  enum MatchResult
+  enum CardType
+
+  class GoalEntry
+  class CardEntry
+  class SubstitutionEntry
+  class MatchSummary
+  class TeamStats
+  class PlayerStats
+}
+
+package "Aggregate" {
+  class MatchAggregate {
+    +handle_event(event)
+    +to_summary(match_id)
+    +to_team_stats(match_id, team_id)
+    +to_player_stats(match_id, player_id)
+  }
+
+  class TeamStatsAccumulator
+  class PlayerStatsAccumulator
+}
+
+Team *-- Player
+
+MatchStarted --|> MatchEvent
+GoalScored --|> MatchEvent
+GoalCancelled --|> MatchEvent
+MatchFinished --|> MatchEvent
+RedCard --|> MatchEvent
+PassAttempted --|> MatchEvent
+ShotAttempted --|> MatchEvent
+FoulCommitted --|> MatchEvent
+YellowCard --|> MatchEvent
+SaveMade --|> MatchEvent
+Substitution --|> MatchEvent
+MatchPaused --|> MatchEvent
+MatchResumed --|> MatchEvent
+MatchCancelled --|> MatchEvent
+MatchForfeited --|> MatchEvent
+
+DomainEvent --> MatchEvent
+
+MatchStarted --> Team
+MatchEvent --> MatchTime
+GoalScored --> TeamId
+GoalScored --> PlayerId
+GoalCancelled --> EventId
+MatchFinished --> Score
+
+MatchAggregate --> DomainEvent
+MatchAggregate --> MatchSummary
+MatchAggregate --> TeamStats
+MatchAggregate --> PlayerStats
+MatchAggregate *-- TeamStatsAccumulator
+MatchAggregate *-- PlayerStatsAccumulator
+
+MatchSummary --> MatchStatus
+MatchSummary --> Score
+MatchSummary --> GoalEntry
+MatchSummary --> CardEntry
+MatchSummary --> SubstitutionEntry
+
+TeamStats --> TeamId
+PlayerStats --> PlayerId
+PlayerStats --> TeamId
+
+@enduml

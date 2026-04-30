@@ -10,7 +10,7 @@ use async_trait::async_trait;
 pub use error::{ApplicationError, ApplicationResult};
 pub use event_publisher::{DomainEventPublisher, NoOpPublisher};
 pub use query_service::{MatchQueryService, MatchReadService};
-pub use repository::MatchRepository;
+pub use repository::{MatchRepository, MatchStatsRepository};
 pub use service::MatchSummaryService;
 
 #[async_trait]

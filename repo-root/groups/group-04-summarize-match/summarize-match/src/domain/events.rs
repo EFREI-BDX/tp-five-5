@@ -239,4 +239,64 @@ impl DomainEvent {
             DomainEvent::MatchForfeited(event) => &event.match_id,
         }
     }
+
+    pub fn event_id(&self) -> &str {
+        match self {
+            DomainEvent::MatchStarted(event) => &event.event_id,
+            DomainEvent::GoalScored(event) => &event.event_id,
+            DomainEvent::GoalCancelled(event) => &event.event_id,
+            DomainEvent::MatchFinished(event) => &event.event_id,
+            DomainEvent::RedCard(event) => &event.event_id,
+            DomainEvent::PassAttempted(event) => &event.event_id,
+            DomainEvent::ShotAttempted(event) => &event.event_id,
+            DomainEvent::FoulCommitted(event) => &event.event_id,
+            DomainEvent::YellowCard(event) => &event.event_id,
+            DomainEvent::SaveMade(event) => &event.event_id,
+            DomainEvent::Substitution(event) => &event.event_id,
+            DomainEvent::MatchPaused(event) => &event.event_id,
+            DomainEvent::MatchResumed(event) => &event.event_id,
+            DomainEvent::MatchCancelled(event) => &event.event_id,
+            DomainEvent::MatchForfeited(event) => &event.event_id,
+        }
+    }
+
+    pub fn occurred_at(&self) -> &str {
+        match self {
+            DomainEvent::MatchStarted(event) => &event.occurred_at,
+            DomainEvent::GoalScored(event) => &event.occurred_at,
+            DomainEvent::GoalCancelled(event) => &event.occurred_at,
+            DomainEvent::MatchFinished(event) => &event.occurred_at,
+            DomainEvent::RedCard(event) => &event.occurred_at,
+            DomainEvent::PassAttempted(event) => &event.occurred_at,
+            DomainEvent::ShotAttempted(event) => &event.occurred_at,
+            DomainEvent::FoulCommitted(event) => &event.occurred_at,
+            DomainEvent::YellowCard(event) => &event.occurred_at,
+            DomainEvent::SaveMade(event) => &event.occurred_at,
+            DomainEvent::Substitution(event) => &event.occurred_at,
+            DomainEvent::MatchPaused(event) => &event.occurred_at,
+            DomainEvent::MatchResumed(event) => &event.occurred_at,
+            DomainEvent::MatchCancelled(event) => &event.occurred_at,
+            DomainEvent::MatchForfeited(event) => &event.occurred_at,
+        }
+    }
+
+    pub fn match_time(&self) -> &MatchTime {
+        match self {
+            DomainEvent::MatchStarted(event) => &event.match_time,
+            DomainEvent::GoalScored(event) => &event.match_time,
+            DomainEvent::GoalCancelled(event) => &event.match_time,
+            DomainEvent::MatchFinished(event) => &event.match_time,
+            DomainEvent::RedCard(event) => &event.match_time,
+            DomainEvent::PassAttempted(event) => &event.match_time,
+            DomainEvent::ShotAttempted(event) => &event.match_time,
+            DomainEvent::FoulCommitted(event) => &event.match_time,
+            DomainEvent::YellowCard(event) => &event.match_time,
+            DomainEvent::SaveMade(event) => &event.match_time,
+            DomainEvent::Substitution(event) => &event.match_time,
+            DomainEvent::MatchPaused(event) => &event.match_time,
+            DomainEvent::MatchResumed(event) => &event.match_time,
+            DomainEvent::MatchCancelled(event) => &event.match_time,
+            DomainEvent::MatchForfeited(event) => &event.match_time,
+        }
+    }
 }

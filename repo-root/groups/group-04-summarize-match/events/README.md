@@ -1,10 +1,10 @@
 # Match Event Catalog
 
-Ce dossier separe le contrat d'entree des events consommes et le contrat de sortie des events produits par `resume-match`.
+Ce dossier separe le contrat d'entree des events consommes et le contrat de sortie des events produits par `summarize-match`.
 
 ## Inbound contract
 
-Contrat d'entree du bounded context `resume-match` (physiquement dans `inbound/`).
+Contrat d'entree du bounded context `summarize-match` (physiquement dans `inbound/`).
 
 ### Reference commune
 
@@ -30,7 +30,7 @@ Contrat d'entree du bounded context `resume-match` (physiquement dans `inbound/`
 
 ## Outbound contract
 
-Le bounded context `resume-match` ne produit pas d'event metier sortant aujourd'hui.
+Le bounded context `summarize-match` ne produit pas d'event metier sortant aujourd'hui.
 
 ## Convention de conception
 

@@ -10,3 +10,5 @@ Fiches par Value Object pour le domaine `summarize-match`.
 - [Score](Score.md) — score home/away encapsulé.
 - [MatchResult](MatchResult.md) — résultat d'un match du point de vue d'un joueur.
 - [MatchStatus](MatchStatus.md) — état courant d'un match dans le read model.
+
+Ces fiches couvrent les Value Objects actuellement presents dans `summarize-match/src/domain/value_objects.rs` et les enums metier exposes par `summarize-match/src/domain/summary.rs`.

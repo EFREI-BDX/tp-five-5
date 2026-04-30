@@ -2,7 +2,7 @@
 
 ## Role
 
-`BaseEvent` est l'enveloppe commune a tous les events de match consommes par `resume-match`.
+`BaseEvent` est l'enveloppe commune a tous les events de match consommes par `summarize-match`.
 
 ## Structure
 
@@ -40,7 +40,7 @@
 - La timeline est ordonnee par `matchTime`, puis par `occurredAt`.
 - Les references vers `playerId` et `teamId` doivent appartenir aux participants du match.
 - Un event de jeu referenceant un joueur expulse apres `RED_CARD` est invalide.
-- `tirs_cadrés <= tirs` et `passes_reussies <= passes` sont des invariants de domaine verifies par le contexte `resume-match`.
+- `tirs_cadres <= tirs` et `passes_reussies <= passes` sont des invariants de domaine verifies par le contexte `summarize-match`.
 
 ## Portee hexagonale
 

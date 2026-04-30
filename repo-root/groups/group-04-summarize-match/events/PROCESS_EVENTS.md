@@ -1,6 +1,6 @@
 # Guide — Processus réutilisable pour ajouter un événement
 
-Ce document décrit un processus reproductible (schema-first, TDD) pour ajouter un événement consommé par `resume-match` (`summarize-match`). Il formalise où placer les artefacts (JSON Schema, fixtures, docs), comment dériver les Value Objects (VO), et comment intégrer code + tests en respectant DDD, Hexagonal, TDD et SOLID.
+Ce document décrit un processus reproductible (schema-first, TDD) pour ajouter un événement consommé par `summarize-match`. Il formalise où placer les artefacts (JSON Schema, fixtures, docs), comment dériver les Value Objects (VO), et comment intégrer code + tests en respectant DDD, Hexagonal, TDD et SOLID.
 
 **Principes clés**
 - **Domain First**: la logique métier et les Value Objects vivent dans `src/domain.rs` (ou modules `domain/`) — ils ne doivent pas dépendre d'infrastructure.

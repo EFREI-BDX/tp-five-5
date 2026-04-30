@@ -17,11 +17,150 @@ impl DatabaseMigrator {
                 r#"
                 CREATE TABLE IF NOT EXISTS match_events (
                     id SERIAL PRIMARY KEY,
-                    match_id TEXT NOT NULL,
+                    event_id UUID NOT NULL,
+                    match_id UUID NOT NULL,
                     event_type TEXT NOT NULL,
                     payload JSONB NOT NULL,
-                    occurred_at TEXT NOT NULL
+                    occurred_at TIMESTAMPTZ NOT NULL,
+                    time_minute INTEGER NOT NULL,
+                    time_second INTEGER NOT NULL,
+                    time_period TEXT NOT NULL,
+                    period TEXT NOT NULL
                 );
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                ALTER TABLE match_events
+                    ADD COLUMN IF NOT EXISTS event_id UUID;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                ALTER TABLE match_events
+                    ADD COLUMN IF NOT EXISTS time_minute INTEGER,
+                    ADD COLUMN IF NOT EXISTS time_second INTEGER,
+                    ADD COLUMN IF NOT EXISTS time_period TEXT,
+                    ADD COLUMN IF NOT EXISTS period TEXT;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                UPDATE match_events
+                SET event_id = (
+                    payload -> (
+                        SELECT key
+                        FROM jsonb_object_keys(payload) AS event_keys(key)
+                        LIMIT 1
+                    ) ->> 'event_id'
+                )::UUID
+                WHERE event_id IS NULL;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                UPDATE match_events
+                SET
+                    time_minute = (
+                        payload -> (
+                            SELECT key
+                            FROM jsonb_object_keys(payload) AS event_keys(key)
+                            LIMIT 1
+                        ) #>> '{match_time,minute}'
+                    )::INTEGER,
+                    time_second = (
+                        payload -> (
+                            SELECT key
+                            FROM jsonb_object_keys(payload) AS event_keys(key)
+                            LIMIT 1
+                        ) #>> '{match_time,second}'
+                    )::INTEGER,
+                    time_period = (
+                        payload -> (
+                            SELECT key
+                            FROM jsonb_object_keys(payload) AS event_keys(key)
+                            LIMIT 1
+                        ) #>> '{match_time,period}'
+                    ),
+                    period = (
+                        payload -> (
+                            SELECT key
+                            FROM jsonb_object_keys(payload) AS event_keys(key)
+                            LIMIT 1
+                        ) #>> '{match_time,period}'
+                    )
+                WHERE
+                    time_minute IS NULL
+                    OR time_second IS NULL
+                    OR time_period IS NULL
+                    OR period IS NULL;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                ALTER TABLE match_events
+                    ALTER COLUMN time_minute SET NOT NULL,
+                    ALTER COLUMN time_second SET NOT NULL,
+                    ALTER COLUMN time_period SET NOT NULL,
+                    ALTER COLUMN period SET NOT NULL;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                ALTER TABLE match_events
+                    ALTER COLUMN event_id SET NOT NULL;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                ALTER TABLE match_events
+                    ALTER COLUMN match_id TYPE UUID USING match_id::UUID;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                ALTER TABLE match_events
+                    ALTER COLUMN occurred_at TYPE TIMESTAMPTZ USING occurred_at::TIMESTAMPTZ;
                 "#
                 .to_string(),
             ))
@@ -380,6 +519,100 @@ impl DatabaseMigrator {
                     END IF;
                 END;
                 $$ LANGUAGE plpgsql;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                CREATE OR REPLACE FUNCTION get_match_team_stats(
+                    p_match_id UUID,
+                    p_team_id UUID
+                )
+                RETURNS TABLE (
+                    match_id UUID,
+                    team_id UUID,
+                    goals INTEGER,
+                    shots INTEGER,
+                    shots_on_target INTEGER,
+                    passes_attempted INTEGER,
+                    passes_succeeded INTEGER,
+                    saves INTEGER,
+                    fouls_committed INTEGER,
+                    yellow_cards INTEGER,
+                    red_cards INTEGER,
+                    substitutions INTEGER,
+                    players_used INTEGER
+                ) AS $$
+                    SELECT
+                        stats.match_id,
+                        stats.team_id,
+                        stats.goals,
+                        stats.shots,
+                        stats.shots_on_target,
+                        stats.passes_attempted,
+                        stats.passes_succeeded,
+                        stats.saves,
+                        stats.fouls_committed,
+                        stats.yellow_cards,
+                        stats.red_cards,
+                        stats.substitutions,
+                        stats.players_used
+                    FROM match_team_stats stats
+                    WHERE stats.match_id = p_match_id AND stats.team_id = p_team_id;
+                $$ LANGUAGE sql STABLE;
+                "#
+                .to_string(),
+            ))
+            .await?;
+
+        self.db
+            .execute(Statement::from_string(
+                self.db.get_database_backend(),
+                r#"
+                CREATE OR REPLACE FUNCTION get_match_player_stats(
+                    p_match_id UUID,
+                    p_player_id UUID
+                )
+                RETURNS TABLE (
+                    match_id UUID,
+                    player_id UUID,
+                    team_id UUID,
+                    goals INTEGER,
+                    assists INTEGER,
+                    shots INTEGER,
+                    shots_on_target INTEGER,
+                    passes_attempted INTEGER,
+                    passes_succeeded INTEGER,
+                    saves INTEGER,
+                    fouls_committed INTEGER,
+                    yellow_cards INTEGER,
+                    red_cards INTEGER,
+                    substitutions_in INTEGER,
+                    substitutions_out INTEGER
+                ) AS $$
+                    SELECT
+                        stats.match_id,
+                        stats.player_id,
+                        stats.team_id,
+                        stats.goals,
+                        stats.assists,
+                        stats.shots,
+                        stats.shots_on_target,
+                        stats.passes_attempted,
+                        stats.passes_succeeded,
+                        stats.saves,
+                        stats.fouls_committed,
+                        stats.yellow_cards,
+                        stats.red_cards,
+                        stats.substitutions_in,
+                        stats.substitutions_out
+                    FROM match_player_stats stats
+                    WHERE stats.match_id = p_match_id AND stats.player_id = p_player_id;
+                $$ LANGUAGE sql STABLE;
                 "#
                 .to_string(),
             ))

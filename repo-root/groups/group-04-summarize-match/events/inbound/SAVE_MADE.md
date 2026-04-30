@@ -21,8 +21,6 @@ Event d'arret effectue par le gardien.
 }
 ```
 
-keeperTeamId , relatedShotEventId supprimé 
-
 ## Regles payload
 
 | Champ | Type | Obligatoire | Description |

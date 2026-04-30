@@ -1,2 +1,753 @@
 {
+  "info": {
+    "_postman_id": "8e4c9f44-8a18-4b1a-9e1f-61af8ef4e0d8",
+    "name": "group-04 summarize-match API",
+    "description": "Collection Postman rejouable pour tester l'API Rust summarize-match: health, ingestion d'events, summary, stats equipe et stats joueur. MATCH_STARTED regenere un matchId et chaque requete regenere son eventId.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "matchId",
+      "value": "11111111-2222-4333-8444-555555555555",
+      "type": "string"
+    },
+    {
+      "key": "homeTeamId",
+      "value": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+      "type": "string"
+    },
+    {
+      "key": "awayTeamId",
+      "value": "ffffffff-eeee-dddd-cccc-bbbbbbbbbbbb",
+      "type": "string"
+    },
+    {
+      "key": "homeGoalkeeperId",
+      "value": "00000000-0000-0000-0000-000000000001",
+      "type": "string"
+    },
+    {
+      "key": "homePlayerId",
+      "value": "00000000-0000-0000-0000-000000000002",
+      "type": "string"
+    },
+    {
+      "key": "homeAssistantId",
+      "value": "00000000-0000-0000-0000-000000000003",
+      "type": "string"
+    },
+    {
+      "key": "homeSubInId",
+      "value": "00000000-0000-0000-0000-000000000011",
+      "type": "string"
+    },
+    {
+      "key": "awayGoalkeeperId",
+      "value": "00000000-0000-0000-0000-000000000006",
+      "type": "string"
+    },
+    {
+      "key": "awayPlayerId",
+      "value": "00000000-0000-0000-0000-000000000007",
+      "type": "string"
+    },
+    {
+      "key": "matchStartedEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "passEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "goalShotEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "goalScoredEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "savedShotEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "saveEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "foulEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "yellowCardEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "substitutionEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pausedEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resumedEventId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "finishedEventId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events - happy path",
+      "description": "Executer les requetes dans l'ordre. La requete 01 regenere un nouveau matchId; chaque requete regenere son eventId. La sequence cree un match termine avec un score final 1-0.",
+      "item": [
+        {
+          "name": "01 POST MATCH_STARTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{matchStartedEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"MATCH_STARTED\",\n  \"occurredAt\": \"2026-04-30T12:00:00Z\",\n  \"matchTime\": {\n    \"minute\": 0,\n    \"second\": 0,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"homeTeam\": {\n      \"teamId\": \"{{homeTeamId}}\",\n      \"startingPlayers\": [\n        { \"playerId\": \"{{homeGoalkeeperId}}\", \"isGoalkeeper\": true },\n        { \"playerId\": \"{{homePlayerId}}\", \"isGoalkeeper\": false },\n        { \"playerId\": \"{{homeAssistantId}}\", \"isGoalkeeper\": false },\n        { \"playerId\": \"00000000-0000-0000-0000-000000000004\", \"isGoalkeeper\": false },\n        { \"playerId\": \"00000000-0000-0000-0000-000000000005\", \"isGoalkeeper\": false }\n      ]\n    },\n    \"awayTeam\": {\n      \"teamId\": \"{{awayTeamId}}\",\n      \"startingPlayers\": [\n        { \"playerId\": \"{{awayGoalkeeperId}}\", \"isGoalkeeper\": true },\n        { \"playerId\": \"{{awayPlayerId}}\", \"isGoalkeeper\": false },\n        { \"playerId\": \"00000000-0000-0000-0000-000000000008\", \"isGoalkeeper\": false },\n        { \"playerId\": \"00000000-0000-0000-0000-000000000009\", \"isGoalkeeper\": false },\n        { \"playerId\": \"00000000-0000-0000-0000-000000000010\", \"isGoalkeeper\": false }\n      ]\n    },\n    \"scheduledDurationMinutes\": 40\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"matchId\", pm.variables.replaceIn(\"{{$guid}}\"));",
+                  "pm.collectionVariables.set(\"matchStartedEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02 POST PASS_ATTEMPTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{passEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"PASS_ATTEMPTED\",\n  \"occurredAt\": \"2026-04-30T12:01:10Z\",\n  \"matchTime\": {\n    \"minute\": 1,\n    \"second\": 10,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"passerId\": \"{{homeAssistantId}}\",\n    \"teamId\": \"{{homeTeamId}}\",\n    \"receiverId\": \"{{homePlayerId}}\",\n    \"succeeded\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"passEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 POST SHOT_ATTEMPTED GOAL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{goalShotEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"SHOT_ATTEMPTED\",\n  \"occurredAt\": \"2026-04-30T12:01:20Z\",\n  \"matchTime\": {\n    \"minute\": 1,\n    \"second\": 20,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"shooterId\": \"{{homePlayerId}}\",\n    \"teamId\": \"{{homeTeamId}}\",\n    \"onTarget\": true,\n    \"outcome\": \"GOAL\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"goalShotEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "04 POST GOAL_SCORED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{goalScoredEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"GOAL_SCORED\",\n  \"occurredAt\": \"2026-04-30T12:01:21Z\",\n  \"matchTime\": {\n    \"minute\": 1,\n    \"second\": 21,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"scoringTeamId\": \"{{homeTeamId}}\",\n    \"scorerId\": \"{{homePlayerId}}\",\n    \"assistId\": \"{{homeAssistantId}}\",\n    \"isOwnGoal\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"goalScoredEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 POST SHOT_ATTEMPTED SAVED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{savedShotEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"SHOT_ATTEMPTED\",\n  \"occurredAt\": \"2026-04-30T12:02:10Z\",\n  \"matchTime\": {\n    \"minute\": 2,\n    \"second\": 10,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"shooterId\": \"{{awayPlayerId}}\",\n    \"teamId\": \"{{awayTeamId}}\",\n    \"onTarget\": true,\n    \"outcome\": \"SAVED\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"savedShotEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 POST SAVE_MADE",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{saveEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"SAVE_MADE\",\n  \"occurredAt\": \"2026-04-30T12:02:11Z\",\n  \"matchTime\": {\n    \"minute\": 2,\n    \"second\": 11,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"keeperId\": \"{{homeGoalkeeperId}}\",\n    \"keeperTeamId\": \"{{homeTeamId}}\",\n    \"relatedShotEventId\": \"{{savedShotEventId}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"saveEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 POST FOUL_COMMITTED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{foulEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"FOUL_COMMITTED\",\n  \"occurredAt\": \"2026-04-30T12:03:00Z\",\n  \"matchTime\": {\n    \"minute\": 3,\n    \"second\": 0,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"playerId\": \"{{awayPlayerId}}\",\n    \"teamId\": \"{{awayTeamId}}\",\n    \"againstPlayerId\": \"{{homePlayerId}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"foulEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 POST YELLOW_CARD",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{yellowCardEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"YELLOW_CARD\",\n  \"occurredAt\": \"2026-04-30T12:03:05Z\",\n  \"matchTime\": {\n    \"minute\": 3,\n    \"second\": 5,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"playerId\": \"{{awayPlayerId}}\",\n    \"teamId\": \"{{awayTeamId}}\",\n    \"relatedFoulEventId\": \"{{foulEventId}}\",\n    \"cardNumber\": 1\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"yellowCardEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "09 POST SUBSTITUTION",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{substitutionEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"SUBSTITUTION\",\n  \"occurredAt\": \"2026-04-30T12:18:00Z\",\n  \"matchTime\": {\n    \"minute\": 18,\n    \"second\": 0,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {\n    \"teamId\": \"{{homeTeamId}}\",\n    \"playerOutId\": \"00000000-0000-0000-0000-000000000004\",\n    \"playerInId\": \"{{homeSubInId}}\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"substitutionEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "10 POST MATCH_PAUSED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{pausedEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"MATCH_PAUSED\",\n  \"occurredAt\": \"2026-04-30T12:20:00Z\",\n  \"matchTime\": {\n    \"minute\": 20,\n    \"second\": 0,\n    \"period\": \"SECOND_HALF\"\n  },\n  \"payload\": {\n    \"reason\": \"HALF_TIME\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"pausedEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "11 POST MATCH_RESUMED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{resumedEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"MATCH_RESUMED\",\n  \"occurredAt\": \"2026-04-30T12:20:30Z\",\n  \"matchTime\": {\n    \"minute\": 20,\n    \"second\": 30,\n    \"period\": \"SECOND_HALF\"\n  },\n  \"payload\": {\n    \"reason\": \"HALF_TIME_END\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"resumedEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "12 POST MATCH_FINISHED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"{{finishedEventId}}\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"MATCH_FINISHED\",\n  \"occurredAt\": \"2026-04-30T12:40:00Z\",\n  \"matchTime\": {\n    \"minute\": 40,\n    \"second\": 0,\n    \"period\": \"SECOND_HALF\"\n  },\n  \"payload\": {\n    \"finalScore\": {\n      \"home\": 1,\n      \"away\": 0\n    }\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"finishedEventId\", pm.variables.replaceIn(\"{{$guid}}\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Queries",
+      "item": [
+        {
+          "name": "GET match summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "summary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET home team stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/teams/{{homeTeamId}}/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "teams",
+                "{{homeTeamId}}",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET away team stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/teams/{{awayTeamId}}/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "teams",
+                "{{awayTeamId}}",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET scorer player stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/players/{{homePlayerId}}/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "players",
+                "{{homePlayerId}}",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET goalkeeper player stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/{{matchId}}/players/{{homeGoalkeeperId}}/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "{{matchId}}",
+                "players",
+                "{{homeGoalkeeperId}}",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Error examples",
+      "item": [
+        {
+          "name": "GET summary invalid UUID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/matches/not-a-uuid/summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "matches",
+                "not-a-uuid",
+                "summary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST invalid event schema",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"not-a-uuid\",\n  \"matchId\": \"{{matchId}}\",\n  \"type\": \"MATCH_STARTED\",\n  \"occurredAt\": \"2026-04-30T12:00:00Z\",\n  \"matchTime\": {\n    \"minute\": 0,\n    \"second\": 0,\n    \"period\": \"FIRST_HALF\"\n  },\n  \"payload\": {}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
 }

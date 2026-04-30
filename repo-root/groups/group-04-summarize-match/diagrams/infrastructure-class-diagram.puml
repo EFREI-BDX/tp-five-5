@@ -1,0 +1,164 @@
+@startuml
+title summarize-match - Infrastructure Class Diagram
+
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+package "Inbound HTTP" {
+  class EventHttpState
+  class QueryHttpState
+  class ErrorResponse
+  class ErrorBody
+}
+
+package "Inbound Consumer" {
+  class Consumer {
+    +process_json(raw_json)
+  }
+
+  class BaseEvent {
+    +event_id
+    +match_id
+    +event_type
+    +occurred_at
+    +match_time
+    +payload
+  }
+
+  interface EventMapper {
+    +event_type()
+    +map(event)
+  }
+
+  class MapperRegistry {
+    +map(event)
+  }
+
+  interface EventSchemaValidator {
+    +validate(...)
+  }
+
+  class FileBasedSchemaValidator
+  class SchemaRegistry
+}
+
+package "Mappers" {
+  class MatchStartedMapper
+  class GoalScoredMapper
+  class GoalCancelledMapper
+  class MatchFinishedMapper
+  class RedCardMapper
+  class PassAttemptedMapper
+  class ShotAttemptedMapper
+  class FoulCommittedMapper
+  class YellowCardMapper
+  class SaveMadeMapper
+  class SubstitutionMapper
+  class MatchPausedMapper
+  class MatchResumedMapper
+  class MatchCancelledMapper
+  class MatchForfeitedMapper
+}
+
+package "DTO Payloads" {
+  class MatchStartedPayload
+  class GoalScoredPayload
+  class GoalCancelledPayload
+  class MatchFinishedPayload
+  class MatchForfeitedPayload
+  class RedCardPayload
+  class PassAttemptedPayload
+  class ShotAttemptedPayload
+  class FoulCommittedPayload
+  class YellowCardPayload
+  class SaveMadePayload
+  class SubstitutionPayload
+  class ReasonPayload
+}
+
+package "Repositories" {
+  class InMemoryMatchRepository
+  class SeaOrmMatchRepository {
+    +load(match_id)
+    +append(event)
+    +read_summary(match_id)
+    +read_team_stats(match_id, team_id)
+    +read_player_stats(match_id, player_id)
+  }
+
+  class MatchEventEntityModel
+  class MatchReadModelEntityModel
+}
+
+package "Outbound" {
+  class LoggingPublisher
+  class NoOpEventPublisher
+  class HttpRecordMatchClient
+}
+
+package "DB" {
+  class DatabaseMigrator {
+    +run()
+  }
+
+  enum ValidationError
+}
+
+package "Application Ports" {
+  interface ApplicationService
+  interface MatchQueryService
+  interface MatchRepository
+  interface MatchStatsRepository
+  interface DomainEventPublisher
+  interface RecordMatchProvider
+}
+
+package "Domain" {
+  class DomainEvent
+  class MatchAggregate
+}
+
+EventHttpState --> Consumer
+QueryHttpState --> MatchQueryService
+
+Consumer --> ApplicationService
+Consumer --> EventSchemaValidator
+Consumer --> MapperRegistry
+
+MapperRegistry o-- EventMapper
+EventMapper --> BaseEvent
+EventMapper --> DomainEvent
+
+FileBasedSchemaValidator ..|> EventSchemaValidator
+
+MatchStartedMapper ..|> EventMapper
+GoalScoredMapper ..|> EventMapper
+GoalCancelledMapper ..|> EventMapper
+MatchFinishedMapper ..|> EventMapper
+RedCardMapper ..|> EventMapper
+PassAttemptedMapper ..|> EventMapper
+ShotAttemptedMapper ..|> EventMapper
+FoulCommittedMapper ..|> EventMapper
+YellowCardMapper ..|> EventMapper
+SaveMadeMapper ..|> EventMapper
+SubstitutionMapper ..|> EventMapper
+MatchPausedMapper ..|> EventMapper
+MatchResumedMapper ..|> EventMapper
+MatchCancelledMapper ..|> EventMapper
+MatchForfeitedMapper ..|> EventMapper
+
+InMemoryMatchRepository ..|> MatchRepository
+InMemoryMatchRepository ..|> MatchStatsRepository
+
+SeaOrmMatchRepository ..|> MatchRepository
+SeaOrmMatchRepository ..|> MatchStatsRepository
+SeaOrmMatchRepository --> MatchAggregate
+SeaOrmMatchRepository --> DomainEvent
+
+LoggingPublisher ..|> DomainEventPublisher
+NoOpEventPublisher ..|> DomainEventPublisher
+HttpRecordMatchClient ..|> RecordMatchProvider
+
+@enduml

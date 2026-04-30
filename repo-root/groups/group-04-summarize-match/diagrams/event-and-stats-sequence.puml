@@ -1,0 +1,182 @@
+@startuml
+title summarize-match - Event ingestion and stats query sequence
+
+hide footbox
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 25
+skinparam BoxPadding 10
+
+actor "Client HTTP\n(Postman / mock)" as Client
+
+box "Infrastructure inbound" #F7F7F7
+participant "Axum routes\nroutes.rs" as Routes
+participant "HTTP handler\nhandlers.rs" as Handler
+participant "Consumer\nconsumer.rs" as Consumer
+participant "FileBasedSchemaValidator\nschema_validator.rs" as Validator
+participant "MapperRegistry\nmapper_registry.rs" as Registry
+participant "EventMapper\nmappers/*" as Mapper
+end box
+
+box "Application" #EEF6FF
+participant "MatchSummaryService\nservice.rs" as CommandService
+participant "MatchReadService\nquery_service.rs" as QueryService
+end box
+
+box "Domain" #FFF8E8
+participant "DomainEvent\nevents.rs" as DomainEvent
+participant "MatchAggregate\naggregate.rs" as Aggregate
+participant "MatchSummary / Stats\nsummary.rs" as ReadModel
+end box
+
+box "Infrastructure persistence" #F0FFF0
+participant "SeaOrmMatchRepository\nsea_orm_match_repository.rs" as Repository
+participant "DatabaseMigrator\ndb_migrator.rs" as Migrator
+end box
+
+database "PostgreSQL / Neon" as DB
+participant "Stored functions\napply/get stats" as StoredFunctions
+
+== Startup ==
+
+Routes -> Migrator : run()
+activate Migrator
+Migrator -> DB : CREATE/ALTER tables
+Migrator -> DB : CREATE OR REPLACE FUNCTION\napply_match_event_stats(jsonb)
+Migrator -> DB : CREATE OR REPLACE FUNCTION\nget_match_team_stats(uuid, uuid)
+Migrator -> DB : CREATE OR REPLACE FUNCTION\nget_match_player_stats(uuid, uuid)
+Migrator --> Routes : migrations ready
+deactivate Migrator
+
+== POST /events ==
+
+Client -> Routes : POST /events\nBaseEvent JSON
+Routes -> Handler : accept_event(state, body)
+Handler -> Consumer : process_json(body)
+activate Consumer
+
+Consumer -> Validator : validate_base(raw_json)
+activate Validator
+Validator --> Consumer : BaseEvent valid
+deactivate Validator
+
+Consumer -> Validator : validate_payload(event.type, event.payload)
+activate Validator
+Validator --> Consumer : payload valid
+deactivate Validator
+
+Consumer -> Registry : map(BaseEvent)
+activate Registry
+Registry -> Mapper : map(BaseEvent)
+activate Mapper
+Mapper -> DomainEvent : build typed DomainEvent
+Mapper --> Registry : DomainEvent
+deactivate Mapper
+Registry --> Consumer : DomainEvent
+deactivate Registry
+
+Consumer -> CommandService : handle(DomainEvent)
+activate CommandService
+
+CommandService -> Repository : load(match_id)
+activate Repository
+Repository -> DB : SELECT payload\nFROM match_events\nWHERE match_id = $1\nORDER BY id
+DB --> Repository : previous event payloads
+Repository -> Aggregate : replay_events(events)
+activate Aggregate
+Aggregate --> Repository : MatchAggregate state
+deactivate Aggregate
+Repository --> CommandService : MatchAggregate
+deactivate Repository
+
+CommandService -> Aggregate : handle_event(DomainEvent)
+activate Aggregate
+Aggregate -> Aggregate : enforce business invariants\n(started, terminal state,\nscore, red cards, pause)
+Aggregate --> CommandService : accepted
+deactivate Aggregate
+
+CommandService -> Repository : append(DomainEvent)
+activate Repository
+Repository -> DB : BEGIN
+
+alt event is MATCH_STARTED
+  Repository -> DB : INSERT INTO matches\n(match_id, home_team_id,\n away_team_id,\n scheduled_duration_minutes,\n occurred_at)
+end
+
+Repository -> DB : INSERT INTO match_events\n(event_id, match_id, event_type,\npayload, occurred_at,\ntime_minute, time_second,\ntime_period, period)
+Repository -> StoredFunctions : SELECT apply_match_event_stats($1::jsonb)
+activate StoredFunctions
+StoredFunctions -> DB : update match_team_stats,\nmatch_player_stats,\nmatch_goal_index,\nmatch_player_registry
+StoredFunctions --> Repository : stats updated
+deactivate StoredFunctions
+
+Repository -> DB : COMMIT
+Repository --> CommandService : append ok
+deactivate Repository
+
+CommandService --> Consumer : ok
+deactivate CommandService
+Consumer --> Handler : ok
+deactivate Consumer
+Handler --> Client : HTTP 202 Accepted
+
+== GET /matches/{matchId}/summary ==
+
+Client -> Routes : GET /matches/{matchId}/summary
+Routes -> QueryService : get_summary(match_id)
+activate QueryService
+QueryService -> Repository : read_summary(match_id)
+activate Repository
+Repository -> Repository : load(match_id)
+Repository -> DB : SELECT payload\nFROM match_events\nWHERE match_id = $1\nORDER BY id
+DB --> Repository : event payloads
+Repository -> Aggregate : replay_events(events)
+activate Aggregate
+Aggregate -> ReadModel : to_summary(match_id)
+activate ReadModel
+ReadModel --> Aggregate : MatchSummary
+deactivate ReadModel
+Aggregate --> Repository : MatchSummary
+deactivate Aggregate
+Repository --> QueryService : Option<MatchSummary>
+deactivate Repository
+QueryService --> Client : HTTP 200 + summary JSON
+deactivate QueryService
+
+== GET /matches/{matchId}/teams/{teamId}/stats ==
+
+Client -> Routes : GET team stats
+Routes -> QueryService : get_team_stats(match_id, team_id)
+activate QueryService
+QueryService -> Repository : read_team_stats(match_id, team_id)
+activate Repository
+Repository -> StoredFunctions : SELECT * FROM\nget_match_team_stats($1::uuid, $2::uuid)
+activate StoredFunctions
+StoredFunctions -> DB : read match_team_stats
+DB --> StoredFunctions : row
+StoredFunctions --> Repository : TeamStats row
+deactivate StoredFunctions
+Repository --> QueryService : Option<TeamStats>
+deactivate Repository
+QueryService --> Client : HTTP 200 + team stats JSON
+deactivate QueryService
+
+== GET /matches/{matchId}/players/{playerId}/stats ==
+
+Client -> Routes : GET player stats
+Routes -> QueryService : get_player_stats(match_id, player_id)
+activate QueryService
+QueryService -> Repository : read_player_stats(match_id, player_id)
+activate Repository
+Repository -> StoredFunctions : SELECT * FROM\nget_match_player_stats($1::uuid, $2::uuid)
+activate StoredFunctions
+StoredFunctions -> DB : read match_player_stats
+DB --> StoredFunctions : row
+StoredFunctions --> Repository : PlayerStats row
+deactivate StoredFunctions
+Repository --> QueryService : Option<PlayerStats>
+deactivate Repository
+QueryService --> Client : HTTP 200 + player stats JSON
+deactivate QueryService
+
+@enduml

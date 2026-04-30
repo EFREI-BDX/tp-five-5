@@ -1,5 +1,7 @@
 use super::in_memory::replay_events;
-use crate::application::{ApplicationError, ApplicationResult, MatchRepository};
+use crate::application::{
+    ApplicationError, ApplicationResult, MatchRepository, MatchStatsRepository,
+};
 use crate::domain::{
     DomainEvent, MatchAggregate, MatchSummary, PlayerId, PlayerStats, TeamId, TeamStats,
 };
@@ -26,7 +28,7 @@ impl MatchRepository for SeaOrmMatchRepository {
             .db
             .query_all(Statement::from_sql_and_values(
                 DbBackend::Postgres,
-                "SELECT payload FROM match_events WHERE match_id::text = $1 ORDER BY id",
+                "SELECT payload FROM match_events WHERE match_id = $1::uuid ORDER BY id",
                 vec![match_id.into()],
             ))
             .await
@@ -48,9 +50,11 @@ impl MatchRepository for SeaOrmMatchRepository {
     }
 
     async fn append(&self, event: DomainEvent) -> ApplicationResult<()> {
+        let event_id = event.event_id().to_string();
         let match_id = event.match_id().to_string();
         let event_type = event.event_type().to_string();
-        let occurred_at = event_occurred_at(&event).to_string();
+        let occurred_at = event.occurred_at().to_string();
+        let match_time = event.match_time();
         let payload_json = serde_json::to_value(&event)
             .map_err(|e| ApplicationError::repository(e.to_string()))?;
 
@@ -60,14 +64,45 @@ impl MatchRepository for SeaOrmMatchRepository {
             .await
             .map_err(|error| ApplicationError::repository(error.to_string()))?;
 
+        if let DomainEvent::MatchStarted(match_started) = &event {
+            txn.execute(Statement::from_sql_and_values(
+                DbBackend::Postgres,
+                r#"
+                INSERT INTO matches (
+                    match_id,
+                    home_team_id,
+                    away_team_id,
+                    scheduled_duration_minutes,
+                    occurred_at
+                )
+                VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5::timestamptz)
+                ON CONFLICT (match_id) DO NOTHING
+                "#,
+                vec![
+                    match_id.clone().into(),
+                    match_started.home_team.team_id.0.clone().into(),
+                    match_started.away_team.team_id.0.clone().into(),
+                    (match_started.scheduled_duration_minutes as i32).into(),
+                    occurred_at.clone().into(),
+                ],
+            ))
+            .await
+            .map_err(|error| ApplicationError::repository(error.to_string()))?;
+        }
+
         txn.execute(Statement::from_sql_and_values(
             DbBackend::Postgres,
-            "INSERT INTO match_events (match_id, event_type, payload, occurred_at) VALUES ($1, $2, $3, $4)",
+            "INSERT INTO match_events (event_id, match_id, event_type, payload, occurred_at, time_minute, time_second, time_period, period) VALUES ($1::uuid, $2::uuid, $3, $4, $5::timestamptz, $6, $7, $8, $9)",
             vec![
+                event_id.into(),
                 match_id.into(),
                 event_type.into(),
                 payload_json.clone().into(),
                 occurred_at.into(),
+                (match_time.minute as i32).into(),
+                (match_time.second as i32).into(),
+                match_time.period.clone().into(),
+                match_time.period.clone().into(),
             ],
         ))
         .await
@@ -87,7 +122,10 @@ impl MatchRepository for SeaOrmMatchRepository {
 
         Ok(())
     }
+}
 
+#[async_trait]
+impl MatchStatsRepository for SeaOrmMatchRepository {
     async fn read_summary(&self, match_id: &str) -> ApplicationResult<Option<MatchSummary>> {
         let aggregate = self.load(match_id).await?;
         if aggregate.is_known() {
@@ -121,8 +159,7 @@ impl MatchRepository for SeaOrmMatchRepository {
                     red_cards,
                     substitutions,
                     players_used
-                FROM match_team_stats
-                WHERE match_id = $1::uuid AND team_id = $2::uuid
+                FROM get_match_team_stats($1::uuid, $2::uuid)
                 "#,
                 vec![match_id.into(), team_id.0.clone().into()],
             ))
@@ -158,8 +195,7 @@ impl MatchRepository for SeaOrmMatchRepository {
                     red_cards,
                     substitutions_in,
                     substitutions_out
-                FROM match_player_stats
-                WHERE match_id = $1::uuid AND player_id = $2::uuid
+                FROM get_match_player_stats($1::uuid, $2::uuid)
                 "#,
                 vec![match_id.into(), player_id.0.clone().into()],
             ))
@@ -218,24 +254,4 @@ fn row_u32(row: &QueryResult, column: &str) -> ApplicationResult<u32> {
         .try_get("", column)
         .map_err(|error| ApplicationError::repository(error.to_string()))?;
     u32::try_from(value).map_err(|error| ApplicationError::repository(error.to_string()))
-}
-
-fn event_occurred_at(event: &DomainEvent) -> &str {
-    match event {
-        DomainEvent::MatchStarted(event) => &event.occurred_at,
-        DomainEvent::GoalScored(event) => &event.occurred_at,
-        DomainEvent::GoalCancelled(event) => &event.occurred_at,
-        DomainEvent::MatchFinished(event) => &event.occurred_at,
-        DomainEvent::RedCard(event) => &event.occurred_at,
-        DomainEvent::PassAttempted(event) => &event.occurred_at,
-        DomainEvent::ShotAttempted(event) => &event.occurred_at,
-        DomainEvent::FoulCommitted(event) => &event.occurred_at,
-        DomainEvent::YellowCard(event) => &event.occurred_at,
-        DomainEvent::SaveMade(event) => &event.occurred_at,
-        DomainEvent::Substitution(event) => &event.occurred_at,
-        DomainEvent::MatchPaused(event) => &event.occurred_at,
-        DomainEvent::MatchResumed(event) => &event.occurred_at,
-        DomainEvent::MatchCancelled(event) => &event.occurred_at,
-        DomainEvent::MatchForfeited(event) => &event.occurred_at,
-    }
 }
