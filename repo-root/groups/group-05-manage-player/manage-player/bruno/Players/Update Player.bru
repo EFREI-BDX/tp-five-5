@@ -1,0 +1,23 @@
+meta {
+  name: Update Player
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:8081/players/{{playerId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "phone": "+33698765432",
+    "email": "jean.updated@example.com"
+  }
+}

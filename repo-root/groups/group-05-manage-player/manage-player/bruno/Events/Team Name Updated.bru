@@ -1,0 +1,29 @@
+meta {
+  name: Team Name Updated
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/events/teams/name-updated
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "teamId": "{{teamId}}",
+    "name": "Five FC"
+  }
+}
+
+tests {
+  test("should accept team name updated events", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+}

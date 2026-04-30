@@ -1,0 +1,28 @@
+meta {
+  name: Team Deleted
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/events/teams/deleted
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "teamId": "{{teamId}}"
+  }
+}
+
+tests {
+  test("should accept team deleted events", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+}

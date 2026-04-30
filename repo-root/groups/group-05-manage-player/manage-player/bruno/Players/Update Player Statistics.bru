@@ -1,0 +1,25 @@
+meta {
+  name: Update Player Statistics
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8081/players/{{playerId}}/statistics
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "matchesPlayed": 10,
+    "goalsScored": 4,
+    "assists": 2,
+    "wins": 6
+  }
+}

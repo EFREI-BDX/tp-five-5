@@ -1,0 +1,15 @@
+meta {
+  name: Count Players
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:8081/admin/players/count
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: dev-api-key 
+}

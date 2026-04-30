@@ -1,0 +1,15 @@
+meta {
+  name: Reset Players
+  type: http
+  seq: 2
+}
+
+delete {
+  url: http://localhost:8081/admin/players
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}

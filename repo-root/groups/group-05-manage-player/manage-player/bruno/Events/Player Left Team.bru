@@ -1,0 +1,29 @@
+meta {
+  name: Player Left Team
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/events/teams/player-left
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  X-API-KEY: {{apiKey}}
+}
+
+body:json {
+  {
+    "playerId": "{{playerId}}",
+    "teamId": "{{teamId}}"
+  }
+}
+
+tests {
+  test("should accept player left team events", function() {
+    expect(res.getStatus()).to.equal(202);
+  });
+}

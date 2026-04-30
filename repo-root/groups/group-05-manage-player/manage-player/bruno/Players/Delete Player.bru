@@ -1,0 +1,15 @@
+meta {
+  name: Delete Player
+  type: http
+  seq: 5
+}
+
+delete {
+  url: http://localhost:8081/players/{{playerId}}
+  body: none
+  auth: none
+}
+
+headers {
+  X-API-KEY: {{apiKey}}
+}
