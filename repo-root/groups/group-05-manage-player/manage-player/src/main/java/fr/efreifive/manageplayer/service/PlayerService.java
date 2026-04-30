@@ -9,6 +9,10 @@ import fr.efreifive.manageplayer.dto.UpdatePlayerRequest;
 import fr.efreifive.manageplayer.dto.UpdatePlayerResponse;
 import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsRequest;
 import fr.efreifive.manageplayer.dto.UpdatePlayerStatisticsResponse;
+import fr.efreifive.manageplayer.event.out.PlayerCreatedEvent;
+import fr.efreifive.manageplayer.event.out.PlayerDeletedEvent;
+import fr.efreifive.manageplayer.event.out.PlayerEventPublisher;
+import fr.efreifive.manageplayer.event.out.PlayerNameUpdatedEvent;
 import fr.efreifive.manageplayer.mapper.PlayerMapper;
 import fr.efreifive.manageplayer.repository.PlayerRepository;
 import java.time.Instant;
@@ -32,10 +36,12 @@ public class PlayerService implements IPlayerAdminService {
 
     private final PlayerRepository playerRepository;
     private final PlayerMapper playerMapper;
+    private final PlayerEventPublisher playerEventPublisher;
 
-    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper) {
+    public PlayerService(PlayerRepository playerRepository, PlayerMapper playerMapper, PlayerEventPublisher playerEventPublisher) {
         this.playerRepository = playerRepository;
         this.playerMapper = playerMapper;
+        this.playerEventPublisher = playerEventPublisher;
     }
 
     public List<PlayerDto> findAll() {
@@ -65,6 +71,13 @@ public class PlayerService implements IPlayerAdminService {
             now
         );
         PlayerDto createdPlayer = playerRepository.create(id, player);
+        playerEventPublisher.publish(new PlayerCreatedEvent(
+            createdPlayer.id(),
+            createdPlayer.firstName(),
+            createdPlayer.lastName(),
+            createdPlayer.email(),
+            createdPlayer.status()
+        ));
         return new CreatePlayerResponse(createdPlayer.id(), createdPlayer.status(), createdPlayer.createdAt());
     }
 
@@ -86,6 +99,13 @@ public class PlayerService implements IPlayerAdminService {
             updatedAt
         );
         PlayerDto updatedPlayer = playerRepository.update(player);
+        if (!existingPlayer.firstName().equals(updatedPlayer.firstName()) || !existingPlayer.lastName().equals(updatedPlayer.lastName())) {
+            playerEventPublisher.publish(new PlayerNameUpdatedEvent(
+                updatedPlayer.id(),
+                updatedPlayer.firstName(),
+                updatedPlayer.lastName()
+            ));
+        }
         return new UpdatePlayerResponse(updatedPlayer.id(), updatedPlayer.updatedAt());
     }
 
@@ -96,6 +116,7 @@ public class PlayerService implements IPlayerAdminService {
         }
 
         PlayerDto deletedPlayer = playerRepository.delete(id);
+        playerEventPublisher.publish(new PlayerDeletedEvent(deletedPlayer.id()));
         return new DeletePlayerResponse(deletedPlayer.id(), deletedPlayer.status(), deletedPlayer.updatedAt());
     }
 

@@ -40,7 +40,8 @@ CREATE TABLE fiveplayer.player_statistics
 CREATE TABLE fiveplayer.team
 (
     id   char(36)     not null primary key,
-    name varchar(100) not null
+    name varchar(100) not null,
+    constraint team_name_not_blank_ck check (TRIM(name) <> '')
 );
 
 CREATE TABLE fiveplayer.player_team
@@ -99,5 +100,17 @@ VALUES ('11111111-1111-4111-8111-111111111111', 60, 42, 28, 39, 10, 11, 18),
        ('16161616-1616-4161-8161-161616161616', 18, 0, 0, 10, 4, 4, 1),
        ('17171717-1717-4171-8171-171717171717', 18, 0, 0, 10, 4, 4, 1),
        ('18181818-1818-4181-8181-181818181818', 18, 1, 2, 10, 4, 4, 1);
+
+INSERT INTO fiveplayer.team (id, name)
+VALUES ('aaaaaaaa-0000-4000-8000-000000000001', 'Five Paris Legends'),
+       ('aaaaaaaa-0000-4000-8000-000000000002', 'Five Madrid Stars'),
+       ('aaaaaaaa-0000-4000-8000-000000000003', 'Five Youth Academy');
+
+INSERT INTO fiveplayer.player_team (idPlayer, idTeam)
+VALUES ('11111111-1111-4111-8111-111111111111', 'aaaaaaaa-0000-4000-8000-000000000001'),
+       ('33333333-3333-4333-8333-333333333333', 'aaaaaaaa-0000-4000-8000-000000000001'),
+       ('44444444-4444-4444-8444-444444444444', 'aaaaaaaa-0000-4000-8000-000000000003'),
+       ('66666666-6666-4666-8666-666666666666', 'aaaaaaaa-0000-4000-8000-000000000002'),
+       ('77777777-7777-4777-8777-777777777777', 'aaaaaaaa-0000-4000-8000-000000000002');
 
 COMMIT;

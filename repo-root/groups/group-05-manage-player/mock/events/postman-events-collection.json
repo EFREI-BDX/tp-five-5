@@ -1,0 +1,115 @@
+{
+  "info": {
+    "name": "Player Management Events",
+    "description": "Collection Postman pour tester les events entrants du service manage-player.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "TeamNameUpdated",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teamId\": \"aaaaaaaa-0000-4000-8000-000000000001\",\n  \"name\": \"Five Paris Legends Updated\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/teams/name-updated",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "teams", "name-updated"]
+        }
+      }
+    },
+    {
+      "name": "TeamDeleted",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teamId\": \"aaaaaaaa-0000-4000-8000-000000000003\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/teams/deleted",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "teams", "deleted"]
+        }
+      }
+    },
+    {
+      "name": "PlayerJoinedTeam",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"playerId\": \"22222222-2222-4222-8222-222222222222\",\n  \"teamId\": \"aaaaaaaa-0000-4000-8000-000000000001\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/teams/player-joined",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "teams", "player-joined"]
+        }
+      }
+    },
+    {
+      "name": "PlayerLeftTeam",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"playerId\": \"11111111-1111-4111-8111-111111111111\",\n  \"teamId\": \"aaaaaaaa-0000-4000-8000-000000000001\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/teams/player-left",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "teams", "player-left"]
+        }
+      }
+    },
+    {
+      "name": "MatchPlayerEvent",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-API-KEY", "value": "{{apiKey}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"playerId\": \"11111111-1111-4111-8111-111111111111\",\n  \"matchesPlayed\": 61,\n  \"goalsScored\": 43,\n  \"assists\": 29,\n  \"wins\": 40,\n  \"losses\": 10,\n  \"draws\": 11,\n  \"mvps\": 19\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/events/matches/player",
+          "host": ["{{baseUrl}}"],
+          "path": ["events", "matches", "player"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "apiKey",
+      "value": "dev-api-key"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 DROP PROCEDURE IF EXISTS fiveplayer.idCheck;
 DROP PROCEDURE IF EXISTS fiveplayer.playerIdCheck;
+DROP PROCEDURE IF EXISTS fiveplayer.teamIdCheck;
 DROP PROCEDURE IF EXISTS fiveplayer.teamNameCheck;
 DROP PROCEDURE IF EXISTS fiveplayer.playerFirstNameCheck;
 DROP PROCEDURE IF EXISTS fiveplayer.playerLastNameCheck;
@@ -23,6 +24,8 @@ DROP PROCEDURE IF EXISTS fiveplayer.playerLeaveTeam;
 
 DROP PROCEDURE IF EXISTS fiveplayer.teamGetAll;
 DROP PROCEDURE IF EXISTS fiveplayer.teamGetById;
+DROP PROCEDURE IF EXISTS fiveplayer.playerTeamGetByPlayerId;
+DROP PROCEDURE IF EXISTS fiveplayer.playerTeamGetByTeamId;
 DROP PROCEDURE IF EXISTS fiveplayer.playerGetAll;
 DROP PROCEDURE IF EXISTS fiveplayer.playerGetById;
 DROP PROCEDURE IF EXISTS fiveplayer.playerCount;
@@ -55,6 +58,19 @@ BEGIN
 
     IF _id NOT REGEXP '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' THEN
         SET errorMessage_ = 'Player id must be a valid UUID';
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = errorMessage_;
+    END IF;
+END //
+
+CREATE PROCEDURE fiveplayer.teamIdCheck(IN _id VARCHAR(255), OUT errorMessage_ VARCHAR(500))
+BEGIN
+    SET errorMessage_ = '';
+
+    CALL fiveplayer.idCheck(_id, errorMessage_);
+
+    IF _id NOT REGEXP '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$' THEN
+        SET errorMessage_ = 'Team id must be a valid UUID';
         SIGNAL SQLSTATE '45000'
             SET MESSAGE_TEXT = errorMessage_;
     END IF;
@@ -261,7 +277,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_id, errorMessage_);
+    CALL fiveplayer.teamIdCheck(_id, errorMessage_);
     CALL fiveplayer.teamNameCheck(_name, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.team WHERE id = _id) > 0 THEN
@@ -291,7 +307,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_id, errorMessage_);
+    CALL fiveplayer.teamIdCheck(_id, errorMessage_);
     CALL fiveplayer.teamNameCheck(_name, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.team WHERE id = _id) = 0 THEN
@@ -321,7 +337,7 @@ BEGIN
     START TRANSACTION;
     SET errorMessage_ = '';
 
-    CALL fiveplayer.idCheck(_id, errorMessage_);
+    CALL fiveplayer.teamIdCheck(_id, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.team WHERE id = _id) = 0 THEN
         SET errorMessage_ = CONCAT('No team with id ', _id, ' exists');
@@ -583,7 +599,7 @@ BEGIN
     SET errorMessage_ = '';
 
     CALL fiveplayer.playerIdCheck(_playerId, errorMessage_);
-    CALL fiveplayer.idCheck(_teamId, errorMessage_);
+    CALL fiveplayer.teamIdCheck(_teamId, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _playerId) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _playerId, ' exists');
@@ -635,7 +651,7 @@ BEGIN
     SET errorMessage_ = '';
 
     CALL fiveplayer.playerIdCheck(_playerId, errorMessage_);
-    CALL fiveplayer.idCheck(_teamId, errorMessage_);
+    CALL fiveplayer.teamIdCheck(_teamId, errorMessage_);
 
     IF (SELECT COUNT(*) FROM fiveplayer.player WHERE id = _playerId) = 0 THEN
         SET errorMessage_ = CONCAT('No player with id ', _playerId, ' exists');
@@ -678,11 +694,45 @@ CREATE PROCEDURE fiveplayer.teamGetById(
     IN _id VARCHAR(255)
 )
 BEGIN
+    DECLARE errorMessage VARCHAR(500);
+
+    CALL fiveplayer.teamIdCheck(_id, errorMessage);
+
     SELECT id,
            name
     FROM fiveplayer.TeamView
     WHERE id = _id
     LIMIT 1;
+END //
+
+CREATE PROCEDURE fiveplayer.playerTeamGetByPlayerId(
+    IN _playerId VARCHAR(255)
+)
+BEGIN
+    DECLARE errorMessage VARCHAR(500);
+
+    CALL fiveplayer.playerIdCheck(_playerId, errorMessage);
+
+    SELECT idPlayer,
+           idTeam
+    FROM fiveplayer.PlayerTeamView
+    WHERE idPlayer = _playerId
+    ORDER BY idTeam;
+END //
+
+CREATE PROCEDURE fiveplayer.playerTeamGetByTeamId(
+    IN _teamId VARCHAR(255)
+)
+BEGIN
+    DECLARE errorMessage VARCHAR(500);
+
+    CALL fiveplayer.teamIdCheck(_teamId, errorMessage);
+
+    SELECT idPlayer,
+           idTeam
+    FROM fiveplayer.PlayerTeamView
+    WHERE idTeam = _teamId
+    ORDER BY idPlayer;
 END //
 
 CREATE PROCEDURE fiveplayer.playerGetAll()
@@ -774,6 +824,7 @@ BEGIN
     DELETE FROM fiveplayer.player_team;
     DELETE FROM fiveplayer.player_statistics;
     DELETE FROM fiveplayer.player;
+    DELETE FROM fiveplayer.team;
 
     COMMIT;
 END //
@@ -791,6 +842,8 @@ GRANT EXECUTE ON PROCEDURE fiveplayer.playerJoinTeam TO 'jad_efrei_five_2526'@'%
 GRANT EXECUTE ON PROCEDURE fiveplayer.playerLeaveTeam TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.teamGetAll TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.teamGetById TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveplayer.playerTeamGetByPlayerId TO 'jad_efrei_five_2526'@'%';
+GRANT EXECUTE ON PROCEDURE fiveplayer.playerTeamGetByTeamId TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.playerGetAll TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.playerGetById TO 'jad_efrei_five_2526'@'%';
 GRANT EXECUTE ON PROCEDURE fiveplayer.playerCount TO 'jad_efrei_five_2526'@'%';

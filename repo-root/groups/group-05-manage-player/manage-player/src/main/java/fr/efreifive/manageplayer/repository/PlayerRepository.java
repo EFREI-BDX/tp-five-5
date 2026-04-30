@@ -72,6 +72,21 @@ public class PlayerRepository {
         callPlayerTeamProcedure("fiveplayer.playerLeaveTeam", playerId, teamId);
     }
 
+    public void upsertTeam(UUID teamId, String name) {
+        try {
+            callTeamUpdateName(teamId, name);
+        } catch (ResponseStatusException exception) {
+            if (exception.getReason() == null || !exception.getReason().startsWith("No team with id")) {
+                throw exception;
+            }
+            callTeamCreate(teamId, name);
+        }
+    }
+
+    public void deleteTeam(UUID teamId) {
+        callTeamDelete(teamId);
+    }
+
     public PersistenceOperationResult deleteAll() {
         try {
             jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
@@ -189,6 +204,45 @@ public class PlayerRepository {
                     statement.setString(1, playerId.toString());
                     statement.setString(2, teamId.toString());
                     statement.registerOutParameter(3, Types.VARCHAR);
+                    statement.execute();
+                }
+                return null;
+            });
+        } catch (DataAccessException exception) {
+            throw toResponseStatusException(exception);
+        }
+    }
+
+    private void callTeamCreate(UUID teamId, String name) {
+        callTeamProcedure("fiveplayer.teamCreate", teamId, name);
+    }
+
+    private void callTeamUpdateName(UUID teamId, String name) {
+        callTeamProcedure("fiveplayer.teamUpdateName", teamId, name);
+    }
+
+    private void callTeamProcedure(String procedureName, UUID teamId, String name) {
+        try {
+            jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
+                try (CallableStatement statement = connection.prepareCall("{CALL " + procedureName + "(?, ?, ?)}")) {
+                    statement.setString(1, teamId.toString());
+                    statement.setString(2, name);
+                    statement.registerOutParameter(3, Types.VARCHAR);
+                    statement.execute();
+                }
+                return null;
+            });
+        } catch (DataAccessException exception) {
+            throw toResponseStatusException(exception);
+        }
+    }
+
+    private void callTeamDelete(UUID teamId) {
+        try {
+            jdbcTemplate.execute((ConnectionCallback<Void>) connection -> {
+                try (CallableStatement statement = connection.prepareCall("{CALL fiveplayer.teamDelete(?, ?)}")) {
+                    statement.setString(1, teamId.toString());
+                    statement.registerOutParameter(2, Types.VARCHAR);
                     statement.execute();
                 }
                 return null;
