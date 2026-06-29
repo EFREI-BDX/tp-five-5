@@ -1,0 +1,40 @@
+@startuml
+
+[01 Manage Field] as C01
+interface "Field" as Field
+C01 -right- Field
+
+[02 Manage Match] as C02
+interface "Match" as Match
+C02 -right- Match
+
+[03 Record Match] as C03
+interface "Event" as Event
+C03 -right- Event
+
+[04 Summarize Match] as C04
+interface "Summary" as Summary
+C04 -right- Summary
+
+[05 Manage Player] as C05
+interface "Player" as Player
+C05 -right- Player
+
+[06 Manage Team] as C06
+interface "Team" as Team
+C06 -left- Team
+
+C02 .down.> Field
+
+C03 .right.> Match
+C03 .left.> Player
+
+C04 .down.> Field
+C04 .left.> Match
+C04 .up.> Event
+
+C05 .up.> Team
+
+C06 .down.> Player
+
+@enduml
